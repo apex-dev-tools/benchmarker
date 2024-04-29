@@ -19,6 +19,7 @@ jobs:
 
       - name: Publish package
         run: |
+          npm ci
           npm run build
           npm publish --access public
         env:

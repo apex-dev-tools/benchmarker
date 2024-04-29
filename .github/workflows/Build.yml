@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
 
       - name: Build
         run: npm run build
