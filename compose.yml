@@ -2,20 +2,18 @@ services:
   db:
     image: postgres:15
     environment:
-      # POSTGRES_USER: postgres (default)
-      # POSTGRES_DB: postgres (default)
-      POSTGRES_PASSWORD: test
+      POSTGRES_USER: pg
+      POSTGRES_DB: pg
+      POSTGRES_PASSWORD: pg
     ports:
-      - 5433:5432 # from host: postgresql://postgres:test@localhost:5433/postgres
+      - 5433:5432 # from host: postgresql://pg:pg@localhost:5433/pg
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Login Info
   # System: PostgresSQL,
   # Server: db,
-  # Username: postgres
-  # Password: test
-  # Database: postgres
+  # Username/Password/Database: pg
   adminer:
     image: adminer
     ports:
