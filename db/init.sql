@@ -1,3 +1,5 @@
+-- Free to edit this file, used to provision docker database for testing
+
 CREATE SCHEMA IF NOT EXISTS performance;
 
 CREATE TABLE IF NOT EXISTS performance.execution_info (
