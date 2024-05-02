@@ -27,20 +27,40 @@ export async function saveExecutionInfo(testResults: TestResultI[], orgContext: 
 	return bulkSaveExecutionInfo(executionInfoRows);
 }
 
+function createExecutionInfo(
+	resultId: number,
+	orgInfoId: number,
+	packageId: number | null,
+	buildId: string
+): ExecutionInfo {
+	const executionInfo: ExecutionInfo = new ExecutionInfo();
+	executionInfo.testResultId = resultId;
+	executionInfo.orgInfoId = orgInfoId;
+	if (packageId) executionInfo.packageInfoId = packageId;
+	executionInfo.externalBuildId = buildId;
+
+	return executionInfo;
+}
+
 const generateExecutionInfoRows = (testResultsIds: number[], orgInfoId: number, packagesId: number[]): ExecutionInfo[] => {
 	const externalBuildId = getExternalBuildId();
 
 	return testResultsIds
-		.map((testResultId: number) => {
-			const executionInfoRowsPerResultId: ExecutionInfo[] = packagesId.map((packageInfoId: number) => {
-						const executionInfo: ExecutionInfo = new ExecutionInfo();
-						executionInfo.testResultId = testResultId;
-						executionInfo.orgInfoId = orgInfoId;
-						executionInfo.packageInfoId = packageInfoId;
-						executionInfo.externalBuildId = externalBuildId;
-						return executionInfo;
-					});
-			return executionInfoRowsPerResultId;
-		})
-		.reduce((accumulator: ExecutionInfo[], currentExecutionInfoArray: ExecutionInfo[]) => accumulator.concat(currentExecutionInfoArray));
+		.flatMap((testResultId: number) => {
+			if (packagesId.length) {
+				return packagesId.map((packageInfoId: number) =>
+					createExecutionInfo(
+						testResultId,
+						orgInfoId,
+						packageInfoId,
+						externalBuildId
+					)
+				);
+			}
+
+			// packagesId could be empty for completely unmanaged org
+			return [
+				createExecutionInfo(testResultId, orgInfoId, null, externalBuildId)
+			];
+		});
 };
