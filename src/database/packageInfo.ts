@@ -13,6 +13,9 @@ const save = async function(packageVersion: string, packageName: string, package
 };
 
 const getPackagesBySubscriberVersionId = async function(packageVersionIds: string[]): Promise<PackageInfo[]> {
+	if (!packageVersionIds || packageVersionIds.length === 0) {
+		return [];
+	}
 	const connection = await getConnection();
 	const packages: PackageInfo[] = await connection
 		.getRepository(PackageInfo)

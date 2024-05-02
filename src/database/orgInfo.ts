@@ -13,6 +13,9 @@ const save = async function(executionInfo: OrgInfo) {
 };
 
 const getOrgInfoByOrgId = async function(orgId: string, apiVersion: string): Promise<OrgInfo|undefined> {
+	if (!orgId || !apiVersion) {
+		return undefined;
+	}
 	const connection = await getConnection();
 	const orgInfo: OrgInfo|undefined = await connection
 		.getRepository(OrgInfo)
