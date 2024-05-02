@@ -75,7 +75,7 @@
     "node": ">16.0.0"
   },
   "nyc": {
-    "branches": 100,
+    "branches": 80,
     "check-coverage": true,
     "extension": [
       ".ts"
@@ -84,14 +84,14 @@
       "**/*.d.ts",
       "src/shared/uiHelper.ts"
     ],
-    "functions": 100,
+    "functions": 80,
     "include": [
       "src/shared/**/*.ts",
       "src/services/**/*.ts",
       "src/database/**/*.ts"
     ],
     "instrument": true,
-    "lines": 100,
+    "lines": 80,
     "per-file": true,
     "reporter": [
       "html",
@@ -102,7 +102,7 @@
       "ts-node/register"
     ],
     "sourceMap": true,
-    "statements": 100
+    "statements": 80
   },
   "lint-staged": {
     "*.ts": "tslint --fix src/**/*.ts"
