@@ -4,7 +4,9 @@ A performance testing framework, which orchestrates, profiles and persists stats
 
 ## Usage
 
-TODO
+Tests execute using different templates in a JavaScript testing framework (e.g. mocha, jest). Results are can be saved to a provided PostgresSQL database.
+
+The `TransactionTestTemplate` calls a function (`FlowStep`, most often created by helpers) to execute some anonymous Apex code provided for the test. The Apex can come from a file or inline as a string. This Apex code can also collect Governor limit metrics which will be extracted at the end of the test. After all tests complete, data attributed to the template can be saved. For a sample execution, see `test_system/basic.test.ts`. Other test templates include boilerplate for running async batch processes and form/page loading.
 
 ## Development
 
