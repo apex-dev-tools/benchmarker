@@ -65,6 +65,24 @@ describe('src/database/orgInfo', async () => {
 
 	describe('getOrgInfoByOrgId', () => {
 
+		it('returns undefined for no org id', async () => {
+			// Given
+			// When
+			const orgInfoResult = await orgInfoModel.getOrgInfoByOrgId(undefined as unknown as string, '45');
+
+			// Then
+			expect(orgInfoResult).to.be.undefined;
+		});
+
+		it('returns undefined for no api version', async () => {
+			// Given
+			// When
+			const orgInfoResult = await orgInfoModel.getOrgInfoByOrgId('id', undefined as unknown as string);
+
+			// Then
+			expect(orgInfoResult).to.be.undefined;
+		});
+
 		it('returns given row', async () => {
 			// Given
 			let connection: {

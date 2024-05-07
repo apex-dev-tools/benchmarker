@@ -75,6 +75,24 @@ describe('src/database/packageInfo', async () => {
 			getConnection = stub(db, 'getConnection');
 		});
 
+		it('returns empty for undefined package list', async () => {
+			// Given
+			// When
+			const packageInfos = await packageInfoModel.getPackagesBySubscriberVersionId(undefined as unknown as string[]);
+
+			// Then
+			expect(packageInfos).to.eql([]);
+		});
+
+		it('returns empty for no packages', async () => {
+			// Given
+			// When
+			const packageInfos = await packageInfoModel.getPackagesBySubscriberVersionId([]);
+
+			// Then
+			expect(packageInfos).to.eql([]);
+		});
+
 		it('call getPackagesBySubscriberVersionId method', async () => {
 			// Given
 			const package1 = new PackageInfo('name1', '1', 'id11', 'id22', false, 0 );

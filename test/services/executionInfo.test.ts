@@ -104,6 +104,48 @@ describe('src/services/execution-info/index', () => {
 			expect(bulkDBSaveExecutionInfoRowsStub.args[0][0][2]).to.deep.equal(execInfo3);
 			expect(bulkDBSaveExecutionInfoRowsStub.args[0][0][3]).to.deep.equal(execInfo4);
 		});
+
+		it('saveExecutionInfo creates execution infos without packages', async () => {
+			// Given
+			const testExternalBuildId = 'Test Pipeline 1 - Build #1';
+			process.env.EXTERNAL_BUILD_ID = testExternalBuildId;
+			process.env.DATABASE_URL = 'test';
+			const bulkDBSaveExecutionInfoRowsStub = stub(orgModelShapeManager.executionInfoModel, 'bulkSave').resolves();
+
+			const testResult1 = new TestResult();
+			testResult1.id = 1;
+
+			const testResults: TestResult[] = [
+				testResult1
+			];
+
+			stub(saveTestResult, 'saveTestResults').resolves(testResults);
+
+			stub(packageInfoService, 'createNewPackages').resolves();
+
+			const packagesInfo: PackageInfo[] = [];
+
+			stub(packageInfoService, 'getPackageInfoByPackageVersionId').resolves(packagesInfo);
+
+			const orgInfoDB = new OrgInfo();
+			orgInfoDB.id = 0;
+
+			stub(orgContextService, 'createNewOrgInfo').resolves(orgInfoDB);
+
+			// When
+			await saveExecutionInfo([] as saveTestResult.TestResultI[], {} as orgContextService.OrgContext);
+
+			// Then
+			const execInfo1: ExecutionInfo = new ExecutionInfo();
+			execInfo1.id = 0;
+			execInfo1.orgInfoId = 0;
+			execInfo1.testResultId = 1;
+			execInfo1.packageInfoId = -1;
+			execInfo1.externalBuildId = testExternalBuildId;
+
+			expect(bulkDBSaveExecutionInfoRowsStub.args[0][0][0]).to.deep.equal(execInfo1);
+		});
+
 	});
 
 });
