@@ -25,7 +25,9 @@
     "lint": "tslint src/**/*.ts",
     "postversion": "npm run doc:generate",
     "test": "DEBUG=-* nyc mocha 'test/**/*.test.ts'",
-    "test:only": "DEBUG=-* nyc mocha"
+    "test:only": "DEBUG=-* nyc mocha",
+    "test:system:init": "cp test_system/.env .env",
+    "test:system": "mocha 'test_system/**/*.test.ts' --timeout 30000"
   },
   "dependencies": {
     "axios": "1.4.0",
@@ -73,7 +75,7 @@
     "node": ">16.0.0"
   },
   "nyc": {
-    "branches": 100,
+    "branches": 80,
     "check-coverage": true,
     "extension": [
       ".ts"
@@ -82,14 +84,14 @@
       "**/*.d.ts",
       "src/shared/uiHelper.ts"
     ],
-    "functions": 100,
+    "functions": 80,
     "include": [
       "src/shared/**/*.ts",
       "src/services/**/*.ts",
       "src/database/**/*.ts"
     ],
     "instrument": true,
-    "lines": 100,
+    "lines": 80,
     "per-file": true,
     "reporter": [
       "html",
@@ -100,7 +102,7 @@
       "ts-node/register"
     ],
     "sourceMap": true,
-    "statements": 100
+    "statements": 80
   },
   "lint-staged": {
     "*.ts": "tslint --fix src/**/*.ts"

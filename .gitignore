@@ -2,8 +2,8 @@ node_modules/
 .sfdx
 .nyc_output
 coverage
+/.env
 
 dist
 build
-.env
 *.tgz
