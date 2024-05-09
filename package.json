@@ -56,7 +56,7 @@
     "chai": "4.4.1",
     "chai-as-promised": "7.1.1",
     "copyfiles": "2.4.1",
-    "lighthouse": "5.1.0",
+    "lighthouse": "12.0.0",
     "mocha": "10.4.0",
     "nyc": "15.1.0",
     "sinon": "17.0.2",
