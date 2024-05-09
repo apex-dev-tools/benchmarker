@@ -8,7 +8,6 @@ import { getIsIncognitoBrowser, getLighthouseHTMLReport, isHeadless, getLighthou
 import { ERROR_OPENING_BROWSER, FORM_LOAD } from '../shared/constants';
 import { TestPerformanceErrorI } from '../shared/uiHelper';
 import { getNavigation } from '../services/navigate/navigate';
-import debug = require('debug');
 import { INavigate } from '../services/navigate/types';
 import { getLighthouseMetrics, getLighthouseMetricsAndSaveFile, ProcessedLigthouseMetrics } from '../services/metrics';
 import moment from 'moment';
@@ -131,7 +130,7 @@ export class FormLoadTestTemplate {
 		}
 
 		if (!browserOpened) {
-			debug(ERROR_OPENING_BROWSER);
+			console.error(ERROR_OPENING_BROWSER);
 		}
 	}
 
