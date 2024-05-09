@@ -116,7 +116,7 @@ export class FormLoadTestTemplate {
 
 				this._browser = await this.getBrowser();
 				this._incognitoRequired = getIsIncognitoBrowser();
-				context = this._incognitoRequired ? await this._browser.createIncognitoBrowserContext() : this._browser.browserContexts()[0];
+				context = this._incognitoRequired ? await this._browser.createBrowserContext() : this._browser.browserContexts()[0];
 
 				this._page = await context.newPage();
 				await this.page.setViewport({
