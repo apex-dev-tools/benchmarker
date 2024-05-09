@@ -8,8 +8,8 @@ import { expect } from 'chai';
 import { stub, restore } from 'sinon';
 import * as envVarsHelper from '../../../src/services/salesforce/env';
 import { getSalesforceAuthInfoFromEnvVars, connectToSalesforceOrg, SalesforceConnection } from '../../../src/services/salesforce/connection';
-import jsforce from 'jsforce';
 import { AuthInfo, Org } from '@salesforce/core';
+import jsforce from '@jsforce/jsforce-node';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);

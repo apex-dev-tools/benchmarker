@@ -2,7 +2,7 @@
  * Copyright (c) 2020 FinancialForce.com, inc. All rights reserved.
  */
 
-import { ExecuteOptions, ExecuteAnonymousResult } from 'jsforce';
+
 import { getUnmanagePackages } from '../../shared/env';
 import { SalesforceConnection } from './connection';
 import { MATCH_PATTERN_ANONYMOUS_CODE_OUTPUT } from '../../shared/constants';
@@ -12,6 +12,8 @@ import {
 	TestStepDescription,
 	GovernorMetricsResult
 } from '../../testTemplates/transactionTestTemplate';
+import { ExecuteAnonymousResult } from '@jsforce/jsforce-node/lib/api/tooling';
+import { QueryOptions, QueryResult, Record } from '@jsforce/jsforce-node';
 
 export const replaceNamespace = (text: string) => {
 	let result = text;
@@ -58,18 +60,12 @@ export const executeAnonymous = async (
 export const query = async (
 	connection: SalesforceConnection,
 	queryCode: string,
-	options?: ExecuteOptions
-): Promise<any> => {
-	return new Promise((resolve, reject) => {
-		connection.query(
-			replaceNamespace(queryCode),
-			options,
-			(error, response: any) => {
-				if (error) reject(error);
-				else resolve(response);
-			}
-		);
-	});
+	options?: QueryOptions
+): Promise<QueryResult<Record>> => {
+	return connection.query(
+		replaceNamespace(queryCode),
+		options
+	);
 };
 
 /** @ignore */
@@ -82,7 +78,7 @@ export const sobject: any = (
 export const extractDataFromExecuteAnonymousResult = (
 	anonymousExecutionResult: ExecuteAnonymousResult
 ) =>
-	anonymousExecutionResult.exceptionMessage.match(
+	anonymousExecutionResult.exceptionMessage?.match(
 		MATCH_PATTERN_ANONYMOUS_CODE_OUTPUT
 	);
 
@@ -118,7 +114,7 @@ export const extractMatchTimeFromExecuteAnonymousResult = (
 		anonymousExecutionResult
 	);
 	if (!matchTime) {
-		throw new Error(anonymousExecutionResult.exceptionMessage);
+		throw new Error(anonymousExecutionResult.exceptionMessage || '');
 	}
 	const msElapsed: number = +matchTime![1];
 	return msElapsed;

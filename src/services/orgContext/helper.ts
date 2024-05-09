@@ -14,7 +14,7 @@ export const getIsLex = async (connectionData: SalesforceConnection): Promise<bo
 	const apex = 'User u = [SELECT UserPreferencesLightningExperiencePreferred FROM User WHERE Id = :UserInfo.getUserId() LIMIT 1]; '
 		+ 'System.assert(false, \'-_\' + u.UserPreferencesLightningExperiencePreferred + \'_-\');';
 	const result = await executeAnonymous(connectionData, apex);
-	const groups = result.exceptionMessage.match(MATCH_PATTERN_ANONYMOUS_CODE_OUTPUT);
+	const groups = result.exceptionMessage?.match(MATCH_PATTERN_ANONYMOUS_CODE_OUTPUT);
 	isLex = !!groups && groups[1] === 'true';
 
 	return isLex;
@@ -33,10 +33,10 @@ export async function getUserInfoData(connection: SalesforceConnection) {
 
 export async function getOrganizationData(connection: SalesforceConnection) {
 	try {
-	const organizationResponse: any = await query(connection, 'SELECT  Id, InstanceName, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization', {});
+	const organizationResponse: any = await query(connection, 'SELECT  Id, InstanceName, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization');
 	const organizationRecord = organizationResponse.records[0];
 
-	const domainResponse: any = await query(connection, 'SELECT Domain FROM Domain', {});
+	const domainResponse: any = await query(connection, 'SELECT Domain FROM Domain');
 	const domainRecord = domainResponse.records[0];
 
 	const isTrial: any = (!organizationRecord.IsSandbox && organizationRecord.TrialExpirationDate !== null);
@@ -83,7 +83,11 @@ export async function getLoginUrl(connectionData: SalesforceConnection): Promise
 	// Suppress the Try LEX dialog by using the source URL parameter
 	// https://help.salesforce.com/articleView?id=More-information-on-the-Try-Lightning-Experience-Now-prompt&language=en_US&type=1
 	const retUrl = encodeURIComponent('home/home.jsp?source=lex');
-	return `${connectionData.instanceUrl}/secur/frontdoor.jsp?sid=${encodeURIComponent(connectionData.accessToken)}&retURL=${retUrl}`;
+	const sid = connectionData.accessToken;
+	if (sid == null) {
+		throw new Error('Failed to generate login url - no access token/session ID');
+	}
+	return `${connectionData.instanceUrl}/secur/frontdoor.jsp?sid=${encodeURIComponent(sid)}&retURL=${retUrl}`;
 }
 
 export async function getPackagesInfo(connection: SalesforceConnection): Promise<PackageInfoI[]> {
@@ -116,25 +120,17 @@ export async function getPackagesInfo(connection: SalesforceConnection): Promise
 }
 
 async function getPackageInfoData(connection: SalesforceConnection) {
-	const apex = 'SELECT SubscriberPackage.Name,' +
-	' SubscriberPackageVersion.MajorVersion,' +
-	' SubscriberPackageVersion.MinorVersion,' +
-	' SubscriberPackageVersion.PatchVersion,' +
-	' SubscriberPackageVersion.Id,' +
-	' SubscriberPackage.Id,' +
-	' SubscriberPackageVersion.IsBeta, ' +
-	' SubscriberPackageVersion.BuildNumber ' +
-	' FROM InstalledSubscriberPackage';
-
-	return new Promise((resolve, reject) => {
-		connection.tooling.query(apex, {}, (error: any, response: any) => {
-			if (error) {
-				reject(error);
-			} else {
-				resolve(response);
-			}
-		});
-	});
+	return connection.tooling.query(
+		'SELECT SubscriberPackage.Name,' +
+		' SubscriberPackageVersion.MajorVersion,' +
+		' SubscriberPackageVersion.MinorVersion,' +
+		' SubscriberPackageVersion.PatchVersion,' +
+		' SubscriberPackageVersion.Id,' +
+		' SubscriberPackage.Id,' +
+		' SubscriberPackageVersion.IsBeta, ' +
+		' SubscriberPackageVersion.BuildNumber ' +
+		' FROM InstalledSubscriberPackage'
+	);
 }
 
 export async function retry<T>(fn: () => Promise<T>, retryCount = 3, initialWaitTimeMs = 1000, backoffMultiplier = 2): Promise<T> {

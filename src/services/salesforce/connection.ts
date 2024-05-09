@@ -3,7 +3,7 @@
  */
 
 import { Connection, AuthInfo, Org } from '@salesforce/core';
-import jsforce from 'jsforce';
+import jsforce from '@jsforce/jsforce-node';
 import { getSfdxUsername, getSalesforceUsername, getSalesforcePassword, getSalesforceToken, getSalesforceUrlLogin } from './env';
 
 /**
@@ -30,7 +30,7 @@ export interface SalesforceAuthInfo {
  * const connectionSFDXorg: SalesforceConnection = await connectToSalesforceOrg({ username: getSfdxUsername(), isSFDX: true });
  * const connectionNonSFDXorg: SalesforceConnection =  await connectToSalesforceOrg({username: getSalesforceUsername(), password: getSalesforcePassword() + getSalesforceToken(), loginUrl: getSalesforceUrlLogin()});
  * //Using getSalesforceAuthInfoFromEnvVars() to retrieve the needed credentials
- * constconnectionWithWrapper = await connectToSalesforceOrg(getSalesforceAuthInfoFromEnvVars());
+ * const connectionWithWrapper = await connectToSalesforceOrg(getSalesforceAuthInfoFromEnvVars());
  * ```
  */
 export const connectToSalesforceOrg = async (authInfoWrapper: SalesforceAuthInfo): Promise<SalesforceConnection> => {
@@ -65,7 +65,7 @@ const connectToStandardOrg = async (authInfoWrapper: SalesforceAuthInfo): Promis
 	await jsForceConnection.login(authInfoWrapper.username, authInfoWrapper.password!);
 
 	const authInfo = await AuthInfo.create({
-		username: jsForceConnection.accessToken
+		username: jsForceConnection.accessToken || undefined
 	});
 
 	connection = await SalesforceConnection.create({

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 FinancialForce.com, inc. All rights reserved.
  */
-import { Batch, BatchResultInfo, Job, RecordResult } from 'jsforce';
+
 import { chunk, cloneDeep } from 'lodash';
 import { Timer } from '../../shared/timer';
 import { delay } from '../../shared/uiHelper';
@@ -9,6 +9,8 @@ import { BULK_API_DEFAULT_CHUNK_SIZE, BULK_API_INSERT_OPERATION, ERROR_DUPLICATE
 import { replaceNamespace, sobject } from './utils';
 import { SalesforceConnection } from './connection';
 import { generateRecordsWithCSVData } from '../filesystem/filesystem';
+import { Job, BulkOperation, Batch, BulkQueryBatchResult, BulkIngestBatchResult } from '@jsforce/jsforce-node/lib/api/bulk';
+import { Schema } from '@jsforce/jsforce-node';
 
 /**
  * Deletes SObject records filter by a field with its value
@@ -158,24 +160,27 @@ export async function bulkInsert(connection: SalesforceConnection, properties: {
  * ```
  */
 export const generateExternalIds = (nItems: number, prefix: string) => new Array(nItems).fill(0, ).map(() => prefix + Math.trunc(Math.random() * 1000000000));
-const insertDataWithBatches = async (connection: SalesforceConnection, objectApiName: string, operation: string, records: any[], chunkSize: number ): Promise<Array<{failed: boolean, errors: string[]}>> => {
+const insertDataWithBatches = async (connection: SalesforceConnection, objectApiName: string, operation: BulkOperation, records: any[], chunkSize: number ): Promise<Array<{failed: boolean, errors: string[]}>> => {
 	connection.bulk.pollTimeout = 300000;
 	const job = connection.bulk.createJob(objectApiName, operation);
 	const allBatchesPromises = chunk(records, chunkSize)
 		.map(chunkedData => insertChunk(job, chunkedData))
-		.map(batchInfo => getBulkBatchResults(batchInfo))
-									.map( batchResultPromise => batchResultPromise
-			.then(batchResults => getBulkBatchExecution(batchResults as BatchResultInfo[])));
+		.map(batchInfo => getBulkBatchResults(job, batchInfo)
+			.then(batchResults => getBulkBatchExecution(batchResults as BulkIngestBatchResult))
+		);
 	const batchExecutionResults = await Promise.all(allBatchesPromises);
 	await job.close();
 	return batchExecutionResults;
 };
-const insertChunk = ( job: Job , chunkedData: any[]) => {
+const insertChunk = ( job: Job<Schema, BulkOperation> , chunkedData: any[]) => {
 	let batchJob = job.createBatch();
 	return batchJob = batchJob.execute(chunkedData);
 };
-function getBulkBatchExecution(batchResults: BatchResultInfo[]): {failed: boolean, errors: string[]} {
-	const results: {failed: boolean, errors: string[]} = batchResults.reduce((accumulator: {failed: boolean, errors: string[]}, element: BatchResultInfo) => {
+function getBulkBatchExecution(batchResults: BulkIngestBatchResult): {failed: boolean, errors: string[]} {
+	const results: {failed: boolean, errors: string[]} = batchResults.reduce((accumulator: {failed: boolean, errors: string[]}, element: {
+		success: boolean;
+		errors: string[];
+	}) => {
 		if (!element.success && element.errors ) {
 			accumulator = cloneDeep(accumulator);
 			accumulator.failed = true;
@@ -189,15 +194,15 @@ function getBulkBatchExecution(batchResults: BatchResultInfo[]): {failed: boolea
 	}, {failed: false, errors: ['']});
 	return results;
 }
-async function getBulkBatchResults(batchItem: Batch, timeToRetry: number = 1000, maxAttempts: number = 99999999999, currentAttempt: number = 0): Promise<RecordResult[] | BatchResultInfo[]> {
+async function getBulkBatchResults(job: Job<Schema, BulkOperation>, batchItem: Batch<Schema, BulkOperation>, timeToRetry: number = 1000, maxAttempts: number = 99999999999, currentAttempt: number = 0): Promise<BulkQueryBatchResult | BulkIngestBatchResult> {
 	return new Promise<any>(async (resolve, reject) => {
 		try {
-			resolve(await checkBatchStatus(batchItem));
+			resolve(await checkBatchStatus(job, batchItem));
 		} catch (err) {
 			if (currentAttempt < maxAttempts) {
 				await delay(timeToRetry);
 				try {
-					resolve(await getBulkBatchResults(batchItem, timeToRetry, maxAttempts, ++currentAttempt));
+					resolve(await getBulkBatchResults(job, batchItem, timeToRetry, maxAttempts, ++currentAttempt));
 				} catch (e) {
 					reject('Error getting batch job results, error: ' + e.message);
 				}
@@ -207,12 +212,13 @@ async function getBulkBatchResults(batchItem: Batch, timeToRetry: number = 1000,
 		}
 	});
 }
-async function checkBatchStatus(batchItem: Batch): Promise<RecordResult[] | BatchResultInfo[]> {
+async function checkBatchStatus(job: Job<Schema, BulkOperation>, batchItem: Batch<Schema, BulkOperation>): Promise<BulkQueryBatchResult | BulkIngestBatchResult> {
 	return new Promise(async (resolve, reject) => {
 		try {
+			const jobStatus = await job.check();
 			const batchStatus = await batchItem.check();
-			if (batchStatus && batchStatus.state && (batchStatus.state === 'Completed' || batchStatus.state === 'Closed')) {
-				const batchResults: RecordResult[] | BatchResultInfo[] = await batchItem.retrieve();
+			if ((batchStatus && batchStatus.state === 'Completed') || (jobStatus && jobStatus.state === 'Closed')) {
+				const batchResults: BulkQueryBatchResult | BulkIngestBatchResult = await batchItem.retrieve();
 				resolve(batchResults);
 			} else {
 				reject('Batch job error, batch job status is not Complete/Closed');

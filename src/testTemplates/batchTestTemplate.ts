@@ -176,7 +176,7 @@ const gatherResults = async (
 								ndocuments: number = batchTestTemplate.nDocumentsInitial,
 								nlines: number = batchTestTemplate.nLinesInitial
 							) => {
-	let processStartResult: ProcessStartResult | void;
+	let processStartResult: ProcessStartResult | void = void 0;
 
 	try {
 		const dataCreationResult = await batchTestTemplate.dataCreation(ndocuments, nlines, batchTestTemplate.connection);
@@ -189,17 +189,18 @@ const gatherResults = async (
 		}
 
 	} catch (e) {
-			console.error(`Exception on ${batchTestTemplate.action}, ${e.message}, error info: ${e.exception}`);
-			const errorTimer: Timer = onError(batchTestTemplate, e);
-			const errorResults = addResult({
-				timer: errorTimer,
-				ndocuments,
-				nlines
-			});
+		console.error(`Exception on ${batchTestTemplate.action}, ${e.message}, error info: ${e.exception}`);
+		const errorTimer: Timer = onError(batchTestTemplate, e);
+		const errorResults = addResult({
+			timer: errorTimer,
+			ndocuments,
+			nlines
+		});
 
-			await saveResults(batchTestTemplate, errorResults);
-			await batchTestTemplate.dataDeletion(batchTestTemplate.connection);
-		}
+		await saveResults(batchTestTemplate, errorResults);
+		await batchTestTemplate.dataDeletion(batchTestTemplate.connection);
+		return;
+	}
 
 	if (processStartResult && (processStartResult.apexJobId || processStartResult.customParameter)) {
 		if (batchTestTemplate.batchStatusCheckingIntervalTime > 0 ) // Mainly for testing
@@ -263,7 +264,7 @@ const saveResults = async (batchTestTemplate: BatchProcessTestTemplate, results:
 
 const defaultCheckProcessStatus = async (batchProcessParams: BatchProcessParams): Promise<BatchProcessStatusResult> => {
 	console.log(`Default BatchTestTemplate process status checker: Checking Job Status for apexJobId ${batchProcessParams.apexJobId}`);
-	const response = await query( batchProcessParams.connection , `select status, CompletedDate, CreatedDate, NumberOfErrors, ExtendedStatus from AsyncApexJob WHERE id = '${batchProcessParams.apexJobId}'`, {});
+	const response = await query( batchProcessParams.connection , `select status, CompletedDate, CreatedDate, NumberOfErrors, ExtendedStatus from AsyncApexJob WHERE id = '${batchProcessParams.apexJobId}'`);
 
 	const statusCheckResult: BatchProcessStatusResult = {};
 

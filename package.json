@@ -30,12 +30,12 @@
     "test:system": "mocha 'test_system/**/*.test.ts' --timeout 30000"
   },
   "dependencies": {
+    "@jsforce/jsforce-node": "3.2.0",
+    "@salesforce/core": "7.3.5",
     "axios": "1.6.8",
-    "@salesforce/core": "2.3.0",
     "cli-table": "0.3.1",
     "debug": "4.1.1",
     "dotenv": "16.0.3",
-    "jsforce": "1.9.3",
     "lodash": "4.17.15",
     "moment": "2.24.0",
     "pg": "8.7.3",
@@ -50,7 +50,6 @@
     "@types/cli-table": "0.3.0",
     "@types/debug": "4.1.4",
     "@types/dotenv": "4.0.3",
-    "@types/jsforce": "1.9.2",
     "@types/lodash": "4.14.144",
     "@types/mocha": "7.0.2",
     "@types/node": "10.14.7",

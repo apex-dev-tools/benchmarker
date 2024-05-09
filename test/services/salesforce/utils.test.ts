@@ -15,9 +15,10 @@ import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { extractDataFromExecuteAnonymousResult, extractMatchTimeFromExecuteAnonymousResult, extractJSONFromExecuteAnonymousResult, extractGovernorMetricsFromGenericApexFlow } from '../../../src/services/salesforce/utils';
 import * as salesforceUtilsHelper from '../../../src/services/salesforce/utils';
-import { ExecuteAnonymousResult } from 'jsforce';
+
 import { SalesforceConnection } from '../../../src/services/salesforce/connection';
 import { TestStepDescription } from '../../../src/testTemplates/transactionTestTemplate';
+import { ExecuteAnonymousResult } from '@jsforce/jsforce-node/lib/api/tooling';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -47,7 +48,7 @@ describe('src/services/salesforce/utils', () => {
 					})
 			};
 
-			const response = await utils.query(connectionStub as Connection, 'query soql', {});
+			const response = await utils.query(connectionStub as Connection, 'query soql');
 			expect(response.records[0].Id).to.be.eq(123);
 		});
 
@@ -62,7 +63,7 @@ describe('src/services/salesforce/utils', () => {
 			};
 
 			try {
-				await utils.query(connectionStub as Connection, 'query soql', {});
+				await utils.query(connectionStub as Connection, 'query soql');
 				expect.fail();
 			} catch (e) {
 				expect(e.exception).to.be.eq('something went bad');
