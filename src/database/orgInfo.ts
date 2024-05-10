@@ -12,12 +12,12 @@ const save = async function(executionInfo: OrgInfo) {
 	return connection.manager.save(executionInfo);
 };
 
-const getOrgInfoByOrgId = async function(orgId: string, apiVersion: string): Promise<OrgInfo|undefined> {
+const getOrgInfoByOrgId = async function(orgId: string, apiVersion: string): Promise<OrgInfo | null> {
 	if (!orgId || !apiVersion) {
-		return undefined;
+		return null;
 	}
 	const connection = await getConnection();
-	const orgInfo: OrgInfo|undefined = await connection
+	const orgInfo: OrgInfo | null = await connection
 		.getRepository(OrgInfo)
 		.createQueryBuilder('org')
 		.where('org.org_id = :orgId', {orgId})
@@ -34,7 +34,7 @@ export const orgInfoModel: OrgInfoModel = {
 
 interface OrgInfoModel {
 	save(executionInfo: OrgInfo): Promise<OrgInfo>;
-	getOrgInfoByOrgId(orgId: string, apiVersion: string): Promise<OrgInfo|undefined>;
+	getOrgInfoByOrgId(orgId: string, apiVersion: string): Promise<OrgInfo | null>;
 }
 
 export async function saveOrgInfo(orgInfo: OrgInfo) {

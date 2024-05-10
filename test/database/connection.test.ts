@@ -8,7 +8,7 @@ import { createStubInstance, SinonStub, stub, SinonStubbedInstance, restore } fr
 import * as env from '../../src/shared/env';
 import sinonChai from 'sinon-chai';
 import * as typeorm from 'typeorm';
-import { Connection } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { OrgInfo } from '../../src/database/entity/org';
 import { TestResult } from '../../src/database/entity/result';
 import { PackageInfo } from '../../src/database/entity/package';
@@ -17,16 +17,16 @@ import { ExecutionInfo } from '../../src/database/entity/execution';
 chai.use(sinonChai);
 
 describe('src/database/connection', () => {
-	let connection: SinonStubbedInstance<Connection>;
+	let connection: SinonStubbedInstance<DataSource>;
 	let getDatabaseUrl: SinonStub;
-	let createConnection: SinonStub;
+	let dataSourceStub: SinonStub;
 
 	beforeEach(() => {
 		delete require.cache[require.resolve('../../src/database/connection')];
 
-		connection = createStubInstance(Connection);
+		connection = createStubInstance(DataSource);
 		getDatabaseUrl = stub(env, 'getDatabaseUrl');
-		createConnection = stub(typeorm, 'createConnection');
+		dataSourceStub = stub(typeorm, 'DataSource').returns(connection);
 	});
 
 	afterEach(() => {
@@ -37,7 +37,7 @@ describe('src/database/connection', () => {
 		it('should lazy load', async () => {
 			// Given
 			getDatabaseUrl.returns('postgres://exampleUser:examplePassword@examplehost.com:1234/exampleDb');
-			createConnection.resolves(connection);
+			connection.initialize.resolves(connection);
 
 			const { getConnection } = require('../../src/database/connection');
 
@@ -47,13 +47,13 @@ describe('src/database/connection', () => {
 
 			// Then
 			expect(actual1).to.eql(actual2);
-			expect(createConnection).to.be.calledOnce;
+			expect(connection.initialize).to.be.calledOnce;
 		});
 
 		it('should create a connection with sensible defaults', async () => {
 			// Given
 			getDatabaseUrl.returns('');
-			createConnection.resolves(connection);
+			connection.initialize.resolves(connection);
 
 			const { getConnection } = require('../../src/database/connection');
 
@@ -62,7 +62,8 @@ describe('src/database/connection', () => {
 
 			// Then
 			expect(actual).to.be.ok;
-			expect(createConnection).to.be.calledOnceWithExactly({
+			expect(connection.initialize).to.be.calledOnce;
+			expect(dataSourceStub).to.be.calledOnceWithExactly({
 				type: 'postgres',
 				entities: [TestResult, OrgInfo, PackageInfo, ExecutionInfo],
 				schema: 'performance',
@@ -80,7 +81,7 @@ describe('src/database/connection', () => {
 		it('should create a connection with database url values', async () => {
 			// Given
 			getDatabaseUrl.returns('postgres://exampleUser:examplePassword@examplehost.com:1234/exampleDb');
-			createConnection.resolves(connection);
+			connection.initialize.resolves(connection);
 
 			const { getConnection } = require('../../src/database/connection');
 
@@ -89,7 +90,8 @@ describe('src/database/connection', () => {
 
 			// Then
 			expect(actual).to.be.ok;
-			expect(createConnection).to.be.calledOnceWithExactly({
+			expect(connection.initialize).to.be.calledOnce;
+			expect(dataSourceStub).to.be.calledOnceWithExactly({
 				type: 'postgres',
 				entities: [TestResult, OrgInfo, PackageInfo, ExecutionInfo],
 				schema: 'performance',

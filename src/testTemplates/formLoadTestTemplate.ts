@@ -160,9 +160,9 @@ export class FormLoadTestTemplate {
 
 			if (lighthouseFeatureEnabled && lighthouseEnabled && !this._incognitoRequired) {
 				if (getLighthouseHTMLReport()) {
-					await getLighthouseMetricsAndSaveFile('lighthouse-report',  `${pageName}_${moment().format()}.html`, this._page, isHeadless());
+					await getLighthouseMetricsAndSaveFile('lighthouse-report',  `${pageName}_${moment().format()}.html`, this._page);
 				} else {
-					const lighthouseMetrics: ProcessedLigthouseMetrics[] = await getLighthouseMetrics(this._page, isHeadless());
+					const lighthouseMetrics: ProcessedLigthouseMetrics[] = await getLighthouseMetrics(this._page);
 					lighthouseSpeedIndex = Math.round(lighthouseMetrics.find((metricItem) => metricItem.metric === 'speed-index')!.value);
 					lighthouseTimeToInteractive = Math.round(lighthouseMetrics.find((metricItem) => metricItem.metric === 'interactive')!.value);
 				}

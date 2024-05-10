@@ -12,8 +12,8 @@ import { navigate } from '../../../src/services/navigate/classic';
 
 const SELECTORS = Object.freeze({
 	ALL_TABS: 'a[href*="showAllTabs"]',
-	ALL_TABS_TAB_NO_NAME: '//a[contains(@class, "listRelatedObject")]',
-	ALL_TABS_TAB_FOR_NAME: '//a[contains(@class, "listRelatedObject") and text()="Example Tab"]',
+	ALL_TABS_TAB_NO_NAME: 'xpath///a[contains(@class, "listRelatedObject")]',
+	ALL_TABS_TAB_FOR_NAME: 'xpath///a[contains(@class, "listRelatedObject") and text()="Example Tab"]',
 	HOME_INDICATOR: 'div[title="App Menu"]'
 });
 
@@ -68,7 +68,6 @@ describe('src/services/navigate/classic', async () => {
 		// Reject any unexpected waitForSelector/XPath calls, so each test
 		// has to explicitly declare which elements it expects
 		stub(page, 'waitForSelector').rejects(new Error('Bad'));
-		stub(page, 'waitForXPath').rejects(new Error('Bad'));
 
 		// Just resolve any navigation events, each test will check
 		// the positive and negative case.
@@ -99,7 +98,7 @@ describe('src/services/navigate/classic', async () => {
 		let tabElement: StubElementHandle;
 
 		beforeEach(() => {
-			tabElement = stubFindElement(page, 'waitForXPath', undefined, SELECTORS.ALL_TABS_TAB_FOR_NAME);
+			tabElement = stubFindElement(page, 'waitForSelector', undefined, SELECTORS.ALL_TABS_TAB_FOR_NAME);
 		});
 
 		describe('when doNavigate is undefined', () => {
@@ -123,7 +122,7 @@ describe('src/services/navigate/classic', async () => {
 			it('should reject if find tab rejects', async () => {
 				// Given
 				const navigateConfig = { doNavigate: false, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
+				tabElement = stubFindElement(page, 'waitForSelector', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
 
 				// When
 				await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
@@ -152,7 +151,7 @@ describe('src/services/navigate/classic', async () => {
 			it('should reject if no tab name is passed', async () => {
 				// Given
 				const navigateConfig = { doNavigate: false, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad selector'), SELECTORS.ALL_TABS_TAB_NO_NAME);
+				tabElement = stubFindElement(page, 'waitForSelector', new Error('Bad selector'), SELECTORS.ALL_TABS_TAB_NO_NAME);
 
 				// When
 				await expect(goToAllTabsTab(navigateConfig))
@@ -170,7 +169,7 @@ describe('src/services/navigate/classic', async () => {
 			it('should reject if find tab rejects', async () => {
 				// Given
 				const navigateConfig = { doNavigate: true, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
+				tabElement = stubFindElement(page, 'waitForSelector', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
 
 				// When
 				await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
@@ -182,10 +181,10 @@ describe('src/services/navigate/classic', async () => {
 				expect(page.waitForNavigation).to.not.have.been.called;
 			});
 
-			it('should error if waitForXPath resolves null', async () => {
+			it('should error if waitForSelector resolves null', async () => {
 
 				// Given
-				(page.waitForXPath as SinonStub).resolves(null);
+				(page.waitForSelector as SinonStub).resolves(null);
 				const navigateConfig = { doNavigate: true, page };
 
 				// When

@@ -17,7 +17,7 @@ async function goToAllTabsTab(config: INavigateConfig, tabName?: string): Promis
 	const doNavigate = config.doNavigate !== undefined ? config.doNavigate : true;
 
 	const xpathPartTabName = tabName ? ` and text()="${tabName}"` : '';
-	const element = await page.waitForXPath(`//a[contains(@class, "listRelatedObject")${xpathPartTabName}]`);
+	const element = await page.waitForSelector(`xpath///a[contains(@class, "listRelatedObject")${xpathPartTabName}]`);
 
 	if (tabName && doNavigate) {
 

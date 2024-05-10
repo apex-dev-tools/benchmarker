@@ -29,13 +29,13 @@ export interface ProcessedLigthouseMetrics {
 	value: number;
 }
 
-export const getLighthouseMetricsAndSaveFile = async (directoryName: string, fileName: string, page: Page, headless: boolean) => {
-	const fileContent = await gatherLighthouseMetrics(page, 'html', headless);
+export const getLighthouseMetricsAndSaveFile = async (directoryName: string, fileName: string, page: Page) => {
+	const fileContent = await gatherLighthouseMetrics(page, 'html');
 	await saveFileIntoDir(directoryName, fileName, fileContent);
 };
 
-export const getLighthouseMetrics = async (page: Page, headless: boolean): Promise<ProcessedLigthouseMetrics[]> => {
-	const lighthouseMetrics: LighthouseMetrics = JSON.parse(await gatherLighthouseMetrics(page, 'json', headless));
+export const getLighthouseMetrics = async (page: Page): Promise<ProcessedLigthouseMetrics[]> => {
+	const lighthouseMetrics: LighthouseMetrics = JSON.parse(await gatherLighthouseMetrics(page, 'json'));
 
 	const processedResult: ProcessedLigthouseMetrics[] =
 		Object

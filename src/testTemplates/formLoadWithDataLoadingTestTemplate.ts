@@ -163,7 +163,7 @@ const getNavigationPage = async (fldlTestTemplate: FormLoadWithDataLoadingTestTe
 
 			fldlTestTemplate.browser = await getBrowser();
 			incognitoRequired = getIsIncognitoBrowser();
-			context = incognitoRequired ? await fldlTestTemplate.browser.createIncognitoBrowserContext() : fldlTestTemplate.browser.browserContexts()[0];
+			context = incognitoRequired ? await fldlTestTemplate.browser.createBrowserContext() : fldlTestTemplate.browser.browserContexts()[0];
 
 			fldlTestTemplate.page = await context.newPage();
 			await fldlTestTemplate.page.setViewport({

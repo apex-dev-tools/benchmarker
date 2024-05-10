@@ -70,7 +70,6 @@ describe('../../../src/services/navigate/lex', async () => {
 		// Reject any unexpected waitForSelector/XPath calls, so each test
 		// has to explicitly declare which elements it expects
 		stub(page, 'waitForSelector').rejects(new Error('selector Bad'));
-		stub(page, 'waitForXPath').rejects(new Error('xpath Bad'));
 
 		// Just resolve any navigation events, each test will check
 		// the positive and negative case.

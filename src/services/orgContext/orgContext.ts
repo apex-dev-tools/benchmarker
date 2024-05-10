@@ -50,7 +50,7 @@ export async function getOrgContext(connection: SalesforceConnection): Promise<O
 }
 
 export async function createNewOrgInfo(orgInfoToSave: OrgInfoI): Promise<OrgInfo> {
-	let orgInfo: OrgInfo| undefined = await getOrgInfoById(orgInfoToSave.orgID, orgInfoToSave.apiVersion);
+	let orgInfo: OrgInfo | null = await getOrgInfoById(orgInfoToSave.orgID, orgInfoToSave.apiVersion);
 	if (!orgInfo) {
 		orgInfo = new OrgInfo();
 		orgInfo.fillOrgContextInformation(orgInfoToSave);
