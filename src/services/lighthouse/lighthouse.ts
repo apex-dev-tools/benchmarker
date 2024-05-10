@@ -6,19 +6,16 @@
 import { Page } from 'puppeteer';
 import { config } from './config.performance';
 import { getIsIncognitoBrowser } from '../../shared/env';
+import lighthouse, { Flags, OutputMode } from 'lighthouse';
 
-export const gatherLighthouseMetrics = async (page: Page, outputFormat: string, headless: boolean): Promise<string> => {
-	// @ts-ignore
-	const lighthouse = (await import('lighthouse')).default
-
+export const gatherLighthouseMetrics = async (page: Page, outputFormat: OutputMode): Promise<string> => {
 	const port = page.browser().wsEndpoint().split(':')[2].split('/')[0];
-	const opts = {
-		port,
+	const opts: Flags = {
+		port: port ? parseInt(port) : undefined,
 		output: outputFormat,
-		emulatedFormFactor: 'desktop',
+		formFactor: 'desktop',
 		throttlingMethod: 'provided',
-		disableStorageReset:  !getIsIncognitoBrowser(),
-		chromeFlags: headless ? '--headless' : ''
+		disableStorageReset: !getIsIncognitoBrowser()
 	};
 
 	return lighthouse(page.url(), opts, config)
