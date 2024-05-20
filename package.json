@@ -20,19 +20,19 @@
     "build": "npm run build:clean && npm run compile && npm run build:copy",
     "build:clean": "rm -rf dist",
     "build:copy": "copyfiles -u 1 src/**/*.cls dist/src",
-    "compile": "tsc --skipLibCheck",
+    "compile": "tsc",
     "doc:generate": "typedoc --excludeNotExported --ignoreCompilerErrors --out doc src/**/*",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "husky",
     "postversion": "npm run doc:generate",
-    "test": "DEBUG=-* nyc mocha 'test/**/*.test.ts'",
-    "test:only": "DEBUG=-* nyc mocha",
+    "test": "nyc mocha 'test/**/*.test.*'",
+    "test:only": "nyc mocha",
     "test:system:init": "cp test_system/.env .env",
-    "test:system": "mocha 'test_system/**/*.test.ts' --timeout 30000"
+    "test:system": "mocha --timeout 30000 'test_system/**/*.test.*'"
   },
   "dependencies": {
     "@jsforce/jsforce-node": "3.2.0",
-    "@salesforce/core": "7.3.5",
+    "@salesforce/core": "7.3.6",
     "axios": "1.6.8",
     "cli-table": "0.3.11",
     "dotenv": "16.4.5",
@@ -41,11 +41,11 @@
     "moment": "2.30.1",
     "pg": "8.11.5",
     "pg-connection-string": "2.6.4",
-    "puppeteer": "22.8.0",
+    "puppeteer": "22.8.2",
+    "tslib": "2.6.2",
     "typeorm": "0.3.20"
   },
   "devDependencies": {
-    "@fluffy-spoon/substitute": "1.208.0",
     "@types/chai": "4.3.16",
     "@types/chai-as-promised": "7.1.8",
     "@types/cli-table": "0.3.4",
@@ -58,7 +58,7 @@
     "@typescript-eslint/parser": "7.9.0",
     "axios-mock-adapter": "1.22.0",
     "chai": "4.4.1",
-    "chai-as-promised": "7.1.1",
+    "chai-as-promised": "7.1.2",
     "copyfiles": "2.4.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
@@ -71,7 +71,6 @@
     "prettier": "3.2.5",
     "sinon": "18.0.0",
     "sinon-chai": "3.7.0",
-    "source-map-support": "0.5.21",
     "ts-node": "10.9.2",
     "typedoc": "0.25.13",
     "typescript": "5.4.5"
@@ -80,7 +79,6 @@
     "node": ">18.0.0"
   },
   "nyc": {
-    "branches": 80,
     "check-coverage": true,
     "extension": [
       ".ts"
@@ -99,12 +97,8 @@
     "lines": 80,
     "per-file": true,
     "reporter": [
-      "html",
       "text",
       "text-summary"
-    ],
-    "require": [
-      "ts-node/register"
     ],
     "sourceMap": true,
     "statements": 80

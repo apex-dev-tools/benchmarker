@@ -8,20 +8,21 @@
     "importHelpers": true,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node16",
     "experimentalDecorators": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
+    "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "target": "es2019",
-    "useUnknownInCatchVariables": false // TODO remove and fix unknowns
+    "target": "es2020",
+    "useUnknownInCatchVariables": false
   },
   "include": [
     "src",
-    "test"
+    "test",
+    "test_system"
   ]
 }
