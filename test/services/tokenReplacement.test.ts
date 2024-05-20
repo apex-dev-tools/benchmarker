@@ -3,33 +3,35 @@
  */
 
 import { expect } from 'chai';
-import { replaceTokensInString, TokenReplacement } from '../../src/services/tokenReplacement';
-import moment = require('moment');
+import {
+  replaceTokensInString,
+  TokenReplacement,
+} from '../../src/services/tokenReplacement';
+import moment from 'moment';
 
 describe('src/services/token-replacement', () => {
-	describe('replaceTokensInString', () => {
-
-		it('replace a single token', () => {
-
-			const originalText = `line 1 with characters
+  describe('replaceTokensInString', () => {
+    it('replace a single token', () => {
+      const originalText = `line 1 with characters
 			line 2 with a value %value1
 			line 3 to finish
 			%value1`;
 
-			const tokenReplacementMap: TokenReplacement = {
-				token: '%value1',
-				value: 'it works!!!'
-			}
+      const tokenReplacementMap: TokenReplacement = {
+        token: '%value1',
+        value: 'it works!!!',
+      };
 
-			const finalText = replaceTokensInString(originalText, [tokenReplacementMap]);
+      const finalText = replaceTokensInString(originalText, [
+        tokenReplacementMap,
+      ]);
 
-			expect(finalText).to.contains('it works!!!');
-			expect(finalText).to.not.contains('%value1');
-		});
+      expect(finalText).to.contains('it works!!!');
+      expect(finalText).to.not.contains('%value1');
+    });
 
-		it('replace a multiple token', () => {
-
-			const originalText = `line 1 with characters
+    it('replace a multiple token', () => {
+      const originalText = `line 1 with characters
 			line 2 with a value %value1
 			line 3 to finish
 			%value1
@@ -37,29 +39,31 @@ describe('src/services/token-replacement', () => {
 			another new line
 			and the end line %value2`;
 
-			const tokenReplacementMap: TokenReplacement[] = [
-				{
-					token: '%value1',
-					value: 'it works!!!'
-				},
-				{
-					token: '%value2',
-					value: 'and this too!'
-				}
-			]
+      const tokenReplacementMap: TokenReplacement[] = [
+        {
+          token: '%value1',
+          value: 'it works!!!',
+        },
+        {
+          token: '%value2',
+          value: 'and this too!',
+        },
+      ];
 
-			const finalText = replaceTokensInString(originalText, tokenReplacementMap);
+      const finalText = replaceTokensInString(
+        originalText,
+        tokenReplacementMap
+      );
 
-			expect(finalText).to.contains('it works!!!');
-			expect(finalText).to.not.contains('%value1');
+      expect(finalText).to.contains('it works!!!');
+      expect(finalText).to.not.contains('%value1');
 
-			expect(finalText).to.contains('and this too!');
-			expect(finalText).to.not.contains('%value2');
-		});
+      expect(finalText).to.contains('and this too!');
+      expect(finalText).to.not.contains('%value2');
+    });
 
-		it('Do not replace token', () => {
-
-			const originalText = `line 1 with characters
+    it('Do not replace token', () => {
+      const originalText = `line 1 with characters
 			line 2 with a value %value1
 			line 3 to finish
 			%value1
@@ -67,20 +71,22 @@ describe('src/services/token-replacement', () => {
 			another new line
 			and the end line %value2`;
 
-			const tokenReplacementMap: TokenReplacement[] = [];
+      const tokenReplacementMap: TokenReplacement[] = [];
 
-			const finalText = replaceTokensInString(originalText, tokenReplacementMap);
+      const finalText = replaceTokensInString(
+        originalText,
+        tokenReplacementMap
+      );
 
-			expect(finalText).to.not.contains('it works!!!');
-			expect(finalText).to.contains('%value1');
+      expect(finalText).to.not.contains('it works!!!');
+      expect(finalText).to.contains('%value1');
 
-			expect(finalText).to.not.contains('and this too!');
-			expect(finalText).to.contains('%value2');
-		});
+      expect(finalText).to.not.contains('and this too!');
+      expect(finalText).to.contains('%value2');
+    });
 
-		it('Replacement with special characters', () => {
-
-			const originalText = `Contact resource = ResourceService.getResourceForCurrentUser();
+    it('Replacement with special characters', () => {
+      const originalText = `Contact resource = ResourceService.getResourceForCurrentUser();
 			String resourceIdParam = String.valueOf(resource.Id);
 
 			Date today = %System__.*today();
@@ -97,21 +103,21 @@ describe('src/services/token-replacement', () => {
 			System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-');
 			`;
 
-			const tokenReplacementMap: TokenReplacement[] = [
-				{
-					token: '%System__.*today()',
-					value: `date.parse('${moment().format('YYYY-MM-DD')}')`
-				}
-			];
+      const tokenReplacementMap: TokenReplacement[] = [
+        {
+          token: '%System__.*today()',
+          value: `date.parse('${moment().format('YYYY-MM-DD')}')`,
+        },
+      ];
 
-			const finalText = replaceTokensInString(originalText, tokenReplacementMap);
+      const finalText = replaceTokensInString(
+        originalText,
+        tokenReplacementMap
+      );
 
-			expect(finalText).to.not.contains('%System.today()');
-			expect(finalText).to.not.contains(`${tokenReplacementMap[0].value}()`);
-			expect(finalText).to.contains(`${tokenReplacementMap[0].value}`);
-
-		});
-
-	});
-
+      expect(finalText).to.not.contains('%System.today()');
+      expect(finalText).to.not.contains(`${tokenReplacementMap[0].value}()`);
+      expect(finalText).to.contains(`${tokenReplacementMap[0].value}`);
+    });
+  });
 });

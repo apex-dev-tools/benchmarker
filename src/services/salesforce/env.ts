@@ -4,21 +4,21 @@
  */
 
 export function getSalesforceUsername() {
-	return process.env.SF_USERNAME || '';
+  return process.env.SF_USERNAME || '';
 }
 
 export function getSalesforcePassword() {
-	return process.env.SF_PASSWORD || '';
+  return process.env.SF_PASSWORD || '';
 }
 
 export function getSalesforceToken() {
-	return process.env.SF_TOKEN || '';
+  return process.env.SF_TOKEN || '';
 }
 
 export function getSalesforceUrlLogin() {
-	return process.env.SF_LOGIN || '';
+  return process.env.SF_LOGIN || '';
 }
 
 export function getSfdxUsername() {
-	return process.env.SFDX_USERNAME || '';
+  return process.env.SFDX_USERNAME || '';
 }
