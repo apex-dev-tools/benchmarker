@@ -21,7 +21,7 @@
     "build:clean": "rm -rf dist",
     "build:copy": "copyfiles -u 1 src/**/*.cls dist/src",
     "compile": "tsc",
-    "doc:generate": "typedoc --excludeNotExported --ignoreCompilerErrors --out doc src/**/*",
+    "doc:generate": "typedoc --out doc ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "husky",
     "postversion": "npm run doc:generate",
