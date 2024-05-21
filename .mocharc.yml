@@ -1,7 +1,7 @@
+color: true
+extension: ['ts']
+full-trace: true
+recursive: true
 require:
   - 'ts-node/register'
-  - 'source-map-support/register'
   - 'dotenv/config'
-full-trace: true
-color: true
-recursive: true

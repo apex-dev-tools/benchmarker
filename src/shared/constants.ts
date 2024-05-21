@@ -18,7 +18,7 @@ export const MOCKPRODUCT_FULLNAME = 'MockProduct';
  ******************************************************************************/
 export const FORM_LOAD = 'Form Load';
 export const DOCUMENT_LINE_PROCESS_EXTENDED_METRICS =
-	'Document Line Process Extended Metrics';
+  'Document Line Process Extended Metrics';
 export const DOCUMENT_LINE_PROCESS = 'Document Line Process';
 export const DOCUMENT_PROCESS = 'Document Process';
 export const ASYNC_PROCESS = 'Async Process';
@@ -58,4 +58,4 @@ export const CSV_EID = '<EID>';
  * ACTION TYPES
  ******************************************************************************/
 export const ERROR_OPENING_BROWSER =
-	'No test will be executed, a problem was found during browser opening and login';
+  'No test will be executed, a problem was found during browser opening and login';

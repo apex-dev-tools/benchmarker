@@ -2,247 +2,267 @@
  * Copyright (c) 2018-2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { expect } from 'chai';
-import * as chai from 'chai';
+import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { Browser, launch, Page } from 'puppeteer';
-import { SinonStub, stub, restore } from 'sinon';
+import { Browser, Frame, HTTPResponse, launch, Page } from 'puppeteer';
+import sinon, { SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
 import { navigate } from '../../../src/services/navigate/classic';
 
 const SELECTORS = Object.freeze({
-	ALL_TABS: 'a[href*="showAllTabs"]',
-	ALL_TABS_TAB_NO_NAME: '//a[contains(@class, "listRelatedObject")]',
-	ALL_TABS_TAB_FOR_NAME: '//a[contains(@class, "listRelatedObject") and text()="Example Tab"]',
-	HOME_INDICATOR: 'div[title="App Menu"]'
+  ALL_TABS: 'a[href*="showAllTabs"]',
+  ALL_TABS_TAB_NO_NAME: 'xpath///a[contains(@class, "listRelatedObject")]',
+  ALL_TABS_TAB_FOR_NAME:
+    'xpath///a[contains(@class, "listRelatedObject") and text()="Example Tab"]',
+  HOME_INDICATOR: 'div[title="App Menu"]',
 });
 
-const { goToFrontdoor , getVfFrame, goToAllTabsTab, homeIsLoaded } = navigate;
+const { goToFrontdoor, getVfFrame, goToAllTabsTab, homeIsLoaded } = navigate;
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 interface StubElementHandle {
-	click: SinonStub;
+  click: SinonStub;
 }
 
-function stubFindElement(page: Page, findFunctionName: keyof Page, error?: Error, ...args: any[]): StubElementHandle {
-	const result = {
-		click: stub().resolves()
-	};
+function stubFindElement(
+  page: Page,
+  findFunctionName: keyof Page,
+  error?: Error,
+  ...args: any[]
+): StubElementHandle {
+  const result = {
+    click: sinon.stub().resolves(),
+  };
 
-	const findElementStub = (page[findFunctionName] as SinonStub).withArgs(...args);
-	if (error)
-		findElementStub.rejects(error);
-	else
-		findElementStub.resolves(result);
+  const findElementStub = (page[findFunctionName] as SinonStub).withArgs(
+    ...args
+  );
+  if (error) findElementStub.rejects(error);
+  else findElementStub.resolves(result);
 
-	return result;
+  return result;
 }
 
 describe('src/services/navigate/classic', async () => {
-	let browser: Browser;
-	let page: Page;
+  let browser: Browser;
+  let page: Page;
 
-	before(async function() {
-		// The first time you start chromium can take some time
-		this.timeout(60000);
-		
-		// Check if running in container, different config is required if so 
-		if (process.env.PUPPETEER_DOCKER_CONTAINER) {
-			browser = await launch({
-				executablePath: '/usr/bin/google-chrome',
-				args: ['--no-sandbox']
-			});
-		} else {
-			browser = await launch();
-		}
-		page = await browser.newPage();
-	});
+  before(async function () {
+    // The first time you start chromium can take some time
+    this.timeout(60000);
 
-	after(async () => {
-		browser.close();
-	});
+    // Check if running in container, different config is required if so
+    if (process.env.PUPPETEER_DOCKER_CONTAINER) {
+      browser = await launch({
+        executablePath: '/usr/bin/google-chrome',
+        args: ['--no-sandbox'],
+      });
+    } else {
+      browser = await launch();
+    }
+    page = await browser.newPage();
+  });
 
-	beforeEach(async () => {
-		// Reject any unexpected waitForSelector/XPath calls, so each test
-		// has to explicitly declare which elements it expects
-		stub(page, 'waitForSelector').rejects(new Error('Bad'));
-		stub(page, 'waitForXPath').rejects(new Error('Bad'));
+  after(async () => {
+    await browser.close();
+  });
 
-		// Just resolve any navigation events, each test will check
-		// the positive and negative case.
-		stub(page, 'waitForNavigation').resolves();
-	});
+  beforeEach(async () => {
+    // Reject any unexpected waitForSelector/XPath calls, so each test
+    // has to explicitly declare which elements it expects
+    sinon.stub(page, 'waitForSelector').rejects(new Error('Bad'));
 
-	afterEach(() => {
-		restore();
-	});
+    // Just resolve any navigation events, each test will check
+    // the positive and negative case.
+    sinon.stub(page, 'waitForNavigation').resolves();
+  });
 
-	describe('goToFrontdoor', () => {
-		it('should return the reponse for the navigation', async () => {
-				stub(page, 'goto').resolves({
-					ok : () => true,
-				});
-				// Given
-				const navigateConfig = { page };
+  afterEach(() => {
+    sinon.restore();
+  });
 
-				// When
-				const reponse = await goToFrontdoor(navigateConfig, 'exampleUrl');
+  describe('goToFrontdoor', () => {
+    it('should return the reponse for the navigation', async () => {
+      sinon.stub(page, 'goto').resolves({
+        ok: () => true,
+      } as HTTPResponse);
+      // Given
+      const navigateConfig = { page };
 
-				// Then
-				expect(reponse!.ok()).to.eql(true);
-		});
-	});
+      // When
+      const reponse = await goToFrontdoor(navigateConfig, 'exampleUrl');
 
-	describe('goToAllTabsTab', () => {
-		let tabElement: StubElementHandle;
+      // Then
+      expect(reponse!.ok()).to.eql(true);
+    });
+  });
 
-		beforeEach(() => {
-			tabElement = stubFindElement(page, 'waitForXPath', undefined, SELECTORS.ALL_TABS_TAB_FOR_NAME);
-		});
+  describe('goToAllTabsTab', () => {
+    let tabElement: StubElementHandle;
 
-		describe('when doNavigate is undefined', () => {
-			it('should return the tab element and click some elements', async () => {
-				// Given
-				const navigateConfig = { page };
+    beforeEach(() => {
+      tabElement = stubFindElement(
+        page,
+        'waitForSelector',
+        undefined,
+        SELECTORS.ALL_TABS_TAB_FOR_NAME
+      );
+    });
 
-				// When
-				const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
+    describe('when doNavigate is undefined', () => {
+      it('should return the tab element and click some elements', async () => {
+        // Given
+        const navigateConfig = { page };
 
-				// Then
-				expect(element).to.eql(tabElement);
+        // When
+        const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
 
-				expect(tabElement.click).to.have.been.calledOnce;
-				expect(page.waitForNavigation).to.have.been.calledOnce;
-			});
-		});
+        // Then
+        expect(element).to.eql(tabElement);
 
-		describe('when doNavigate is false', () => {
+        expect(tabElement.click).to.have.been.calledOnce;
+        expect(page.waitForNavigation).to.have.been.calledOnce;
+      });
+    });
 
-			it('should reject if find tab rejects', async () => {
-				// Given
-				const navigateConfig = { doNavigate: false, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
+    describe('when doNavigate is false', () => {
+      it('should reject if find tab rejects', async () => {
+        // Given
+        const navigateConfig = { doNavigate: false, page };
+        tabElement = stubFindElement(
+          page,
+          'waitForSelector',
+          new Error('Bad allTabs'),
+          SELECTORS.ALL_TABS_TAB_FOR_NAME
+        );
 
-				// When
-				await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
+        // When
+        await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
+          // Then
+          .to.be.rejectedWith('Bad allTabs');
 
-				// Then
-					.to.be.rejectedWith('Bad allTabs');
+        expect(tabElement.click).to.not.have.been.called;
+        expect(page.waitForNavigation).to.not.have.been.called;
+      });
 
-				expect(tabElement.click).to.not.have.been.called;
-				expect(page.waitForNavigation).to.not.have.been.called;
-			});
+      it('should return the tab element without clicking', async () => {
+        // Given
+        const navigateConfig = { doNavigate: false, page };
 
-			it('should return the tab element without clicking', async () => {
-				// Given
-				const navigateConfig = { doNavigate: false, page };
+        // When
+        const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
 
-				// When
-				const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
+        // Then
+        expect(element).to.eql(tabElement);
 
-				// Then
-				expect(element).to.eql(tabElement);
+        expect(tabElement.click).to.not.have.been.called;
+        expect(page.waitForNavigation).to.not.have.been.called;
+      });
 
-				expect(tabElement.click).to.not.have.been.called;
-				expect(page.waitForNavigation).to.not.have.been.called;
-			});
+      it('should reject if no tab name is passed', async () => {
+        // Given
+        const navigateConfig = { doNavigate: false, page };
+        tabElement = stubFindElement(
+          page,
+          'waitForSelector',
+          new Error('Bad selector'),
+          SELECTORS.ALL_TABS_TAB_NO_NAME
+        );
 
-			it('should reject if no tab name is passed', async () => {
-				// Given
-				const navigateConfig = { doNavigate: false, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad selector'), SELECTORS.ALL_TABS_TAB_NO_NAME);
+        // When
+        await expect(goToAllTabsTab(navigateConfig))
+          // Then
+          .to.be.rejectedWith('Bad selector');
 
-				// When
-				await expect(goToAllTabsTab(navigateConfig))
+        expect(tabElement.click).to.not.have.been.called;
+        expect(page.waitForNavigation).to.not.have.been.called;
+      });
+    });
 
-				// Then
-					.to.be.rejectedWith('Bad selector');
+    describe('when doNavigate is true', () => {
+      it('should reject if find tab rejects', async () => {
+        // Given
+        const navigateConfig = { doNavigate: true, page };
+        tabElement = stubFindElement(
+          page,
+          'waitForSelector',
+          new Error('Bad allTabs'),
+          SELECTORS.ALL_TABS_TAB_FOR_NAME
+        );
 
-				expect(tabElement.click).to.not.have.been.called;
-				expect(page.waitForNavigation).to.not.have.been.called;
-			});
-		});
+        // When
+        await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
+          // Then
+          .to.be.rejectedWith('Bad allTabs');
 
-		describe('when doNavigate is true', () => {
+        expect(tabElement.click).to.not.have.been.called;
+        expect(page.waitForNavigation).to.not.have.been.called;
+      });
 
-			it('should reject if find tab rejects', async () => {
-				// Given
-				const navigateConfig = { doNavigate: true, page };
-				tabElement = stubFindElement(page, 'waitForXPath', new Error('Bad allTabs'), SELECTORS.ALL_TABS_TAB_FOR_NAME);
+      it('should error if waitForSelector resolves null', async () => {
+        // Given
+        (page.waitForSelector as SinonStub).resolves(null);
+        const navigateConfig = { doNavigate: true, page };
 
-				// When
-				await expect(goToAllTabsTab(navigateConfig, 'Example Tab'))
+        // When
+        await expect(goToAllTabsTab(navigateConfig, 'Example Tab Null'))
+          // Then
+          .to.be.rejectedWith('All tab not found.');
 
-				// Then
-					.to.be.rejectedWith('Bad allTabs');
+        expect(page.waitForNavigation).to.not.have.been.called;
+        expect(tabElement.click).to.not.have.been.called;
+      });
 
-				expect(tabElement.click).to.not.have.been.called;
-				expect(page.waitForNavigation).to.not.have.been.called;
-			});
+      it('should return the tab element and click some elements', async () => {
+        // Given
+        const navigateConfig = { doNavigate: true, page };
 
-			it('should error if waitForXPath resolves null', async () => {
+        // When
+        const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
 
-				// Given
-				(page.waitForXPath as SinonStub).resolves(null);
-				const navigateConfig = { doNavigate: true, page };
+        // Then
+        expect(element).to.eql(tabElement);
 
-				// When
-				await expect(goToAllTabsTab(navigateConfig, 'Example Tab Null'))
+        expect(tabElement.click).to.have.been.calledOnce;
+        expect(page.waitForNavigation).to.have.been.calledOnce;
+      });
+    });
+  });
 
-				// Then
-				.to.be.rejectedWith('All tab not found.');
+  describe('getVfFrame', () => {
+    it('should return the vfFrame element', async () => {
+      // Given
+      const frame = { name: 'Main' };
+      const navigateConfig = { page };
+      sinon.stub(page, 'mainFrame').returns(frame as unknown as Frame);
 
-				expect(page.waitForNavigation).to.not.have.been.called;
-				expect(tabElement.click).to.not.have.been.called;
-			});
+      // When
+      const mainFrame = await getVfFrame(navigateConfig);
 
-			it('should return the tab element and click some elements', async () => {
-				// Given
-				const navigateConfig = { doNavigate: true, page };
+      // Then
+      expect(mainFrame).to.eql(frame);
+    });
+  });
 
-				// When
-				const element = await goToAllTabsTab(navigateConfig, 'Example Tab');
+  describe('homeIsLoaded', () => {
+    it('should return an identifiable element after home is loaded', async () => {
+      const homeElement = stubFindElement(
+        page,
+        'waitForSelector',
+        undefined,
+        SELECTORS.HOME_INDICATOR
+      );
 
-				// Then
-				expect(element).to.eql(tabElement);
+      // Given
+      const navigateConfig = { page };
 
-				expect(tabElement.click).to.have.been.calledOnce;
-				expect(page.waitForNavigation).to.have.been.calledOnce;
-			});
+      // When
+      const element = await homeIsLoaded(navigateConfig);
 
-		});
-	});
-
-	describe('getVfFrame', () => {
-
-		it('should return the vfFrame element', async () => {
-			// Given
-			const frame = { name: 'Main' };
-			const navigateConfig = { page };
-			stub(page, 'mainFrame').returns(frame);
-
-			// When
-			const mainFrame = await getVfFrame(navigateConfig);
-
-			// Then
-			expect(mainFrame).to.eql(frame);
-		});
-	});
-
-	describe('homeIsLoaded', () => {
-		it('should return an identifiable element after home is loaded', async () => {
-			const homeElement = stubFindElement(page, 'waitForSelector', undefined, SELECTORS.HOME_INDICATOR);
-
-			// Given
-			const navigateConfig = { page };
-
-			// When
-			const element = await homeIsLoaded(navigateConfig);
-
-			// Then
-			expect(element).to.eql(homeElement);
-		});
-	});
+      // Then
+      expect(element).to.eql(homeElement);
+    });
+  });
 });

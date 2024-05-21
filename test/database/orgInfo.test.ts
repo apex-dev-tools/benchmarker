@@ -2,233 +2,129 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { expect } from 'chai';
-import * as chai from 'chai';
-import { stub, SinonStub, restore } from 'sinon';
+import chai, { expect } from 'chai';
+import sinon, { SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as db from '../../src/database/connection';
-import { orgInfoModel } from '../../src/database/orgInfo';
 import { OrgInfo } from '../../src/database/entity/org';
-import { OrgInfoI } from '../../src/services/orgContext/orgContext';
-import * as env from '../../src/shared/env';
 import { saveOrgInfo, getOrgInfoById } from '../../src/database/orgInfo';
+import { DataSource } from 'typeorm';
 
 chai.use(sinonChai);
 
-describe('src/database/orgInfo', async () => {
-
-	afterEach(() => {
-		restore();
-	});
-
-	let getConnection: SinonStub;
-
-	beforeEach(() => {
-		getConnection = stub(db, 'getConnection');
-	});
-
-	describe('save', () => {
-		let connection: {
-			manager: {
-				save: SinonStub
-			}
-		};
-
-		const orgInfo: OrgInfoI = {
-			orgID: '0',
-			releaseVersion: '0',
-			apiVersion: '0',
-			orgType: '0',
-			orgInstance: '0',
-			isSandbox: false,
-			isTrial: false,
-			isMulticurrency: false,
-			isLex: false
-		};
-
-		it('call save method', async () => {
-			// Given
-			connection = { manager: { save: stub().resolves(123) } };
-			getConnection.resolves(connection);
-
-			// When
-			const originalOrgShape: OrgInfo = new OrgInfo();
-			originalOrgShape.fillOrgContextInformation(orgInfo);
-			const executionInfo = await orgInfoModel.save(originalOrgShape);
-
-			expect(getConnection).to.have.been.calledOnce;
-			expect(connection.manager.save).to.have.been.calledOnce;
-			expect(executionInfo).to.be.equal(123);
-		});
-
-	});
-
-	describe('getOrgInfoByOrgId', () => {
-
-		it('returns undefined for no org id', async () => {
-			// Given
-			// When
-			const orgInfoResult = await orgInfoModel.getOrgInfoByOrgId(undefined as unknown as string, '45');
-
-			// Then
-			expect(orgInfoResult).to.be.undefined;
-		});
-
-		it('returns undefined for no api version', async () => {
-			// Given
-			// When
-			const orgInfoResult = await orgInfoModel.getOrgInfoByOrgId('id', undefined as unknown as string);
-
-			// Then
-			expect(orgInfoResult).to.be.undefined;
-		});
-
-		it('returns given row', async () => {
-			// Given
-			let connection: {
-				getRepository?: () => {
-					createQueryBuilder: () => {
-						getOne: () => {},
-						where: () => {},
-						andWhere: () => {}
-					}
-				}
-			};
-
-			const createdOrgInfo: OrgInfo = new OrgInfo();
-			createdOrgInfo.fillOrgContextInformation({
-				orgID: '1',
-				releaseVersion: 'Spring Test 2019',
-				apiVersion: '45',
-				orgType: 'test',
-				orgInstance: 'TestInstance',
-				isSandbox: true,
-				isTrial: true,
-				isMulticurrency: true,
-				isLex: true,
-			});
-
-			const queryBuilder: {
-				getOne: SinonStub,
-				where: SinonStub,
-				andWhere: SinonStub
-			} = {
-				getOne: stub().returns(createdOrgInfo),
-				where: stub().returnsThis(),
-				andWhere: stub().returnsThis()
-			};
-
-			connection = {
-				getRepository : stub().returns({
-					createQueryBuilder: stub().returns(queryBuilder)
-				})
-			};
-
-			getConnection.resolves(connection);
-
-			// When
-			const orgInfoResult = await orgInfoModel.getOrgInfoByOrgId('id', '45');
-
-			// Then
-			expect(createdOrgInfo).to.be.deep.equal(orgInfoResult);
-
-		});
-
-	});
-});
-
 describe('src/database/orgInfo', () => {
+  let connectionStub: SinonStub;
 
-	let getDatabaseUrl: SinonStub;
-	let stubSave: SinonStub;
+  beforeEach(() => {
+    connectionStub = sinon.stub(db, 'getConnection');
+  });
 
-	beforeEach(() => {
-		getDatabaseUrl = stub(env, 'getDatabaseUrl');
-	});
+  afterEach(() => {
+    sinon.restore();
+  });
 
-	afterEach(() => {
-		restore();
-	});
+  describe('saveOrgInfo', () => {
+    it('should save orgInfo', async () => {
+      // Given
+      const saveStub: SinonStub = sinon.stub().resolvesArg(0);
+      connectionStub.resolves({
+        manager: { save: saveStub },
+      } as unknown as DataSource);
 
-	describe('saveOrgInfo', () => {
+      const orgInfo = new OrgInfo();
+      orgInfo.orgId = 'testId';
+      orgInfo.releaseVersion = 'testVersion';
+      orgInfo.apiVersion = 'testApiVersion';
+      orgInfo.orgType = 'testOrgType';
+      orgInfo.instance = 'testInstance';
+      orgInfo.isLex = true;
+      orgInfo.isMulticurrency = true;
+      orgInfo.isSandbox = false;
+      orgInfo.isTrial = false;
 
-		it('saveOrgInfo should save data in database', async () => {
-			// Given
-			stubSave = stub(orgInfoModel, 'save');
-			getDatabaseUrl.returns('test');
+      // When
+      const savedRecord = await saveOrgInfo(orgInfo);
 
-			const orgInfo = new OrgInfo();
-			orgInfo.orgId = 'testId';
-			orgInfo.releaseVersion = 'testVersion';
-			orgInfo.apiVersion = 'testApiVersion';
-			orgInfo.orgType = 'testOrgType';
-			orgInfo.instance = 'testInstance';
-			orgInfo.isLex = true;
-			orgInfo.isMulticurrency = true;
-			orgInfo.isSandbox = false;
-			orgInfo.isTrial = false;
+      // Then
+      expect(saveStub).to.be.calledOnce;
+      expect(savedRecord).to.eql(orgInfo);
+    });
 
-			// When
-			await saveOrgInfo(orgInfo);
+    it('should save orgInfo from context', async () => {
+      // Given
+      const saveStub: SinonStub = sinon.stub().resolvesArg(0);
+      connectionStub.resolves({
+        manager: { save: saveStub },
+      } as unknown as DataSource);
 
-			// Then
-			expect(stubSave).to.have.been.called;
-		});
+      // When
+      const orgInfo = new OrgInfo();
+      orgInfo.fillOrgContextInformation({
+        orgID: 'testId',
+        releaseVersion: 'testVersion',
+        apiVersion: 'testApiVersion',
+        orgType: 'testOrgType',
+        orgInstance: 'testInstance',
+        isLex: true,
+        isMulticurrency: true,
+        isSandbox: false,
+        isTrial: false,
+      });
 
-		it('saveOrgInfo should no save data in database', async () => {
-			// Given
-			getDatabaseUrl.returns('');
-			stubSave = stub(orgInfoModel, 'save');
+      const savedRecord = await saveOrgInfo(orgInfo);
 
-			// When
-			const result = await saveOrgInfo(new OrgInfo());
+      // Then
+      expect(saveStub).to.be.calledOnce;
+      expect(savedRecord).to.eql(orgInfo);
+    });
+  });
 
-			// Then
-			expect(stubSave).to.not.have.been.called;
-			expect(result.orgId).to.be.equal('');
-			expect(result.releaseVersion).to.be.equal('');
-			expect(result.apiVersion).to.be.equal('');
-			expect(result.orgType).to.be.equal('');
-			expect(result.instance).to.be.equal('');
-			expect(result.isLex).to.be.equal(false);
-			expect(result.isMulticurrency).to.be.equal(false);
-			expect(result.isSandbox).to.be.equal(false);
-			expect(result.isTrial).to.be.equal(false);
-		});
-	});
+  describe('getOrgInfoById', () => {
+    it('returns null for no org id', async () => {
+      // Given
+      // When
+      const orgInfoResult = await getOrgInfoById(
+        undefined as unknown as string,
+        '45'
+      );
 
-	describe('getOrgInfoById', () => {
+      // Then
+      expect(orgInfoResult).to.be.null;
+    });
 
-		it('getOrgInfoById should retrieve org info id from database', async () => {
-			// Given
-			stubSave = stub(orgInfoModel, 'getOrgInfoByOrgId');
-			getDatabaseUrl.returns('test');
-			// When
-			await getOrgInfoById('testOrgId', 'testApiVersion');
+    it('returns null for no api version', async () => {
+      // Given
+      // When
+      const orgInfoResult = await getOrgInfoById(
+        'id',
+        undefined as unknown as string
+      );
 
-			// Then
-			expect(stubSave).to.have.been.called;
-		});
+      // Then
+      expect(orgInfoResult).to.be.null;
+    });
 
-		it('getOrgInfoById should no retrieve org info id from database', async () => {
-			// Given
-			getDatabaseUrl.returns('');
-			stubSave = stub(orgInfoModel, 'getOrgInfoByOrgId');
+    it('returns row for id and api version', async () => {
+      // Given
+      const orgInfo = new OrgInfo();
+      const queryStub = sinon.stub().resolves(orgInfo);
+      connectionStub.resolves({
+        getRepository: sinon.stub().returns({
+          createQueryBuilder: sinon.stub().returns({
+            getOne: queryStub,
+            where: sinon.stub().returnsThis(),
+            andWhere: sinon.stub().returnsThis(),
+          }),
+        }),
+      } as unknown as DataSource);
 
-			// When
-			const result = await getOrgInfoById('testOrgId', 'testApiVersion');
+      // When
+      const result = await getOrgInfoById('id', '45');
 
-			// Then
-			expect(stubSave).to.not.have.been.called;
-			expect(result!.orgId).to.be.equal('');
-			expect(result!.releaseVersion).to.be.equal('');
-			expect(result!.apiVersion).to.be.equal('');
-			expect(result!.orgType).to.be.equal('');
-			expect(result!.instance).to.be.equal('');
-			expect(result!.isLex).to.be.equal(false);
-			expect(result!.isMulticurrency).to.be.equal(false);
-			expect(result!.isSandbox).to.be.equal(false);
-			expect(result!.isTrial).to.be.equal(false);
-		});
-	});
+      // Then
+      expect(connectionStub).to.be.calledOnce;
+      expect(queryStub).to.be.calledOnce;
+      expect(result).to.eql(orgInfo);
+    });
+  });
 });

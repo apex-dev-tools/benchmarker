@@ -2,106 +2,135 @@
  * Copyright (c) 2018-2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import * as chai from 'chai';
-import { expect } from 'chai';
-import { createStubInstance, SinonStub, stub, SinonStubbedInstance, restore } from 'sinon';
-import * as env from '../../src/shared/env';
+import chai, { expect } from 'chai';
+import sinon, { SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
-import * as typeorm from 'typeorm';
-import { Connection } from 'typeorm';
-import { OrgInfo } from '../../src/database/entity/org';
-import { TestResult } from '../../src/database/entity/result';
-import { PackageInfo } from '../../src/database/entity/package';
-import { ExecutionInfo } from '../../src/database/entity/execution';
+import pgstr from 'pg-connection-string';
+import { DataSource } from 'typeorm';
+import {
+  resetConnection,
+  getConnection,
+  DB_ENTITIES,
+} from '../../src/database/connection';
 
 chai.use(sinonChai);
 
 describe('src/database/connection', () => {
-	let connection: SinonStubbedInstance<Connection>;
-	let getDatabaseUrl: SinonStub;
-	let createConnection: SinonStub;
+  let parseDatabaseUrlStub: SinonStub;
+  let initializeStub: SinonStub;
 
-	beforeEach(() => {
-		delete require.cache[require.resolve('../../src/database/connection')];
+  beforeEach(() => {
+    delete process.env.DATABASE_URL;
+    resetConnection();
 
-		connection = createStubInstance(Connection);
-		getDatabaseUrl = stub(env, 'getDatabaseUrl');
-		createConnection = stub(typeorm, 'createConnection');
-	});
+    parseDatabaseUrlStub = sinon.stub(pgstr, 'parse').returns({
+      host: null,
+      database: null,
+    });
 
-	afterEach(() => {
-		restore();
-	});
+    initializeStub = sinon
+      .stub(DataSource.prototype, 'initialize')
+      .resolvesThis();
+  });
 
-	describe('getConnection', () => {
-		it('should lazy load', async () => {
-			// Given
-			getDatabaseUrl.returns('postgres://exampleUser:examplePassword@examplehost.com:1234/exampleDb');
-			createConnection.resolves(connection);
+  afterEach(() => {
+    sinon.restore();
+  });
 
-			const { getConnection } = require('../../src/database/connection');
+  describe('getConnection', () => {
+    it('should load connection url from env vars', async () => {
+      // Given
+      process.env.DATABASE_URL = 'test';
 
-			// When
-			const actual1 = await getConnection();
-			const actual2 = await getConnection();
+      // When
+      const actual = await getConnection();
 
-			// Then
-			expect(actual1).to.eql(actual2);
-			expect(createConnection).to.be.calledOnce;
-		});
+      // Then
+      expect(actual).to.be.ok;
+      expect(parseDatabaseUrlStub).to.be.calledOnceWithExactly('test');
+      expect(initializeStub).to.be.calledOnce;
+    });
 
-		it('should create a connection with sensible defaults', async () => {
-			// Given
-			getDatabaseUrl.returns('');
-			createConnection.resolves(connection);
+    it('should lazy load', async () => {
+      // Given
+      // When
+      const actual1 = await getConnection();
+      const actual2 = await getConnection();
 
-			const { getConnection } = require('../../src/database/connection');
+      // Then
+      expect(actual1).to.eql(actual2);
+      expect(initializeStub).to.be.calledOnce;
+    });
 
-			// When
-			const actual = await getConnection();
+    it('should reset connection', async () => {
+      // Given
+      // When
+      const actual1 = await getConnection();
+      resetConnection();
 
-			// Then
-			expect(actual).to.be.ok;
-			expect(createConnection).to.be.calledOnceWithExactly({
-				type: 'postgres',
-				entities: [TestResult, OrgInfo, PackageInfo, ExecutionInfo],
-				schema: 'performance',
-				synchronize: true,
-				logging: false,
-				host: 'localhost',
-				port: 5432,
-				username: '',
-				password: '',
-				database: '',
-				ssl: false
-			});
-		});
+      parseDatabaseUrlStub.returns({
+        host: 'example.com',
+        database: null,
+      });
+      const actual2 = await getConnection();
 
-		it('should create a connection with database url values', async () => {
-			// Given
-			getDatabaseUrl.returns('postgres://exampleUser:examplePassword@examplehost.com:1234/exampleDb');
-			createConnection.resolves(connection);
+      // Then
+      expect(actual1).to.not.eql(actual2);
+      expect(initializeStub).to.be.calledTwice;
+    });
 
-			const { getConnection } = require('../../src/database/connection');
+    it('should create a connection with sensible defaults', async () => {
+      // Given
+      // When
+      const actual = await getConnection();
 
-			// When
-			const actual = await getConnection();
+      // Then
+      expect(actual).to.be.ok;
+      expect(initializeStub).to.be.calledOnce;
+      expect(actual.options).to.be.eql({
+        type: 'postgres',
+        entities: DB_ENTITIES,
+        schema: 'performance',
+        synchronize: true,
+        logging: false,
+        host: 'localhost',
+        port: 5432,
+        username: '',
+        password: '',
+        database: '',
+        ssl: false,
+      });
+    });
 
-			// Then
-			expect(actual).to.be.ok;
-			expect(createConnection).to.be.calledOnceWithExactly({
-				type: 'postgres',
-				entities: [TestResult, OrgInfo, PackageInfo, ExecutionInfo],
-				schema: 'performance',
-				synchronize: true,
-				logging: false,
-				host: 'examplehost.com',
-				port: '1234',
-				username: 'exampleUser',
-				password: 'examplePassword',
-				database: 'exampleDb',
-				ssl: {rejectUnauthorized: false }
-			});
-		});
-	});
+    it('should create a connection with database url values', async () => {
+      // Given
+      parseDatabaseUrlStub.returns({
+        database: 'exampleDb',
+        host: 'examplehost.com',
+        port: '1234',
+        user: 'exampleUser',
+        password: 'examplePassword',
+      });
+
+      // When
+      const actual = await getConnection();
+
+      // Then
+      expect(actual).to.be.ok;
+      expect(initializeStub).to.be.calledOnce;
+      expect(actual.options).to.be.eql({
+        type: 'postgres',
+        entities: DB_ENTITIES,
+        schema: 'performance',
+        synchronize: true,
+        logging: false,
+        host: 'examplehost.com',
+        port: 1234,
+        username: 'exampleUser',
+        password: 'examplePassword',
+        database: 'exampleDb',
+        ssl: { rejectUnauthorized: false },
+      });
+    });
+  });
 });

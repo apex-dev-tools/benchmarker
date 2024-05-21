@@ -20,62 +20,65 @@
     "build": "npm run build:clean && npm run compile && npm run build:copy",
     "build:clean": "rm -rf dist",
     "build:copy": "copyfiles -u 1 src/**/*.cls dist/src",
-    "compile": "tsc --skipLibCheck",
+    "compile": "tsc",
     "doc:generate": "typedoc --excludeNotExported --ignoreCompilerErrors --out doc src/**/*",
-    "lint": "tslint src/**/*.ts",
+    "lint": "eslint ./src ./test ./test_system --fix",
+    "prepare": "husky",
     "postversion": "npm run doc:generate",
-    "test": "DEBUG=-* nyc mocha 'test/**/*.test.ts'",
-    "test:only": "DEBUG=-* nyc mocha",
+    "test": "nyc mocha 'test/**/*.test.*'",
+    "test:only": "nyc mocha",
     "test:system:init": "cp test_system/.env .env",
-    "test:system": "mocha 'test_system/**/*.test.ts' --timeout 30000"
+    "test:system": "mocha --timeout 30000 'test_system/**/*.test.*'"
   },
   "dependencies": {
-    "axios": "1.4.0",
-    "@salesforce/core": "2.3.0",
-    "cli-table": "0.3.1",
-    "debug": "4.1.1",
-    "dotenv": "16.0.3",
-    "jsforce": "1.9.3",
-    "lodash": "4.17.15",
-    "moment": "2.24.0",
-    "pg": "8.7.3",
-    "pg-connection-string": "2.0.0",
-    "puppeteer": "19.11.1",
-    "typeorm": "0.2.21"
+    "@jsforce/jsforce-node": "3.2.0",
+    "@salesforce/core": "7.3.6",
+    "axios": "1.6.8",
+    "cli-table": "0.3.11",
+    "dotenv": "16.4.5",
+    "lighthouse": "12.0.0",
+    "lodash": "4.17.21",
+    "moment": "2.30.1",
+    "pg": "8.11.5",
+    "pg-connection-string": "2.6.4",
+    "puppeteer": "22.8.2",
+    "tslib": "2.6.2",
+    "typeorm": "0.3.20"
   },
   "devDependencies": {
-    "@fluffy-spoon/substitute": "1.89.0",
-    "@types/chai": "4.1.7",
-    "@types/chai-as-promised": "7.1.0",
-    "@types/cli-table": "0.3.0",
-    "@types/debug": "4.1.4",
-    "@types/dotenv": "4.0.3",
-    "@types/jsforce": "1.9.2",
-    "@types/lodash": "4.14.144",
-    "@types/mocha": "7.0.2",
-    "@types/node": "10.14.7",
-    "@types/sinon": "5.0.5",
-    "@types/sinon-chai": "3.2.0",
-    "axios-mock-adapter": "1.21.4",
-    "chai": "4.2.0",
-    "chai-as-promised": "7.1.1",
+    "@types/chai": "4.3.16",
+    "@types/chai-as-promised": "7.1.8",
+    "@types/cli-table": "0.3.4",
+    "@types/lodash": "4.17.1",
+    "@types/mocha": "10.0.6",
+    "@types/node": "20.12.12",
+    "@types/sinon": "17.0.3",
+    "@types/sinon-chai": "3.2.12",
+    "@typescript-eslint/eslint-plugin": "7.9.0",
+    "@typescript-eslint/parser": "7.9.0",
+    "axios-mock-adapter": "1.22.0",
+    "chai": "4.4.1",
+    "chai-as-promised": "7.1.2",
     "copyfiles": "2.4.1",
-    "lighthouse": "5.1.0",
-    "mocha": "7.1.2",
-    "nyc": "14.1.1",
-    "sinon": "6.1.4",
-    "sinon-chai": "3.2.0",
-    "source-map-support": "0.5.12",
-    "ts-node": "8.2.0",
-    "tslint": "5.16.0",
-    "typedoc": "0.17.2",
-    "typescript": "4.9.5"
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "5.1.3",
+    "husky": "9.0.11",
+    "lint-staged": "15.2.2",
+    "mocha": "10.4.0",
+    "nyc": "15.1.0",
+    "prettier": "3.2.5",
+    "sinon": "18.0.0",
+    "sinon-chai": "3.7.0",
+    "ts-node": "10.9.2",
+    "typedoc": "0.25.13",
+    "typescript": "5.4.5"
   },
   "engines": {
-    "node": ">16.0.0"
+    "node": ">18.0.0"
   },
   "nyc": {
-    "branches": 80,
     "check-coverage": true,
     "extension": [
       ".ts"
@@ -94,17 +97,13 @@
     "lines": 80,
     "per-file": true,
     "reporter": [
-      "html",
       "text",
       "text-summary"
-    ],
-    "require": [
-      "ts-node/register"
     ],
     "sourceMap": true,
     "statements": 80
   },
   "lint-staged": {
-    "*.ts": "tslint --fix src/**/*.ts"
+    "*.ts": "eslint --cache --cache-location .eslintcache --fix"
   }
 }

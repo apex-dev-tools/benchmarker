@@ -3,70 +3,74 @@
  */
 
 import { TRANSACTION_PROCESS } from '../shared/constants';
-import { connectToSalesforceOrg, getSalesforceAuthInfoFromEnvVars, SalesforceConnection } from '../services/salesforce/connection';
+import {
+  connectToSalesforceOrg,
+  getSalesforceAuthInfoFromEnvVars,
+  SalesforceConnection,
+} from '../services/salesforce/connection';
 import { TokenReplacement } from '../services/tokenReplacement';
 
 export interface GovernorMetricsResult {
-	timer: number;
-	cpuTime: number;
-	dmlRows: number;
-	dmlStatements: number;
-	heapSize: number;
-	queryRows: number;
-	soqlQueries: number;
+  timer: number;
+  cpuTime: number;
+  dmlRows: number;
+  dmlStatements: number;
+  heapSize: number;
+  queryRows: number;
+  soqlQueries: number;
 }
 
 export interface ProcessParams {
-	connection: SalesforceConnection;
+  connection: SalesforceConnection;
 }
 
 /**
  * Test Template to execute anonymous Apex code from a file and extract the Governor Limits
  */
 export class TransactionTestTemplate {
-	/**
-	 * Product name
-	 */
-	public product: string;
+  /**
+   * Product name
+   */
+  public product: string;
 
-	/**
-	 * Object to handle the connection to a Salesforce Org
-	 */
-	public connection: SalesforceConnection;
+  /**
+   * Object to handle the connection to a Salesforce Org
+   */
+  public connection: SalesforceConnection;
 
-	/**
-	 * Describes what kind of action the test is going to perfrom
-	 */
-	public action: string;
+  /**
+   * Describes what kind of action the test is going to perfrom
+   */
+  public action: string;
 
-	/**
-	 * Test steps to be executed
-	 */
-	public flowSteps: FlowStep[];
+  /**
+   * Test steps to be executed
+   */
+  public flowSteps: FlowStep[];
 
-	/**
-	 * Results of the test steps executions
-	 */
-	public flowStepsResults: TestFlowOutput[];
+  /**
+   * Results of the test steps executions
+   */
+  public flowStepsResults: TestFlowOutput[];
 
-	/**
-	 * Defines the use case the test is going to cover. For example Form Load, Document Line Process, Document Process
-	 */
-	public testType: string;
+  /**
+   * Defines the use case the test is going to cover. For example Form Load, Document Line Process, Document Process
+   */
+  public testType: string;
 }
 
 /**
  * TransactionTestTemplate to add information about the name of the flow to be executed and the action perfromed
  */
 export interface TestStepDescription {
-	action: string;
-	flowName: string;
+  action: string;
+  flowName: string;
 }
 
 export interface TestFlowOutput {
-	testStepDescription: TestStepDescription;
-	result: GovernorMetricsResult;
-	error?: string;
+  testStepDescription: TestStepDescription;
+  result: GovernorMetricsResult;
+  error?: string;
 }
 
 /**
@@ -75,43 +79,63 @@ export interface TestFlowOutput {
 export type FlowStep = () => Promise<TestFlowOutput>;
 
 export interface TestFlowOptions {
-	tokenMap?: TokenReplacement[];
+  tokenMap?: TokenReplacement[];
 }
 
 export namespace TransactionProcess {
-	/**
-	 * Sets the configuration for the Test Template
-	 * @param product Product name
-	 * @param testType defines the use case the test is going to cover, by default Transaction Process
-	 */
-	export const build = async (product: string, testType: string = TRANSACTION_PROCESS): Promise<TransactionTestTemplate> => {
-		const processTestTemplate = new TransactionTestTemplate();
-		processTestTemplate.product = product;
-		processTestTemplate.flowSteps = [];
-		processTestTemplate.flowStepsResults = [];
-		processTestTemplate.testType = testType;
+  /**
+   * Sets the configuration for the Test Template
+   * @param product Product name
+   * @param testType defines the use case the test is going to cover, by default Transaction Process
+   */
+  export const build = async (
+    product: string,
+    testType: string = TRANSACTION_PROCESS
+  ): Promise<TransactionTestTemplate> => {
+    const processTestTemplate = new TransactionTestTemplate();
+    processTestTemplate.product = product;
+    processTestTemplate.flowSteps = [];
+    processTestTemplate.flowStepsResults = [];
+    processTestTemplate.testType = testType;
 
-		const connectionData = await connectToSalesforceOrg(getSalesforceAuthInfoFromEnvVars());
-		processTestTemplate.connection = connectionData;
+    const connectionData = await connectToSalesforceOrg(
+      getSalesforceAuthInfoFromEnvVars()
+    );
+    processTestTemplate.connection = connectionData;
 
-		return processTestTemplate;
-	};
+    return processTestTemplate;
+  };
 
-	/**
-	 * Executes Apex code from a file and retrieve the Governor Limits
-	 * @param processTestTemplate object with all the information required to execute a test
-	 * @param testStep list of test steps to be executed
-	 */
-	export const executeTestStep = async (processTestTemplate: TransactionTestTemplate, testStep: FlowStep) => {
-		try {
-			const result: TestFlowOutput = await testStep();
-			processTestTemplate.flowStepsResults.push(result);
-		} catch (e) {
-			if (e.testStepDescription) {
-				processTestTemplate.flowStepsResults.push({ testStepDescription: e.testStepDescription, error: e.message, result: { cpuTime: -1, dmlRows: -1, dmlStatements: -1, heapSize: -1, queryRows: -1, soqlQueries: -1, timer: -1 } });
-			} else {
-				throw e;
-			}
-		}
-	};
+  /**
+   * Executes Apex code from a file and retrieve the Governor Limits
+   * @param processTestTemplate object with all the information required to execute a test
+   * @param testStep list of test steps to be executed
+   */
+  export const executeTestStep = async (
+    processTestTemplate: TransactionTestTemplate,
+    testStep: FlowStep
+  ) => {
+    try {
+      const result: TestFlowOutput = await testStep();
+      processTestTemplate.flowStepsResults.push(result);
+    } catch (e) {
+      if (e.testStepDescription) {
+        processTestTemplate.flowStepsResults.push({
+          testStepDescription: e.testStepDescription,
+          error: e.message,
+          result: {
+            cpuTime: -1,
+            dmlRows: -1,
+            dmlStatements: -1,
+            heapSize: -1,
+            queryRows: -1,
+            soqlQueries: -1,
+            timer: -1,
+          },
+        });
+      } else {
+        throw e;
+      }
+    }
+  };
 }
