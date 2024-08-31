@@ -37,6 +37,8 @@ const outputGovernorLimits: DataTableRow[] = [
   { label: 'Heap size (bytes)', field: 'heapSize' },
   { label: 'Query rows', field: 'queryRows' },
   { label: 'SOQL queries', field: 'soqlQueries' },
+  { label: 'Queueables', field: 'queueableJobs' },
+  { label: 'Futures', field: 'futureCalls' },
 ];
 
 const outputErrors: DataTableRow[] = [

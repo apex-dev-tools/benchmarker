@@ -70,6 +70,8 @@ describe('src/testTemplates/transactionTestTemplate', () => {
           heapSize: 5,
           queryRows: 6,
           soqlQueries: 7,
+          queueableJobs: 8,
+          futureCalls: 9,
         },
       };
       const flowStep: FlowStep = stub().resolves(result);
@@ -89,6 +91,8 @@ describe('src/testTemplates/transactionTestTemplate', () => {
       expect(test.flowStepsResults[0].result.heapSize).to.be.equal(5);
       expect(test.flowStepsResults[0].result.queryRows).to.be.equal(6);
       expect(test.flowStepsResults[0].result.soqlQueries).to.be.equal(7);
+      expect(test.flowStepsResults[0].result.queueableJobs).to.be.equal(8);
+      expect(test.flowStepsResults[0].result.futureCalls).to.be.equal(9);
     });
 
     it('fails and save the result as status is failed', async () => {
@@ -121,6 +125,8 @@ describe('src/testTemplates/transactionTestTemplate', () => {
       expect(test.flowStepsResults[0].result.heapSize).to.be.equal(-1);
       expect(test.flowStepsResults[0].result.queryRows).to.be.equal(-1);
       expect(test.flowStepsResults[0].result.soqlQueries).to.be.equal(-1);
+      expect(test.flowStepsResults[0].result.queueableJobs).to.be.equal(-1);
+      expect(test.flowStepsResults[0].result.futureCalls).to.be.equal(-1);
       expect(test.flowStepsResults[0].result.timer).to.be.equal(-1);
     });
 

@@ -30,6 +30,8 @@ export interface TestResultOutput {
   heapSize?: number;
   queryRows?: number;
   soqlQueries?: number;
+  queueableJobs?: number;
+  futureCalls?: number;
 }
 
 export interface BenchmarkReporter {
@@ -70,6 +72,14 @@ export function convertOutputToTestResult(
   testResult.soqlQueries =
     output.soqlQueries !== undefined
       ? output.soqlQueries
+      : DEFAULT_NUMERIC_VALUE;
+  testResult.queueableJobs =
+    output.queueableJobs !== undefined
+      ? output.queueableJobs
+      : DEFAULT_NUMERIC_VALUE;
+  testResult.futureCalls =
+    output.futureCalls !== undefined
+      ? output.futureCalls
       : DEFAULT_NUMERIC_VALUE;
 
   return testResult;

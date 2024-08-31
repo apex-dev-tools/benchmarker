@@ -35,6 +35,8 @@ export const saveResults = async (
       heapSize: result.heapSize,
       queryRows: result.queryRows,
       soqlQueries: result.soqlQueries,
+      queueableJobs: result.queueableJobs,
+      futureCalls: result.futureCalls,
       action,
       flowName,
       error: flowOutput.error ? flowOutput.error : '',

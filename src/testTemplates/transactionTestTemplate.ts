@@ -18,6 +18,8 @@ export interface GovernorMetricsResult {
   heapSize: number;
   queryRows: number;
   soqlQueries: number;
+  queueableJobs: number;
+  futureCalls: number;
 }
 
 export interface ProcessParams {
@@ -130,6 +132,8 @@ export namespace TransactionProcess {
             heapSize: -1,
             queryRows: -1,
             soqlQueries: -1,
+            queueableJobs: -1,
+            futureCalls: -1,
             timer: -1,
           },
         });
