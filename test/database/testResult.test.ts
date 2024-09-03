@@ -9,7 +9,7 @@ import { TestResult } from '../../src/database/entity/result';
 import { DataSource } from 'typeorm';
 
 import * as db from '../../src/database/connection';
-import { saveTestResult } from '../../src/database/testResult';
+import { loadTestResults, saveTestResult } from '../../src/database/testResult';
 
 chai.use(sinonChai);
 
@@ -40,6 +40,22 @@ describe('src/database/testResult', () => {
       // Then
       expect(saveStub).to.be.calledOnce;
       expect(savedRecords).to.eql(results);
+    });
+  });
+
+  describe('loadTestResults', () => {
+    it('should load test result', async () => {
+      // Given
+      const findStub: SinonStub = sinon.stub();
+      connectionStub.resolves({
+        manager: { find: findStub },
+      } as unknown as DataSource);
+
+      // When
+      await loadTestResults();
+
+      // Then
+      expect(findStub).to.be.calledOnce;
     });
   });
 });
