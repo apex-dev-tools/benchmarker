@@ -22,7 +22,7 @@ describe('System Test Process', () => {
         test,
         await createApexExecutionTestStepFlow(
           test.connection,
-          __dirname + '/basic.apex',
+          __dirname + '/async.apex',
           { flowName: 'System Test', action: 'run system test' }
         )
       );
@@ -38,7 +38,7 @@ describe('System Test Process', () => {
       expect(result.heapSize).to.be.above(0);
       expect(result.queryRows).to.be.equal(0);
       expect(result.soqlQueries).to.be.equal(0);
-      expect(result.queueableJobs).to.be.equal(0);
+      expect(result.queueableJobs).to.be.equal(1);
       expect(result.futureCalls).to.be.equal(0);
     });
   });
