@@ -11,6 +11,7 @@ import {
   getSalesforceToken,
   getSalesforceUrlLogin,
 } from './env';
+import './deploy';
 
 /**
  * Handles connections and requests to Salesforce org
