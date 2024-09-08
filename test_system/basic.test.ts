@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ */
 import { expect } from 'chai';
 import {
   TransactionTestTemplate,

@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ */
+
 // Start collecting initial governor limits
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
 
