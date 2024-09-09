@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 FinancialForce.com, inc. All rights reserved.
+ * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
 import {
