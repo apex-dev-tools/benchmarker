@@ -4,16 +4,17 @@
 
 import { expect } from 'chai';
 import { SalesforceConnection } from '../../../src/services/salesforce/connection';
-import { replaceClasses as replaceClassesTarget } from '../../../src/services/salesforce/deploy';
-import { Connection } from '@salesforce/core';
+import { AuthInfo } from '@salesforce/core';
+import sinon from 'sinon';
 
 describe('Deploy', () => {
   it('should create new class', async () => {
-    const fake = new FakeConnection([]);
-    const connection = fake as any as SalesforceConnection;
+    const tooling = new FakeTooling([]);
+    const connection = await createConnection(tooling);
+
     await connection.replaceClasses(new Map([['Foo', 'public class Foo {}']]));
-    expect(fake.tooling.deletedIds).to.deep.equal([]);
-    expect(fake.tooling.created).to.deep.equal([
+    expect(tooling.deletedIds).to.deep.equal([]);
+    expect(tooling.created).to.deep.equal([
       {
         name: 'Foo',
         body: 'public class Foo {}',
@@ -22,16 +23,17 @@ describe('Deploy', () => {
   });
 
   it('should create multiple new classes', async () => {
-    const fake = new FakeConnection([]);
-    const connection = fake as any as SalesforceConnection;
+    const tooling = new FakeTooling([]);
+    const connection = await createConnection(tooling);
+
     await connection.replaceClasses(
       new Map([
         ['Foo', 'public class Foo {}'],
         ['Bar', 'public class Bar {}'],
       ])
     );
-    expect(fake.tooling.deletedIds).to.deep.equal([]);
-    expect(fake.tooling.created).to.deep.equal([
+    expect(tooling.deletedIds).to.deep.equal([]);
+    expect(tooling.created).to.deep.equal([
       {
         name: 'Foo',
         body: 'public class Foo {}',
@@ -44,11 +46,12 @@ describe('Deploy', () => {
   });
 
   it('should replace an existing class', async () => {
-    const fake = new FakeConnection(['anId']);
-    const connection = fake as any as SalesforceConnection;
+    const tooling = new FakeTooling(['anId']);
+    const connection = await createConnection(tooling);
+
     await connection.replaceClasses(new Map([['Foo', 'public class Foo {}']]));
-    expect(fake.tooling.deletedIds).to.deep.equal(['anId']);
-    expect(fake.tooling.created).to.deep.equal([
+    expect(tooling.deletedIds).to.deep.equal(['anId']);
+    expect(tooling.created).to.deep.equal([
       {
         name: 'Foo',
         body: 'public class Foo {}',
@@ -95,14 +98,14 @@ class FakeTooling {
   }
 }
 
-class FakeConnection {
-  tooling: FakeTooling;
-
-  constructor(existingClassIds: string[]) {
-    this.tooling = new FakeTooling(existingClassIds);
-  }
-
-  replaceClasses(sources: Map<string, string>) {
-    return replaceClassesTarget.apply(this as any as Connection, [sources]);
-  }
+async function createConnection(
+  tooling: FakeTooling
+): Promise<SalesforceConnection> {
+  const connection = new SalesforceConnection({
+    authInfo: await AuthInfo.create({
+      username: '00D000000000000!',
+    }),
+  });
+  sinon.stub(connection, 'tooling').value(tooling);
+  return connection;
 }

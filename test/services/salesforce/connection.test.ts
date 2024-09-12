@@ -10,9 +10,8 @@ import * as envVarsHelper from '../../../src/services/salesforce/env';
 import {
   getSalesforceAuthInfoFromEnvVars,
   connectToSalesforceOrg,
-  SalesforceConnection,
 } from '../../../src/services/salesforce/connection';
-import { AuthInfo, Org } from '@salesforce/core';
+import { AuthInfo, Connection } from '@salesforce/core';
 import jsforce from '@jsforce/jsforce-node';
 
 chai.use(chaiAsPromised);
@@ -48,7 +47,7 @@ describe('salesforce connection module', () => {
   });
 
   describe('connectToSalesforceOrg', () => {
-    it('connect to non-scratch org', async () => {
+    it('connect with username and password', async () => {
       const login = stub().resolves();
       const jsforceStub = stub(jsforce, 'Connection');
 
@@ -57,13 +56,10 @@ describe('salesforce connection module', () => {
         instanceUrl: 'randomUrl',
         login,
       });
-      const authInfoCreate = stub(AuthInfo, 'create').resolves({} as AuthInfo);
-      const sfdxCoreConnectionCreate = stub(
-        SalesforceConnection,
-        'create'
-      ).resolves({
-        instanceUrl: undefined,
-      } as unknown as SalesforceConnection);
+      const authInfoCreate = stub(AuthInfo, 'create').resolves({
+        getConnectionOptions: () => {},
+        getUsername: () => 'username',
+      } as AuthInfo);
 
       const connection = await connectToSalesforceOrg({
         username: 'username',
@@ -78,36 +74,45 @@ describe('salesforce connection module', () => {
       expect(authInfoCreate).to.have.been.calledOnceWith({
         username: 'accessToken',
       });
-      expect(sfdxCoreConnectionCreate).to.have.been.calledOnce;
       expect(connection.instanceUrl).to.be.eq('randomUrl');
     });
 
-    it('connect to scratch org', async () => {
-      const refreshAuthStub = stub();
-      const orgCreate: any = stub(Org, 'create').resolves({
-        refreshAuth: refreshAuthStub,
-        getConnection: stub().resolves({
-          instanceUrl: 'sfdxRandomUrl',
-        }),
-      } as unknown as Org);
+    it('connect with username and password without password', async () => {
+      try {
+        await connectToSalesforceOrg({
+          username: 'username',
+          loginUrl: 'loginUrl',
+        });
+        expect.fail();
+      } catch (e) {
+        expect(e).to.be.instanceof(Error);
+        expect((e as Error).message).to.contains(
+          'Password is required for non-SFDX login'
+        );
+      }
+    });
 
-      const connection = await connectToSalesforceOrg({
+    it('connect with sfdx alias or username', async () => {
+      const authInfoCreate = stub(AuthInfo, 'create').resolves({
+        getConnectionOptions: () => {},
+        getUsername: () => 'username',
+      } as AuthInfo);
+      const requestStub = stub(Connection.prototype, 'request');
+
+      await connectToSalesforceOrg({
         username: 'username',
         isSFDX: true,
       });
 
-      expect(refreshAuthStub).to.have.been.called;
-      expect(orgCreate).to.have.been.calledWith({
-        aliasOrUsername: 'username',
+      expect(authInfoCreate).to.have.been.calledOnceWith({
+        username: 'username',
       });
-      expect(connection.instanceUrl).to.be.eq('sfdxRandomUrl');
+
+      expect(requestStub).to.have.been.calledOnce;
     });
 
-    it('connect to scratch org but fails', async () => {
-      stub(Org, 'create').resolves({
-        refreshAuth: stub(),
-        getConnection: stub().rejects('fake error'),
-      } as unknown as Org);
+    it('connect with sfdx alias or username but fails', async () => {
+      stub(AuthInfo, 'create').rejects('fake error');
 
       try {
         await connectToSalesforceOrg({ username: 'username', isSFDX: true });

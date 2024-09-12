@@ -50,7 +50,7 @@ describe('src/services/salesforce/utils', () => {
       };
 
       const response = await utils.query(
-        connectionStub as Connection,
+        connectionStub as SalesforceConnection,
         'query soql'
       );
       expect(response.records[0].Id).to.be.eq(123);
@@ -121,7 +121,7 @@ describe('src/services/salesforce/utils', () => {
         .reply(200, response);
 
       const result = await utils.executeAnonymous(
-        connection as Connection,
+        connection as SalesforceConnection,
         'apex code'
       );
       console.log(result);
