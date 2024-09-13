@@ -6,10 +6,12 @@
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
 
 // --- Place your code to be tested here ---
-List<String> str = new List<String>();
-for(Integer i=0; i<10000; i++) {
-    str.add('abc');
+class MyQueueable implements Queueable {
+    public void execute(QueueableContext ctx) {
+        
+    }
 }
+System.enqueueJob(new MyQueueable());
 
 // End collecting final governor limits
 GovernorLimits finalLimits = (new GovernorLimits()).getCurrentGovernorLimits();

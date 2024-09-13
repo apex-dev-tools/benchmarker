@@ -10,3 +10,8 @@ export async function saveTestResult(testStepResults: TestResult[]) {
   const connection = await getConnection();
   return connection.manager.save(testStepResults);
 }
+
+export async function loadTestResults(): Promise<TestResult[]> {
+  const connection = await getConnection();
+  return connection.manager.find(TestResult);
+}

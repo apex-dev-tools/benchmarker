@@ -36,6 +36,8 @@ describe('src/testTemplates/saveResult', () => {
             heapSize: 6,
             queryRows: 6,
             soqlQueries: 8,
+            queueableJobs: 9,
+            futureCalls: 10,
           },
         },
       ]);
@@ -54,6 +56,8 @@ describe('src/testTemplates/saveResult', () => {
       expect(reportResultsStub.args[0][0][0].heapSize).to.be.equal(6);
       expect(reportResultsStub.args[0][0][0].queryRows).to.be.equal(6);
       expect(reportResultsStub.args[0][0][0].soqlQueries).to.be.equal(8);
+      expect(reportResultsStub.args[0][0][0].queueableJobs).to.be.equal(9);
+      expect(reportResultsStub.args[0][0][0].futureCalls).to.be.equal(10);
     });
 
     it('saves results with error', async () => {
@@ -73,6 +77,8 @@ describe('src/testTemplates/saveResult', () => {
             heapSize: 6,
             queryRows: 6,
             soqlQueries: 8,
+            queueableJobs: 9,
+            futureCalls: 10,
           },
           error: 'Exception processing flow',
         },
@@ -92,6 +98,8 @@ describe('src/testTemplates/saveResult', () => {
       expect(reportResultsStub.args[0][0][0].heapSize).to.be.equal(6);
       expect(reportResultsStub.args[0][0][0].queryRows).to.be.equal(6);
       expect(reportResultsStub.args[0][0][0].soqlQueries).to.be.equal(8);
+      expect(reportResultsStub.args[0][0][0].queueableJobs).to.be.equal(9);
+      expect(reportResultsStub.args[0][0][0].futureCalls).to.be.equal(10);
       expect(reportResultsStub.args[0][0][0].error).to.be.equal(
         'Exception processing flow'
       );

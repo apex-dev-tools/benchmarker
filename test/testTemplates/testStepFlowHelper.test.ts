@@ -47,6 +47,8 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       heapSize: 1,
       queryRows: 1,
       soqlQueries: 1,
+      queueableJobs: 1,
+      futureCalls: 1,
       timer: 1,
     };
     sinon
@@ -102,6 +104,8 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       heapSize: 1,
       queryRows: 1,
       soqlQueries: 1,
+      queueableJobs: 1,
+      futureCalls: 1,
       timer: 1,
     };
     const extractGovernorMetricsFromGenericApexFlowStub = sinon
@@ -154,6 +158,8 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       heapSize: 1,
       queryRows: 1,
       soqlQueries: 1,
+      queueableJobs: 1,
+      futureCalls: 1,
       timer: 1,
     };
     const extractGovernorMetricsFromGenericApexFlowStub = sinon

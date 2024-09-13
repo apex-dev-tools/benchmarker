@@ -5,7 +5,7 @@
  // This is injected in Anonynmous Apex scripts as a helper so static can't be used
 
 public class GovernorLimits{
-	private Integer timer, cpuTime, dmlRows, dmlStatements, heapSize, queryRows, soqlQueries;
+	private Integer timer, cpuTime, dmlRows, dmlStatements, heapSize, queryRows, soqlQueries, queueableJobs, futureCalls;
 
 	public GovernorLimits getCurrentGovernorLimits() {
 		this.timer = (Integer)Datetime.now().getTime();
@@ -26,6 +26,8 @@ public class GovernorLimits{
 		this.heapSize = govLim2.heapSize - govLim1.heapSize;
 		this.queryRows = govLim2.queryRows - govLim1.queryRows;
 		this.soqlQueries = govLim2.soqlQueries - govLim1.soqlQueries;
+		this.queueableJobs = Limits.getQueueableJobs();
+		this.futureCalls = Limits.getFutureCalls();
 		return this;
 	}
 }

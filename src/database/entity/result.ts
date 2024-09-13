@@ -64,6 +64,12 @@ export class TestResult extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'soql_queries' })
   public soqlQueries = DEFAULT_NUMERIC_VALUE;
 
+  @Column('integer', { nullable: true, name: 'queueable_jobs' })
+  public queueableJobs = DEFAULT_NUMERIC_VALUE;
+
+  @Column('integer', { nullable: true, name: 'future_calls' })
+  public futureCalls = DEFAULT_NUMERIC_VALUE;
+
   public constructor() {
     super();
   }

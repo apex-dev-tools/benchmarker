@@ -60,5 +60,7 @@ CREATE TABLE IF NOT EXISTS performance.test_result (
     dml_statements integer,
     heap_size integer,
     query_rows integer,
-    soql_queries integer
+    soql_queries integer,
+    queueable_jobs integer,
+    future_calls integer
 );
