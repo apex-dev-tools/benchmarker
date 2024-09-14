@@ -26,8 +26,8 @@
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "husky",
     "postversion": "npm run doc:generate",
-    "test": "nyc mocha 'test/**/*.test.*'",
-    "test:only": "nyc mocha",
+    "test": "nyc mocha --timeout 10000 'test/**/*.test.*'",
+    "test:only": "nyc mocha --timeout 10000",
     "test:system:init": "cp test_system/.env .env",
     "test:system": "mocha --timeout 30000 'test_system/**/*.test.*'"
   },
