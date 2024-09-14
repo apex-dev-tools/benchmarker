@@ -20,6 +20,7 @@ import {
   getSalesforceToken,
   getSalesforceUrlLogin,
 } from './env';
+import { retry } from './utils';
 
 /**
  * Handles connections and requests to Salesforce org
@@ -33,18 +34,26 @@ export class SalesforceConnection extends Connection {
     const nameList = Array.from(sources.keys())
       .map(name => `'${name}'`)
       .join(', ');
-    const existingClasses = await this.tooling.query(
-      `Select Id From ApexClass where Name in (${nameList})`
+    const existingClasses = await retry(
+      async () =>
+        await this.tooling.query(
+          `Select Id From ApexClass where Name in (${nameList})`
+        )
     );
     const ids = existingClasses.records.map(r => r.Id) as string[];
     for (const id of ids) {
-      await this.tooling.sobject('ApexClass').delete(id);
+      await retry(
+        async () => await this.tooling.sobject('ApexClass').delete(id)
+      );
     }
 
     for (const name of sources.keys()) {
       const body = sources.get(name);
       if (body) {
-        await this.tooling.sobject('ApexClass').create({ name, body });
+        await retry(
+          async () =>
+            await this.tooling.sobject('ApexClass').create({ name, body })
+        );
       }
     }
   }
