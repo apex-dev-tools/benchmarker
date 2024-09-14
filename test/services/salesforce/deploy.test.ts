@@ -95,6 +95,7 @@ describe('Deploy', () => {
         'Failed to execute function after 3 attempts.'
       );
     }
+    return Promise.resolve();
   });
 
   it('should create multiple new classes', async () => {
