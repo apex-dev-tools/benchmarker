@@ -18,7 +18,13 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "target": "es2020",
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "plugins": [
+      // transformer executed by ts-patch
+      {
+        "transform": "./scripts/apexLoader.ts"
+      }
+    ],
   },
   "include": [
     "src",
