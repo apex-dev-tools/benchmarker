@@ -25,7 +25,7 @@ export const createApexExecutionTestStepFlow = async (
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
   const governorMetricsApexClass = await readFile(
-    require.resolve('./apex/GovernorLimits.cls')
+    require.resolve('./apex/GovernorLimits.apex')
   );
   const originalApexFileContent = await readFile(apexScriptPath);
   const processedApexFileContent = replaceTokensInString(
