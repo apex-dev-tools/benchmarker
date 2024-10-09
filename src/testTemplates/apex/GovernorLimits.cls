@@ -15,6 +15,8 @@ public class GovernorLimits{
 		this.heapSize = Limits.getHeapSize();
 		this.queryRows = Limits.getQueryRows();
 		this.soqlQueries = Limits.getQueries();
+		this.queueableJobs = Limits.getQueueableJobs();
+		this.futureCalls = Limits.getFutureCalls();
 		return this;
 	}
 
@@ -26,8 +28,8 @@ public class GovernorLimits{
 		this.heapSize = govLim2.heapSize - govLim1.heapSize;
 		this.queryRows = govLim2.queryRows - govLim1.queryRows;
 		this.soqlQueries = govLim2.soqlQueries - govLim1.soqlQueries;
-		this.queueableJobs = Limits.getQueueableJobs();
-		this.futureCalls = Limits.getFutureCalls();
+		this.queueableJobs = govLim2.queueableJobs - govLim1.queueableJobs;
+		this.futureCalls = govLim2.futureCalls - govLim1.futureCalls;
 		return this;
 	}
 }
