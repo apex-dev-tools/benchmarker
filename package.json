@@ -18,9 +18,8 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "npm run build:clean && npm run compile && npm run build:copy",
+    "build": "npm run build:clean && npm run compile",
     "build:clean": "rm -rf dist",
-    "build:copy": "copyfiles -u 1 src/**/*.cls dist/src",
     "compile": "tsc",
     "doc:generate": "typedoc --out doc ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
@@ -60,7 +59,6 @@
     "axios-mock-adapter": "1.22.0",
     "chai": "4.4.1",
     "chai-as-promised": "7.1.2",
-    "copyfiles": "2.4.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-node": "11.1.0",
