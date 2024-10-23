@@ -33,28 +33,3 @@ public class GovernorLimits {
 		return this;
 	}
 }
-
-/*
-private GovernorLimits initialLimits;
-private GovernorLimits limitsDiff;
-private String testName;
-private String testAction;
-
-void setName(String name) {
-	testName = name;
-}
-
-void setAction(String action) {
-	testAction = action;
-}
-
-void start() {
-	initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
-}
-
-void stop() {
-	// TODO pass name and action in json
-	limitsDiff = (new GovernorLimits()).getLimitsDiff(initialLimits, (new GovernorLimits()).getCurrentGovernorLimits());
-	System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-');
-}
-*/

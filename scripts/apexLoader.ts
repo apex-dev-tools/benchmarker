@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
