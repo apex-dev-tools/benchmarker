@@ -115,11 +115,15 @@ export namespace TransactionProcess {
    */
   export const executeTestStep = async (
     processTestTemplate: TransactionTestTemplate,
-    testStep: FlowStep
+    testStep: FlowStep,
+    runs: number = 1
   ) => {
     try {
-      const result: TestFlowOutput = await testStep();
-      processTestTemplate.flowStepsResults.push(result);
+      const results: TestFlowOutput[] = [];
+      for (let run = 0; run < runs; run++) {
+        results.push(await testStep());
+      }
+      processTestTemplate.flowStepsResults.push(mergeResults(results));
     } catch (e) {
       if (e.testStepDescription) {
         processTestTemplate.flowStepsResults.push({
@@ -141,5 +145,48 @@ export namespace TransactionProcess {
         throw e;
       }
     }
+  };
+
+  const mergeResults = (results: TestFlowOutput[]): TestFlowOutput => {
+    let error: string | undefined;
+    const governorMetricsResult: GovernorMetricsResult = {
+      cpuTime: 0,
+      dmlRows: 0,
+      dmlStatements: 0,
+      heapSize: 0,
+      queryRows: 0,
+      soqlQueries: 0,
+      queueableJobs: 0,
+      futureCalls: 0,
+      timer: 0,
+    };
+    for (const result of results) {
+      if (!error && result.error) error = result.error;
+      governorMetricsResult.cpuTime += result.result.cpuTime;
+      governorMetricsResult.dmlRows += result.result.dmlRows;
+      governorMetricsResult.dmlStatements += result.result.dmlStatements;
+      governorMetricsResult.heapSize += result.result.heapSize;
+      governorMetricsResult.queryRows += result.result.queryRows;
+      governorMetricsResult.soqlQueries += result.result.soqlQueries;
+      governorMetricsResult.queueableJobs += result.result.queueableJobs;
+      governorMetricsResult.futureCalls += result.result.futureCalls;
+      governorMetricsResult.timer += result.result.timer;
+    }
+
+    governorMetricsResult.cpuTime /= results.length;
+    governorMetricsResult.dmlRows /= results.length;
+    governorMetricsResult.dmlStatements /= results.length;
+    governorMetricsResult.heapSize /= results.length;
+    governorMetricsResult.queryRows /= results.length;
+    governorMetricsResult.soqlQueries /= results.length;
+    governorMetricsResult.queueableJobs /= results.length;
+    governorMetricsResult.futureCalls /= results.length;
+    governorMetricsResult.timer /= results.length;
+
+    return {
+      testStepDescription: results[0].testStepDescription,
+      result: governorMetricsResult,
+      error: error,
+    };
   };
 }
