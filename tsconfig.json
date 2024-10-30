@@ -20,7 +20,6 @@
     "target": "es2020",
     "useUnknownInCatchVariables": false,
     "plugins": [
-      // transformer executed by ts-patch
       {
         "transform": "./scripts/apexLoader.ts"
       }
