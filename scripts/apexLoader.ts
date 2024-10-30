@@ -36,10 +36,10 @@ export default function (
           if (file.endsWith('.apex')) {
             const sourcePath = path.dirname(sourceFile.fileName);
             const filePath = path.resolve(sourcePath, file);
-            console.log(`Inlining apex: ${filePath}`);
             const contents = fs.readFileSync(filePath).toString();
 
             // potentially inject template literal refs
+            // remove comments, \n and \t ?
 
             return ctx.factory.createStringLiteral(contents);
           }
