@@ -78,6 +78,7 @@ export class AnonApexBenchmark extends Benchmark<
         apexCode:
           require('../../../scripts/apex/limits.apex') +
           require('../../../scripts/apex/benchmark.apex') +
+          'benchmark.begin();' +
           content +
           'benchmark.end();',
         type: AnonApexTransactionType.TestCase,
