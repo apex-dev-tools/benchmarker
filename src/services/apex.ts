@@ -18,7 +18,7 @@ export interface ApexBenchmarkServiceOptions {}
 
 export interface ApexBenchmarkOptions {
   /**
-   * Map of string value replacement applied on all loaded scripts.
+   * Map of string value replacement applied on Apex code.
    *
    * @example
    * tokens: [{ token: '%var', value: '100' }]
@@ -26,7 +26,10 @@ export interface ApexBenchmarkOptions {
    */
   tokens?: TokenReplacement[];
   /**
-   * List of namespaces to be removed from any Apex code executed.
+   * List of namespaces to be removed from any Apex code.
+   *
+   * Removes the need to write separate benchmark scripts for managed and
+   * unmanaged executions.
    */
   unmanagedNamespaces?: string[];
 }
@@ -42,9 +45,9 @@ export interface ApexBenchmarkCodeOptions extends ApexBenchmarkOptions {
    * transaction executed.
    *
    * This value should preferably be set in the apex script with
-   * `benchmark.setAction()`.
+   * `benchmark.start('action taken')` or `benchmark.setAction()`.
    *
-   * If left undefined - actions will be named by their index.
+   * If left undefined - actions will be named by their index starting from 1.
    */
   benchmarkActions?: string[];
 }
@@ -55,8 +58,8 @@ export interface ApexBenchmarkResult {
 }
 
 export class ApexBenchmarkService {
-  //private options: RunnerOptions;
   private connection: SalesforceConnection;
+  //private options: ApexBenchmarkServiceOptions;
 
   constructor(
     connection: SalesforceConnection
@@ -66,44 +69,59 @@ export class ApexBenchmarkService {
     //this.options = options || {};
   }
 
+  /**
+   * Run a benchmark for an apex file, or all apex files under the specified
+   * directory path.
+   */
   async benchmark(
     apexPath: string,
     options?: ApexBenchmarkOptions
   ): Promise<ApexBenchmarkResult> {
     const { root, paths } = await this.loadFromPath(apexPath);
 
-    const executions: ApexBenchmarkResult[] = [];
+    const benchmarks: AnonApexBenchmark[] = [];
     for (const apexfile of paths) {
       const apex = await fs.readFile(apexfile, { encoding: 'utf8' });
 
-      const execution = await this.benchmarkCode(apex, {
+      const benchmark = await this.runApexBenchmark(apex, {
         ...options,
         benchmarkName: path.basename(path.relative(root, apexfile), '.apex'),
       });
 
-      executions.push(execution);
+      benchmarks.push(benchmark);
     }
 
-    return this.mergeResults(executions);
+    return this.mergeResults(benchmarks);
   }
 
+  /**
+   * Run a benchmark on Anonymous Apex code.
+   */
   async benchmarkCode(
-    codeStr: string,
+    apexCode: string,
     options: ApexBenchmarkCodeOptions
   ): Promise<ApexBenchmarkResult> {
-    const benchmark = this.createAnonApexBenchmark(options.benchmarkName, {
-      code: replaceTokensInString(codeStr, options?.tokens),
-      connection: this.connection,
-    });
-
-    await benchmark.prepare(options.benchmarkActions);
-
-    await benchmark.run();
+    const benchmark = await this.runApexBenchmark(apexCode, options);
 
     return {
       benchmarks: benchmark.results(),
       errors: benchmark.errors(),
     };
+  }
+
+  private async runApexBenchmark(
+    code: string,
+    options: ApexBenchmarkCodeOptions
+  ): Promise<AnonApexBenchmark> {
+    const benchmark = this.createAnonApexBenchmark(options.benchmarkName, {
+      code: replaceTokensInString(code, options?.tokens),
+      connection: this.connection,
+    });
+
+    await benchmark.prepare(options.benchmarkActions);
+    await benchmark.run();
+
+    return benchmark;
   }
 
   private createAnonApexBenchmark(
@@ -159,14 +177,13 @@ export class ApexBenchmarkService {
     return path.extname(pathStr).toLowerCase() === '.apex';
   }
 
-  private mergeResults(runs: ApexBenchmarkResult[]): ApexBenchmarkResult {
+  private mergeResults(runs: AnonApexBenchmark[]): ApexBenchmarkResult {
     return runs.reduce(
-      (acc, curr) => {
-        acc.benchmarks.push(...curr.benchmarks);
-        acc.errors.push(...curr.errors);
-        return acc;
-      },
-      { benchmarks: [], errors: [] }
+      (acc, curr) => ({
+        benchmarks: acc.benchmarks.concat(curr.results()),
+        errors: acc.errors.concat(curr.errors()),
+      }),
+      { benchmarks: [], errors: [] } as ApexBenchmarkResult
     );
   }
 }
