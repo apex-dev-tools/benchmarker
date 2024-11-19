@@ -7,6 +7,7 @@ import { getDatabaseUrl } from '../shared/env';
 import { OrgContext } from './org/context';
 import {
   TestResultOutput,
+  addAlertRecords,
   convertOutputToTestResult,
   getReporters,
 } from './result/output';
@@ -33,7 +34,10 @@ export async function reportResults(
 
   if (getDatabaseUrl()) {
     try {
-      await save(results, orgContext);
+      const alerts = testResultOutput
+        .filter(result => result.alertThresolds)
+        .map(addAlertRecords);
+      await save(results, orgContext, alerts);
     } catch (err) {
       console.error(
         'Failed to save results to database. Check DATABASE_URL environment variable, unset to skip saving.'

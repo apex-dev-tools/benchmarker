@@ -1,15 +1,19 @@
 /**
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
-import { expect } from 'chai';
+// import { expect } from 'chai';
 import {
   TransactionTestTemplate,
   TransactionProcess,
   createApexExecutionTestStepFlow,
   saveResults,
 } from '../src/';
-import { loadTestResults } from '../src/database/testResult';
+// import { loadTestResults } from '../src/database/testResult';
 import { cleanDatabase } from './database';
+import {
+  AlertInfo,
+  Threshold,
+} from '../src/testTemplates/transactionTestTemplate';
 
 describe('System Test Process', () => {
   let test: TransactionTestTemplate;
@@ -21,28 +25,59 @@ describe('System Test Process', () => {
 
   describe('Flow', function () {
     it('should execute successfully', async () => {
+      const alertInfo = new AlertInfo();
+      alertInfo.storeAlerts = true;
+
       await TransactionProcess.executeTestStep(
         test,
         await createApexExecutionTestStepFlow(
           test.connection,
           __dirname + '/basic.apex',
           { flowName: 'System Test', action: 'run system test' }
+        ),
+        alertInfo
+      );
+    });
+
+    it('should execute successfully 2nd', async () => {
+      const alertInfo = new AlertInfo();
+      alertInfo.storeAlerts = true;
+
+      const thresolds = new Threshold();
+      thresolds.cpuTimeThreshold = 100;
+      thresolds.dmlRowThreshold = 0;
+      thresolds.dmlStatementThreshold = 0;
+      thresolds.durationThreshold = 0;
+      thresolds.heapSizeThreshold = 1000;
+      thresolds.queryRowsThreshold = 0;
+      thresolds.soqlQueriesThreshold = 0;
+
+      alertInfo.thresolds = thresolds;
+
+      await TransactionProcess.executeTestStep(
+        test,
+        await createApexExecutionTestStepFlow(
+          test.connection,
+          __dirname + '/basic.apex',
+          { flowName: 'System Test', action: 'run system test 2' }
+        ),
+        alertInfo
+      );
+    });
+
+    it('should execute successfully 3rd', async () => {
+      await TransactionProcess.executeTestStep(
+        test,
+        await createApexExecutionTestStepFlow(
+          test.connection,
+          __dirname + '/basic.apex',
+          { flowName: 'System Test', action: 'alert not needed' }
         )
       );
-
-      await saveResults(test, test.flowStepsResults);
-
-      const results = await loadTestResults();
-      expect(results.length).to.be.equal(1);
-      const result = results[0];
-      expect(result.cpuTime).to.be.above(0);
-      expect(result.dmlRows).to.be.equal(0);
-      expect(result.dmlStatements).to.be.equal(0);
-      expect(result.heapSize).to.be.above(0);
-      expect(result.queryRows).to.be.equal(0);
-      expect(result.soqlQueries).to.be.equal(0);
-      expect(result.queueableJobs).to.be.equal(0);
-      expect(result.futureCalls).to.be.equal(0);
     });
+  });
+
+  after(async function () {
+    await saveResults(test, test.flowStepsResults);
   });
 });

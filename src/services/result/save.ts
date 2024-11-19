@@ -3,11 +3,13 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
+import { Alert } from '../../database/entity/alert';
 import { ExecutionInfo } from '../../database/entity/execution';
 import { OrgInfo } from '../../database/entity/org';
 import { PackageInfo } from '../../database/entity/package';
 import { TestResult } from '../../database/entity/result';
 import { saveExecutionInfo } from '../../database/executionInfo';
+import { saveAlerts } from '../../database/alertInfo';
 import { getOrgInfoById, saveOrgInfo } from '../../database/orgInfo';
 import {
   getPackagesByVersionId,
@@ -20,7 +22,8 @@ import { Package } from '../org/packages';
 
 export async function save(
   testResults: TestResult[],
-  orgContext: OrgContext
+  orgContext: OrgContext,
+  alerts: Alert[]
 ): Promise<void> {
   const testResultsDB: TestResult[] = await saveTestResults(testResults);
   const orgInfoDB: OrgInfo = await saveOrg(orgContext.orgInfo);
@@ -31,6 +34,16 @@ export async function save(
     packagesDB.map(pkg => pkg.id)
   );
   await saveExecutionInfo(executionInfoRows);
+  alerts.forEach(alert => {
+    const match = testResultsDB.find(
+      result =>
+        result.action === alert.action && result.flowName === alert.flowName
+    );
+    if (match) {
+      alert.testResultId = match.id;
+    }
+  });
+  await saveAlerts(alerts);
 }
 
 function generateExecutionInfoRows(

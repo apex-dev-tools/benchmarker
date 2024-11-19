@@ -3,6 +3,8 @@
  * Copyright (c) 2018-2019 FinancialForce.com, inc. All rights reserved.
  */
 import * as dotenv from 'dotenv';
+import { Threshold } from '../testTemplates/transactionTestTemplate';
+
 dotenv.config({ path: '.env' });
 
 import { PuppeteerNodeLaunchOptions } from 'puppeteer';
@@ -89,6 +91,23 @@ export function getAsyncMonitorTimeout() {
 
 export function getExternalBuildId() {
   return process.env.EXTERNAL_BUILD_ID || '';
+}
+
+export function getThresholds() {
+  const thresolds = new Threshold();
+  thresolds.cpuTimeThreshold = Number(<any>process.env.CPU_TIME_THRESHOLD);
+  thresolds.durationThreshold = Number(<any>process.env.DURATION_THRESHOLD);
+  thresolds.dmlStatementThreshold = Number(
+    <any>process.env.DML_STATEMENTS_THRESHOLD
+  );
+  thresolds.dmlRowThreshold = Number(<any>process.env.DML_ROWS_THRESHOLD);
+  thresolds.heapSizeThreshold = Number(<any>process.env.HEAP_SIZE_THRESHOLD);
+  thresolds.queryRowsThreshold = Number(<any>process.env.QUERY_ROWS_THRESHOLD);
+  thresolds.soqlQueriesThreshold = Number(
+    <any>process.env.SOQL_QUERIES_THRESHOLD
+  );
+
+  return thresolds;
 }
 
 export function getAppLauncherSelector() {

@@ -9,6 +9,7 @@ import {
   SalesforceConnection,
 } from '../services/salesforce/connection';
 import { TokenReplacement } from '../services/tokenReplacement';
+import { getThresholds } from '../shared/env';
 
 export interface GovernorMetricsResult {
   timer: number;
@@ -69,9 +70,25 @@ export interface TestStepDescription {
   flowName: string;
 }
 
+export class Threshold {
+  cpuTimeThreshold: number;
+  durationThreshold: number;
+  dmlStatementThreshold: number;
+  dmlRowThreshold: number;
+  heapSizeThreshold: number;
+  queryRowsThreshold: number;
+  soqlQueriesThreshold: number;
+}
+
+export class AlertInfo {
+  storeAlerts: boolean;
+  thresolds: Threshold;
+}
+
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
   result: GovernorMetricsResult;
+  alertThresolds?: Threshold;
   error?: string;
 }
 
@@ -115,10 +132,13 @@ export namespace TransactionProcess {
    */
   export const executeTestStep = async (
     processTestTemplate: TransactionTestTemplate,
-    testStep: FlowStep
+    testStep: FlowStep,
+    alertInfo?: AlertInfo
   ) => {
     try {
       const result: TestFlowOutput = await testStep();
+      // populating results to also store the thresholds
+      storeAlertThresholds(result, alertInfo);
       processTestTemplate.flowStepsResults.push(result);
     } catch (e) {
       if (e.testStepDescription) {
@@ -136,10 +156,21 @@ export namespace TransactionProcess {
             futureCalls: -1,
             timer: -1,
           },
+          alertThresolds: new Threshold(),
         });
       } else {
         throw e;
       }
     }
   };
+}
+
+function storeAlertThresholds(result: TestFlowOutput, alertInfo?: AlertInfo) {
+  if (alertInfo && alertInfo.storeAlerts === true) {
+    if (alertInfo.thresolds) {
+      result.alertThresolds = alertInfo.thresolds;
+    } else {
+      result.alertThresolds = getThresholds();
+    }
+  }
 }
