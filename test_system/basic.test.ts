@@ -3,6 +3,8 @@
  */
 // import { expect } from 'chai';
 import {
+  AlertInfo,
+  Threshold,
   TransactionTestTemplate,
   TransactionProcess,
   createApexExecutionTestStepFlow,
@@ -10,10 +12,6 @@ import {
 } from '../src/';
 // import { loadTestResults } from '../src/database/testResult';
 import { cleanDatabase } from './database';
-import {
-  AlertInfo,
-  Threshold,
-} from '../src/testTemplates/transactionTestTemplate';
 
 describe('System Test Process', () => {
   let test: TransactionTestTemplate;

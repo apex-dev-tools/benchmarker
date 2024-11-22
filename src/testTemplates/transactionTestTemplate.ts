@@ -167,10 +167,8 @@ export namespace TransactionProcess {
 
 function storeAlertThresholds(result: TestFlowOutput, alertInfo?: AlertInfo) {
   if (alertInfo && alertInfo.storeAlerts === true) {
-    if (alertInfo.thresolds) {
-      result.alertThresolds = alertInfo.thresolds;
-    } else {
-      result.alertThresolds = getThresholds();
-    }
+    result.alertThresolds = alertInfo.thresolds
+      ? alertInfo.thresolds
+      : getThresholds();
   }
 }
