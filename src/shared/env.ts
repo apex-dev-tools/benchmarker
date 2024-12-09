@@ -4,6 +4,8 @@
  */
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
+import fs from 'fs';
+import path from 'path';
 
 import { PuppeteerNodeLaunchOptions } from 'puppeteer';
 
@@ -21,6 +23,31 @@ export function isHeadless() {
 
 export function shouldStoreAlerts() {
   return process.env.STORE_ALERTS === 'true';
+}
+
+/**
+ * Load the range collection from either a custom JSON path or default json file.
+ */
+export function getRangeCollection(): any {
+  const customRangesPath = process.env.CUSTOM_RANGES_PATH;
+  const defaultRangesPath = path.resolve(__dirname, '../../rangeConfig.json');
+
+  let ranges = {};
+
+  if (customRangesPath) {
+    try {
+      const customRanges = fs.readFileSync(customRangesPath, 'utf8');
+      ranges = JSON.parse(customRanges);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  if (Object.keys(ranges).length === 0) {
+    const defaultRanges = fs.readFileSync(defaultRangesPath, 'utf8');
+    ranges = JSON.parse(defaultRanges);
+  }
+  return ranges;
 }
 
 export function getPuppeteerLaunchOptions(

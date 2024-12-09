@@ -9,7 +9,6 @@ import { Timer } from '../../shared/timer';
 import { TableReporter } from './table';
 import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { Alert } from '../../database/entity/alert';
-import rangeCollection from '../../../rangeConfig.json';
 
 export interface TestResultOutput {
   timer: Timer;
@@ -96,7 +95,15 @@ function getThresoldsByRange(
   cpuavg: number,
   dmlrowavg: number,
   heapavg: number,
-  queryRowAvg: number
+  queryRowAvg: number,
+  rangeCollection: {
+    dml_ranges: any[];
+    soql_ranges: any[];
+    cpu_ranges: any[];
+    dmlRows_ranges: any[];
+    heap_ranges: any[];
+    queryRows_ranges: any[];
+  }
 ) {
   //get limit ranges based on the average values
   const dmlRanges = rangeCollection.dml_ranges.filter(
@@ -159,7 +166,8 @@ export async function addAlertByComparingAvg(
       soqlrowavg: number;
       durationavg: number;
     };
-  }
+  },
+  rangeCollection: any
 ): Promise<Alert> {
   const alert: Alert = new Alert();
   alert.action = output.action;
@@ -185,7 +193,8 @@ export async function addAlertByComparingAvg(
     averageResults.cpuavg,
     averageResults.dmlrowavg,
     averageResults.heapavg,
-    averageResults.soqlrowavg
+    averageResults.soqlrowavg,
+    rangeCollection
   );
 
   //storing alerts if there is a degradation

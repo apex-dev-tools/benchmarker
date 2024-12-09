@@ -13,7 +13,7 @@ import {
 } from './result/output';
 import { save } from './result/save';
 import { getAverageValues } from '../database/alertInfo';
-import { shouldStoreAlerts } from '../shared/env';
+import { shouldStoreAlerts, getRangeCollection } from '../shared/env';
 
 export async function reportResults(
   testResultOutput: TestResultOutput[],
@@ -33,6 +33,7 @@ export async function reportResults(
 
   // Fetch average values for all flow-action pairs
   const preFetchedAverages = await getAverageValues(flowActionPairs);
+  const rangeCollection = getRangeCollection();
 
   // Run loggers
   for (const reporter of getReporters()) {
@@ -60,7 +61,12 @@ export async function reportResults(
               ) && shouldStoreAlerts()
           )
           .map(
-            async item => await addAlertByComparingAvg(item, preFetchedAverages)
+            async item =>
+              await addAlertByComparingAvg(
+                item,
+                preFetchedAverages,
+                rangeCollection
+              )
           )
       );
 
