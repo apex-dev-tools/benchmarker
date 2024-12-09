@@ -45,7 +45,7 @@ export const saveResults = async (
       lighthouseSpeedIndex: undefined,
       lighthouseTimeToInteractive: undefined,
       testType: processTestTemplate.testType,
-      alertThresolds: flowOutput.alertThresolds,
+      alertThresolds: flowOutput.alertInfo,
     };
 
     return testStep;

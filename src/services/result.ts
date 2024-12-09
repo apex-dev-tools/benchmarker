@@ -13,6 +13,7 @@ import {
 } from './result/output';
 import { save } from './result/save';
 import { getAverageValues } from '../database/alertInfo';
+import { shouldStoreAlerts } from '../shared/env';
 
 export async function reportResults(
   testResultOutput: TestResultOutput[],
@@ -22,7 +23,12 @@ export async function reportResults(
 
   // Extract flowName and actionName pairs from the test results
   const flowActionPairs = testResultOutput
-    .filter(result => result.alertThresolds) // Only include those that have alert thresholds
+    .filter(
+      result =>
+        !(
+          result.alertThresolds && result.alertThresolds.storeAlerts === false
+        ) && shouldStoreAlerts()
+    ) // Only include those that have alert thresholds
     .map(result => ({ flowName: result.flowName, actionName: result.action }));
 
   // Fetch average values for all flow-action pairs
@@ -46,7 +52,13 @@ export async function reportResults(
       // Generate alerts based on pre-fetched averages
       const alerts = await Promise.all(
         testResultOutput
-          .filter(result => result.alertThresolds)
+          .filter(
+            result =>
+              !(
+                result.alertThresolds &&
+                result.alertThresolds.storeAlerts === false
+              ) && shouldStoreAlerts()
+          )
           .map(
             async item => await addAlertByComparingAvg(item, preFetchedAverages)
           )

@@ -1,5 +1,10 @@
-import { getConnection } from './connection';
+/** @ignore */
+/**
+ * Copyright (c) 2024 Certinia, Inc. All rights reserved.
+ */
+
 import { Alert } from './entity/alert';
+import { getConnection } from './connection';
 
 export async function saveAlerts(alerts: Alert[]) {
   console.log(JSON.stringify(alerts));

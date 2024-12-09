@@ -9,7 +9,6 @@ import {
   SalesforceConnection,
 } from '../services/salesforce/connection';
 import { TokenReplacement } from '../services/tokenReplacement';
-import { getThresholds } from '../shared/env';
 
 export interface GovernorMetricsResult {
   timer: number;
@@ -88,7 +87,7 @@ export class AlertInfo {
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
   result: GovernorMetricsResult;
-  alertThresolds?: Threshold;
+  alertInfo?: AlertInfo;
   error?: string;
 }
 
@@ -138,7 +137,7 @@ export namespace TransactionProcess {
     try {
       const result: TestFlowOutput = await testStep();
       // populating results to also store the thresholds
-      storeAlertThresholds(result, alertInfo);
+      result.alertInfo = alertInfo;
       processTestTemplate.flowStepsResults.push(result);
     } catch (e) {
       if (e.testStepDescription) {
@@ -156,19 +155,11 @@ export namespace TransactionProcess {
             futureCalls: -1,
             timer: -1,
           },
-          alertThresolds: new Threshold(),
+          alertInfo: new AlertInfo(),
         });
       } else {
         throw e;
       }
     }
   };
-}
-
-function storeAlertThresholds(result: TestFlowOutput, alertInfo?: AlertInfo) {
-  if (alertInfo && alertInfo.storeAlerts === true) {
-    result.alertThresolds = alertInfo.thresolds
-      ? alertInfo.thresolds
-      : getThresholds();
-  }
 }

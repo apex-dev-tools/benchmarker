@@ -22,23 +22,19 @@ describe('System Test Process', () => {
 
   describe('Flow', function () {
     it('should execute successfully', async () => {
-      const alertInfo = new AlertInfo();
-      alertInfo.storeAlerts = true;
-
       await TransactionProcess.executeTestStep(
         test,
         await createApexExecutionTestStepFlow(
           test.connection,
           __dirname + '/basic.apex',
           { flowName: 'System Test', action: 'run system test' }
-        ),
-        alertInfo
+        )
       );
     });
 
     it('should execute successfully 3rd', async () => {
       const alertInfo = new AlertInfo();
-      alertInfo.storeAlerts = true;
+      alertInfo.storeAlerts = false;
       await TransactionProcess.executeTestStep(
         test,
         await createApexExecutionTestStepFlow(

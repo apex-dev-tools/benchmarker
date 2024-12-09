@@ -7,7 +7,7 @@ import { TestResult } from '../../database/entity/result';
 import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 import { Timer } from '../../shared/timer';
 import { TableReporter } from './table';
-import { Threshold } from '../../testTemplates/transactionTestTemplate';
+import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { Alert } from '../../database/entity/alert';
 import rangeCollection from '../../../rangeConfig.json';
 
@@ -37,7 +37,7 @@ export interface TestResultOutput {
   futureCalls?: number;
 
   // alert thresolds
-  alertThresolds?: Threshold;
+  alertThresolds?: AlertInfo;
 }
 
 export interface BenchmarkReporter {
@@ -189,56 +189,54 @@ export async function addAlertByComparingAvg(
   );
 
   //storing alerts if there is a degradation
-  if (output.alertThresolds) {
-    alert.dmlStatementsDegraded = output.dmlStatements
-      ? output.dmlStatements >
-        Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
-        ? output.dmlStatements -
-          (Number(thresolds.dmlThresold) + Number(averageResults.dmlavg))
-        : 0
-      : 0;
+  alert.dmlStatementsDegraded = output.dmlStatements
+    ? output.dmlStatements >
+      Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
+      ? output.dmlStatements -
+        (Number(thresolds.dmlThresold) + Number(averageResults.dmlavg))
+      : 0
+    : 0;
 
-    alert.soqlQueriesDegraded = output.soqlQueries
-      ? output.soqlQueries >
-        Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
-        ? output.soqlQueries -
-          (Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg))
-        : 0
-      : 0;
+  alert.soqlQueriesDegraded = output.soqlQueries
+    ? output.soqlQueries >
+      Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
+      ? output.soqlQueries -
+        (Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg))
+      : 0
+    : 0;
 
-    alert.cpuTimeDegraded = output.cpuTime
-      ? output.cpuTime >
-        Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
-        ? output.cpuTime -
-          (Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg))
-        : 0
-      : 0;
+  alert.cpuTimeDegraded = output.cpuTime
+    ? output.cpuTime >
+      Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
+      ? output.cpuTime -
+        (Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg))
+      : 0
+    : 0;
 
-    alert.dmlRowsDegraded = output.dmlRows
-      ? output.dmlRows >
-        Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
-        ? output.dmlRows -
-          (Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg))
-        : 0
-      : 0;
+  alert.dmlRowsDegraded = output.dmlRows
+    ? output.dmlRows >
+      Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
+      ? output.dmlRows -
+        (Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg))
+      : 0
+    : 0;
 
-    alert.heapSizeDegraded = output.heapSize
-      ? output.heapSize >
-        Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
-        ? output.heapSize -
-          (Number(thresolds.heapThreshold) + Number(averageResults.heapavg))
-        : 0
-      : 0;
+  alert.heapSizeDegraded = output.heapSize
+    ? output.heapSize >
+      Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
+      ? output.heapSize -
+        (Number(thresolds.heapThreshold) + Number(averageResults.heapavg))
+      : 0
+    : 0;
 
-    alert.soqlRowDegraded = output.queryRows
-      ? output.queryRows >
-        Number(thresolds.queryRowThreshold) + Number(averageResults.soqlrowavg)
-        ? output.queryRows -
-          (Number(thresolds.queryRowThreshold) +
-            Number(averageResults.soqlrowavg))
-        : 0
-      : 0;
-  }
+  alert.soqlRowDegraded = output.queryRows
+    ? output.queryRows >
+      Number(thresolds.queryRowThreshold) + Number(averageResults.soqlrowavg)
+      ? output.queryRows -
+        (Number(thresolds.queryRowThreshold) +
+          Number(averageResults.soqlrowavg))
+      : 0
+    : 0;
   return alert;
 }
 
