@@ -7,11 +7,12 @@ import { getDatabaseUrl } from '../shared/env';
 import { OrgContext } from './org/context';
 import {
   TestResultOutput,
-  addAlertRecords,
+  addAlertByComparingAvg,
   convertOutputToTestResult,
   getReporters,
 } from './result/output';
 import { save } from './result/save';
+import { getAverageValues } from '../database/alertInfo';
 
 export async function reportResults(
   testResultOutput: TestResultOutput[],
@@ -19,7 +20,17 @@ export async function reportResults(
 ): Promise<void> {
   const results = testResultOutput.map(convertOutputToTestResult);
 
-  // run loggers
+  // Extract flowName and actionName pairs from the test results
+  const flowActionPairs = testResultOutput
+    .filter(result => result.alertThresolds) // Only include those that have alert thresholds
+    .map(result => ({ flowName: result.flowName, actionName: result.action }));
+
+  // Fetch average values for all flow-action pairs
+  const preFetchedAverages = await getAverageValues(flowActionPairs);
+
+  console.log('result.ts  ' + JSON.stringify(preFetchedAverages));
+
+  // Run loggers
   for (const reporter of getReporters()) {
     try {
       await reporter.report(results);
@@ -34,9 +45,15 @@ export async function reportResults(
 
   if (getDatabaseUrl()) {
     try {
-      const alerts = testResultOutput
-        .filter(result => result.alertThresolds)
-        .map(addAlertRecords);
+      // Generate alerts based on pre-fetched averages
+      const alerts = await Promise.all(
+        testResultOutput
+          .filter(result => result.alertThresolds)
+          .map(
+            async item => await addAlertByComparingAvg(item, preFetchedAverages)
+          )
+      );
+
       await save(results, orgContext, alerts);
     } catch (err) {
       console.error(
