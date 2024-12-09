@@ -3,6 +3,7 @@
  */
 // import { expect } from 'chai';
 import {
+  Threshold,
   AlertInfo,
   TransactionTestTemplate,
   TransactionProcess,
@@ -29,6 +30,31 @@ describe('System Test Process', () => {
           __dirname + '/basic.apex',
           { flowName: 'System Test', action: 'run system test' }
         )
+      );
+    });
+
+    it('should execute successfully 2nd', async () => {
+      const alertInfo = new AlertInfo();
+      alertInfo.storeAlerts = true;
+
+      const thresolds = new Threshold();
+      thresolds.cpuTimeThreshold = 0;
+      thresolds.dmlRowThreshold = 0;
+      thresolds.dmlStatementThreshold = 0;
+      thresolds.durationThreshold = 0;
+      thresolds.heapSizeThreshold = 0;
+      thresolds.queryRowsThreshold = 0;
+      thresolds.soqlQueriesThreshold = 0;
+
+      alertInfo.thresolds = thresolds;
+      await TransactionProcess.executeTestStep(
+        test,
+        await createApexExecutionTestStepFlow(
+          test.connection,
+          __dirname + '/basic.apex',
+          { flowName: 'System Test', action: 'run system test 2' }
+        ),
+        alertInfo
       );
     });
 

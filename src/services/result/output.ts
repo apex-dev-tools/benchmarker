@@ -189,54 +189,98 @@ export async function addAlertByComparingAvg(
   );
 
   //storing alerts if there is a degradation
-  alert.dmlStatementsDegraded = output.dmlStatements
-    ? output.dmlStatements >
-      Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
-      ? output.dmlStatements -
-        (Number(thresolds.dmlThresold) + Number(averageResults.dmlavg))
-      : 0
-    : 0;
+  if (output.alertThresolds?.thresolds) {
+    alert.cpuTimeDegraded = output.cpuTime
+      ? output.cpuTime > output.alertThresolds.thresolds.cpuTimeThreshold
+        ? output.cpuTime - output.alertThresolds.thresolds.cpuTimeThreshold
+        : 0
+      : 0;
+    alert.dmlRowsDegraded = output.dmlRows
+      ? output.dmlRows > output.alertThresolds.thresolds.dmlRowThreshold
+        ? output.dmlRows - output.alertThresolds.thresolds.dmlRowThreshold
+        : 0
+      : 0;
+    alert.durationDegraded = output.timer.getTime()
+      ? output.timer.getTime() >
+        output.alertThresolds.thresolds.durationThreshold
+        ? output.timer.getTime() -
+          output.alertThresolds.thresolds.durationThreshold
+        : 0
+      : 0;
+    alert.dmlStatementsDegraded = output.dmlStatements
+      ? output.dmlStatements >
+        output.alertThresolds.thresolds.dmlStatementThreshold
+        ? output.dmlStatements -
+          output.alertThresolds.thresolds.dmlStatementThreshold
+        : 0
+      : 0;
+    alert.heapSizeDegraded = output.heapSize
+      ? output.heapSize > output.alertThresolds.thresolds.heapSizeThreshold
+        ? output.heapSize - output.alertThresolds.thresolds.heapSizeThreshold
+        : 0
+      : 0;
+    alert.queryRowsDegraded = output.queryRows
+      ? output.queryRows > output.alertThresolds.thresolds.queryRowsThreshold
+        ? output.queryRows - output.alertThresolds.thresolds.queryRowsThreshold
+        : 0
+      : 0;
+    alert.soqlQueriesDegraded = output.soqlQueries
+      ? output.soqlQueries >
+        output.alertThresolds.thresolds.soqlQueriesThreshold
+        ? output.soqlQueries -
+          output.alertThresolds.thresolds.soqlQueriesThreshold
+        : 0
+      : 0;
+  } else {
+    alert.dmlStatementsDegraded = output.dmlStatements
+      ? output.dmlStatements >
+        Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
+        ? output.dmlStatements -
+          (Number(thresolds.dmlThresold) + Number(averageResults.dmlavg))
+        : 0
+      : 0;
 
-  alert.soqlQueriesDegraded = output.soqlQueries
-    ? output.soqlQueries >
-      Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
-      ? output.soqlQueries -
-        (Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg))
-      : 0
-    : 0;
+    alert.soqlQueriesDegraded = output.soqlQueries
+      ? output.soqlQueries >
+        Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
+        ? output.soqlQueries -
+          (Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg))
+        : 0
+      : 0;
 
-  alert.cpuTimeDegraded = output.cpuTime
-    ? output.cpuTime >
-      Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
-      ? output.cpuTime -
-        (Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg))
-      : 0
-    : 0;
+    alert.cpuTimeDegraded = output.cpuTime
+      ? output.cpuTime >
+        Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
+        ? output.cpuTime -
+          (Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg))
+        : 0
+      : 0;
 
-  alert.dmlRowsDegraded = output.dmlRows
-    ? output.dmlRows >
-      Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
-      ? output.dmlRows -
-        (Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg))
-      : 0
-    : 0;
+    alert.dmlRowsDegraded = output.dmlRows
+      ? output.dmlRows >
+        Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
+        ? output.dmlRows -
+          (Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg))
+        : 0
+      : 0;
 
-  alert.heapSizeDegraded = output.heapSize
-    ? output.heapSize >
-      Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
-      ? output.heapSize -
-        (Number(thresolds.heapThreshold) + Number(averageResults.heapavg))
-      : 0
-    : 0;
+    alert.heapSizeDegraded = output.heapSize
+      ? output.heapSize >
+        Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
+        ? output.heapSize -
+          (Number(thresolds.heapThreshold) + Number(averageResults.heapavg))
+        : 0
+      : 0;
 
-  alert.soqlRowDegraded = output.queryRows
-    ? output.queryRows >
-      Number(thresolds.queryRowThreshold) + Number(averageResults.soqlrowavg)
-      ? output.queryRows -
-        (Number(thresolds.queryRowThreshold) +
-          Number(averageResults.soqlrowavg))
-      : 0
-    : 0;
+    alert.soqlRowDegraded = output.queryRows
+      ? output.queryRows >
+        Number(thresolds.queryRowThreshold) + Number(averageResults.soqlrowavg)
+        ? output.queryRows -
+          (Number(thresolds.queryRowThreshold) +
+            Number(averageResults.soqlrowavg))
+        : 0
+      : 0;
+  }
   return alert;
 }
 
