@@ -98,8 +98,7 @@ function getThresoldsByRange(
   heapavg: number,
   queryRowAvg: number
 ) {
-  console.log('111 ' + dmlavg);
-
+  //get limit ranges based on the average values
   const dmlRanges = rangeCollection.dml_ranges.filter(
     (e: { start_range: number; end_range: number; threshold: number }) =>
       dmlavg >= e.start_range && dmlavg <= e.end_range
@@ -130,25 +129,13 @@ function getThresoldsByRange(
       queryRowAvg >= e.start_range && queryRowAvg <= e.end_range
   );
 
-  console.log(JSON.stringify(dmlRanges));
-  console.log(JSON.stringify(soqlRanges));
-
+  //get threasholds based on the ranges
   const dmlThresold = dmlRanges[0]?.threshold || 0;
   const soqlThreshold = soqlRanges[0]?.threshold || 0;
   const cpuThreshold = cpuRanges[0]?.threshold || 0;
   const dmlRowThreshold = dmlRowRanges[0]?.threshold || 0;
   const heapThreshold = heapRanges[0]?.threshold || 0;
   const queryRowThreshold = queryRowRanges[0]?.threshold || 0;
-
-  console.log(
-    'Thresholds:',
-    dmlThresold,
-    soqlThreshold,
-    cpuThreshold,
-    dmlRowThreshold,
-    heapThreshold,
-    queryRowThreshold
-  );
 
   return {
     dmlThresold,
@@ -181,9 +168,6 @@ export async function addAlertByComparingAvg(
   // Construct the key for the current flowName and actionName
   const key = `${output.flowName}_${output.action}`;
 
-  console.log('output key ' + key);
-  console.log('preFetchedAverages  ' + JSON.stringify(preFetchedAverages));
-
   // Retrieve pre-fetched average values for this flow-action pair
   const averageResults = preFetchedAverages[key] || {
     dmlavg: 0,
@@ -195,8 +179,6 @@ export async function addAlertByComparingAvg(
     durationavg: 0,
   };
 
-  console.log('Using pre-fetched averages:', averageResults);
-
   const thresolds = getThresoldsByRange(
     averageResults.dmlavg,
     averageResults.soqlavg,
@@ -206,6 +188,7 @@ export async function addAlertByComparingAvg(
     averageResults.soqlrowavg
   );
 
+  //storing alerts if there is a degradation
   if (output.alertThresolds) {
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
@@ -258,51 +241,6 @@ export async function addAlertByComparingAvg(
   }
   return alert;
 }
-
-// adding a simple strategy for now, we need to think some other strategy for final work.
-// export function addAlertRecords(output: TestResultOutput): Alert {
-//   const alert: Alert = new Alert();
-//   alert.action = output.action;
-//   alert.flowName = output.flowName;
-//   if (output.alertThresolds) {
-//     alert.cpuTimeDegraded = output.cpuTime
-//       ? output.cpuTime > output.alertThresolds.cpuTimeThreshold
-//         ? output.cpuTime - output.alertThresolds.cpuTimeThreshold
-//         : 0
-//       : 0;
-//     alert.dmlRowsDegraded = output.dmlRows
-//       ? output.dmlRows > output.alertThresolds.dmlRowThreshold
-//         ? output.dmlRows - output.alertThresolds.dmlRowThreshold
-//         : 0
-//       : 0;
-//     alert.durationDegraded = output.timer.getTime()
-//       ? output.timer.getTime() > output.alertThresolds.durationThreshold
-//         ? output.timer.getTime() - output.alertThresolds.durationThreshold
-//         : 0
-//       : 0;
-//     alert.dmlStatementsDegraded = output.dmlStatements
-//       ? output.dmlStatements > output.alertThresolds.dmlStatementThreshold
-//         ? output.dmlStatements - output.alertThresolds.dmlStatementThreshold
-//         : 0
-//       : 0;
-//     alert.heapSizeDegraded = output.heapSize
-//       ? output.heapSize > output.alertThresolds.heapSizeThreshold
-//         ? output.heapSize - output.alertThresolds.heapSizeThreshold
-//         : 0
-//       : 0;
-//     alert.queryRowsDegraded = output.queryRows
-//       ? output.queryRows > output.alertThresolds.queryRowsThreshold
-//         ? output.queryRows - output.alertThresolds.queryRowsThreshold
-//         : 0
-//       : 0;
-//     alert.soqlQueriesDegraded = output.soqlQueries
-//       ? output.soqlQueries > output.alertThresolds.soqlQueriesThreshold
-//         ? output.soqlQueries - output.alertThresolds.soqlQueriesThreshold
-//         : 0
-//       : 0;
-//   }
-//   return alert;
-// }
 
 let reporters: BenchmarkReporter[] = [new TableReporter()];
 

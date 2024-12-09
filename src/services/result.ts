@@ -28,8 +28,6 @@ export async function reportResults(
   // Fetch average values for all flow-action pairs
   const preFetchedAverages = await getAverageValues(flowActionPairs);
 
-  console.log('result.ts  ' + JSON.stringify(preFetchedAverages));
-
   // Run loggers
   for (const reporter of getReporters()) {
     try {

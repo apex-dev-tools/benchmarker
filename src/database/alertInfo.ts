@@ -46,11 +46,8 @@ export async function getAverageValues(
     };
   } = {};
 
-  console.log('Generated query: ' + query);
-
   try {
     const result = await connection.query(query);
-    console.log('Query response: ' + JSON.stringify(result));
 
     // Populate the results map
     result.forEach(
@@ -66,10 +63,6 @@ export async function getAverageValues(
         durationavg: number;
       }) => {
         const key = `${row.flow_name}_${row.action}`;
-        console.log('alertInfo.ts key ' + key);
-        console.log('alertInfo.rows ' + JSON.stringify(row));
-        // console.log(row.dmlavg);
-        console.log(row.dmlavg);
         resultsMap[key] = {
           dmlavg: row.dmlavg ?? 0,
           soqlavg: row.soqlavg ?? 0,
@@ -82,7 +75,6 @@ export async function getAverageValues(
       }
     );
 
-    console.log('resultMap ' + JSON.stringify(resultsMap));
     return resultsMap;
   } catch (error) {
     console.error('Error fetching average values: ', error);
