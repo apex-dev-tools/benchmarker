@@ -69,9 +69,33 @@ export interface TestStepDescription {
   flowName: string;
 }
 
+/**
+ * Custom thresholds for storing alerts at individual test level
+ */
+export class Thresholds {
+  cpuTimeThreshold: number;
+  durationThreshold: number;
+  dmlStatementThreshold: number;
+  dmlRowThreshold: number;
+  heapSizeThreshold: number;
+  queryRowsThreshold: number;
+  soqlQueriesThreshold: number;
+  queueableJobsThreshold: number;
+  futureCallsThreshold: number;
+}
+
+/**
+ * Defines the thresolds to be used to create alert record and storeAlerts to determine if alert needs to be stored or not.
+ */
+export class AlertInfo {
+  storeAlerts: boolean;
+  thresolds: Thresholds;
+}
+
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
   result: GovernorMetricsResult;
+  alertInfo?: AlertInfo;
   error?: string;
 }
 
@@ -115,10 +139,12 @@ export namespace TransactionProcess {
    */
   export const executeTestStep = async (
     processTestTemplate: TransactionTestTemplate,
-    testStep: FlowStep
+    testStep: FlowStep,
+    alertInfo?: AlertInfo
   ) => {
     try {
       const result: TestFlowOutput = await testStep();
+      result.alertInfo = alertInfo;
       processTestTemplate.flowStepsResults.push(result);
     } catch (e) {
       if (e.testStepDescription) {
