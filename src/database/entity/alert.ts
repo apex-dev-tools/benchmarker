@@ -24,9 +24,6 @@ export class Alert extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'cpu_time_degraded' })
   public cpuTimeDegraded = DEFAULT_NUMERIC_VALUE;
 
-  @Column('integer', { nullable: true, name: 'duration_degraded' })
-  public durationDegraded = DEFAULT_NUMERIC_VALUE;
-
   @Column('integer', { nullable: true, name: 'dml_rows_degraded' })
   public dmlRowsDegraded = DEFAULT_NUMERIC_VALUE;
 

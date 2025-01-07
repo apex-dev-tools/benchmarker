@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS performance.alert (
     flow_name text,
     action text,
     cpu_time_degraded integer,
-    duration_degraded integer,
     dml_rows_degraded integer,
     dml_statements_degraded integer,
     heap_size_degraded integer,
