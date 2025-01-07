@@ -21,6 +21,10 @@ export function isHeadless() {
   return process.env.HEADLESS === 'true';
 }
 
+export function shouldStoreAlerts() {
+  return process.env.STORE_ALERTS === 'true';
+}
+
 export function getPuppeteerLaunchOptions(
   headless?: boolean
 ): PuppeteerNodeLaunchOptions {
