@@ -4,8 +4,15 @@
 
 import { expect } from 'chai';
 import * as env from '../../src/shared/env';
+import sinon from 'sinon';
+import fs from 'fs';
 
 describe('shared/env/index', () => {
+  afterEach(() => {
+    sinon.restore();
+    process.env.CUSTOM_RANGES_PATH = '';
+  });
+
   describe('getDatabaseUrl', () => {
     it('returns supplied value when value is supplied', () => {
       // Given
@@ -489,6 +496,51 @@ describe('shared/env/index', () => {
       expect(value).to.eql(
         'one-app-launcher-tab-item a[data-label="Tab"]Attribute'
       );
+    });
+  });
+
+  describe('getRangeCollection', () => {
+    it('range collection from a custom JSON path', () => {
+      // Given
+      const jsonContent =
+        '{"dml_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
+      sinon.stub(fs, 'readFileSync').returns(jsonContent);
+      process.env.CUSTOM_RANGES_PATH = '../../temp.json';
+
+      // When
+      const ranges = env.getRangeCollection();
+
+      // Then
+      expect(ranges).to.not.be.undefined;
+      expect(Object.keys(ranges).length).to.eql(1);
+      expect(Object.keys(ranges)).to.eql(['dml_ranges']);
+    });
+    it('range collection from a default JSON file', () => {
+      // Given
+      const jsonContent =
+        '{"soql_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
+      sinon.stub(fs, 'readFileSync').returns(jsonContent);
+
+      // When
+      const ranges = env.getRangeCollection();
+
+      // Then
+      expect(ranges).to.not.be.undefined;
+      expect(Object.keys(ranges).length).to.eql(1);
+      expect(Object.keys(ranges)).to.eql(['soql_ranges']);
+    });
+    it('throws an error when file content is not vaild', async () => {
+      // Given
+      process.env.CUSTOM_RANGES_PATH = '../../temp.json';
+      const jsonContent = 'test';
+      sinon.stub(fs, 'readFileSync').returns(jsonContent);
+      try {
+        // When
+        env.getRangeCollection();
+        expect.fail();
+      } catch (e) {
+        expect(e.message).contains('is not valid JSON');
+      }
     });
   });
 });
