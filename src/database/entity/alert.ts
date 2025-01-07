@@ -39,12 +39,6 @@ export class Alert extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'soql_queries_degraded' })
   public soqlQueriesDegraded = DEFAULT_NUMERIC_VALUE;
 
-  @Column('integer', { nullable: true, name: 'queueable_jobs_degraded' })
-  public queueableJobsDegraded = DEFAULT_NUMERIC_VALUE;
-
-  @Column('integer', { nullable: true, name: 'future_calls_degraded' })
-  public futureCallsDegraded = DEFAULT_NUMERIC_VALUE;
-
   public constructor() {
     super();
   }

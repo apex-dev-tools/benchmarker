@@ -78,7 +78,5 @@ CREATE TABLE IF NOT EXISTS performance.alert (
     dml_statements_degraded integer,
     heap_size_degraded integer,
     query_rows_degraded integer,
-    soql_queries_degraded integer,
-    queueable_jobs_degraded integer,
-    future_calls_degraded integer
+    soql_queries_degraded integer
 );
