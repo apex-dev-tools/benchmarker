@@ -71,8 +71,13 @@
     },
     {
       "start_range" : 9000,
-      "end_range" : 9999,
+      "end_range" : 9500,
       "threshold" : 500
+    },
+    {
+      "start_range" : 9501,
+      "end_range" : 9999,
+      "threshold" : 100
     }
   ],
   "heap_ranges":[
