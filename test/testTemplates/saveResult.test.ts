@@ -39,6 +39,17 @@ describe('src/testTemplates/saveResult', () => {
             queueableJobs: 9,
             futureCalls: 10,
           },
+          alertInfo: {
+            storeAlerts: true,
+            thresolds: {
+              cpuTimeThreshold: 1,
+              dmlStatementThreshold: 2,
+              dmlRowThreshold: 3,
+              heapSizeThreshold: 4,
+              queryRowsThreshold: 5,
+              soqlQueriesThreshold: 6,
+            },
+          },
         },
       ]);
 
@@ -58,6 +69,28 @@ describe('src/testTemplates/saveResult', () => {
       expect(reportResultsStub.args[0][0][0].soqlQueries).to.be.equal(8);
       expect(reportResultsStub.args[0][0][0].queueableJobs).to.be.equal(9);
       expect(reportResultsStub.args[0][0][0].futureCalls).to.be.equal(10);
+      expect(reportResultsStub.args[0][0][0].alertInfo.storeAlerts).to.be.equal(
+        true
+      );
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds.cpuTimeThreshold
+      ).to.be.equal(1);
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds
+          .dmlStatementThreshold
+      ).to.be.equal(2);
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds.dmlRowThreshold
+      ).to.be.equal(3);
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds.heapSizeThreshold
+      ).to.be.equal(4);
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds.queryRowsThreshold
+      ).to.be.equal(5);
+      expect(
+        reportResultsStub.args[0][0][0].alertInfo.thresolds.soqlQueriesThreshold
+      ).to.be.equal(6);
     });
 
     it('saves results with error', async () => {
