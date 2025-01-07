@@ -109,7 +109,7 @@
       "threshold" : 1000
     },
     {
-      "start_range" : 50001,
+      "start_range" : 5001,
       "end_range" : 8000,
       "threshold" : 500
     },
