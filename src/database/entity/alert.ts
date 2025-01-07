@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
-import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
+import {
+  DEFAULT_NUMERIC_VALUE,
+  DEFAULT_STRING_VALUE,
+} from '../../shared/constants';
 
 @Entity({ name: 'alert' })
 export class Alert extends PerformanceBaseEntity {
@@ -13,10 +16,10 @@ export class Alert extends PerformanceBaseEntity {
   public testResultId = DEFAULT_NUMERIC_VALUE;
 
   @Column('text', { nullable: true, name: 'action' })
-  public action = '';
+  public action = DEFAULT_STRING_VALUE;
 
   @Column('text', { nullable: true, name: 'flow_name' })
-  public flowName = '';
+  public flowName = DEFAULT_STRING_VALUE;
 
   @Column('integer', { nullable: true, name: 'cpu_time_degraded' })
   public cpuTimeDegraded = DEFAULT_NUMERIC_VALUE;
