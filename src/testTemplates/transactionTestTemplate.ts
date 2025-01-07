@@ -74,14 +74,11 @@ export interface TestStepDescription {
  */
 export class Thresholds {
   cpuTimeThreshold: number;
-  durationThreshold: number;
   dmlStatementThreshold: number;
   dmlRowThreshold: number;
   heapSizeThreshold: number;
   queryRowsThreshold: number;
   soqlQueriesThreshold: number;
-  queueableJobsThreshold: number;
-  futureCallsThreshold: number;
 }
 
 /**
