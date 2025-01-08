@@ -27,6 +27,7 @@ export async function getAverageLimitValuesFromDB(
     FROM performance.test_result
     WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS')
       AND (flow_name, action) IN (${flowActionConditions})
+      AND (error IS NULL OR error = '')
     GROUP BY flow_name, action
   `;
 
