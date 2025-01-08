@@ -138,15 +138,20 @@
     {
       "start_range" : 20001,
       "end_range" : 30000,
-      "threshold" : 5000
+      "threshold" : 4000
     },
     {
       "start_range" : 30001,
-      "end_range" : 45000,
-      "threshold" : 5000
+      "end_range" : 40000,
+      "threshold" : 2000
     },
     {
-      "start_range" : 45000,
+      "start_range" : 40001,
+      "end_range" : 48000,
+      "threshold" : 1000
+    },
+    {
+      "start_range" : 48001,
       "end_range" : 49999,
       "threshold" : 1
     }
