@@ -72,6 +72,41 @@ describe('shared/env/index', () => {
     });
   });
 
+  describe('shouldStoreAlerts', () => {
+    it('returns true when STORE_ALERTS is true', () => {
+      // Given
+      process.env.STORE_ALERTS = 'true';
+
+      // When
+      const shouldStoreAlerts = env.shouldStoreAlerts();
+
+      // Then
+      expect(shouldStoreAlerts).to.be.true;
+    });
+
+    it('returns false when STORE_ALERTS is false', () => {
+      // Given
+      process.env.STORE_ALERTS = 'false';
+
+      // When
+      const shouldStoreAlerts = env.shouldStoreAlerts();
+
+      // Then
+      expect(shouldStoreAlerts).to.be.false;
+    });
+
+    it('returns false when STORE_ALERTS is undefined', () => {
+      // Given
+      process.env.STORE_ALERTS = undefined;
+
+      // When
+      const shouldStoreAlerts = env.shouldStoreAlerts();
+
+      // Then
+      expect(shouldStoreAlerts).to.be.false;
+    });
+  });
+
   describe('isDebug', () => {
     it('returns true when NODE_ENV is debug', () => {
       // Given
