@@ -23,7 +23,7 @@ export async function getAverageLimitValuesFromDB(
       ROUND(AVG(cpu_time)::numeric, 0) AS cpuavg,
       ROUND(AVG(dml_rows)::numeric, 0) AS dmlrowavg,
       ROUND(AVG(heap_size)::numeric, 0) AS heapavg,
-      ROUND(AVG(query_rows)::numeric, 0) AS soqlrowavg,
+      ROUND(AVG(query_rows)::numeric, 0) AS soqlrowavg
     FROM performance.test_result
     WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS')
       AND (flow_name, action) IN (${flowActionConditions})
