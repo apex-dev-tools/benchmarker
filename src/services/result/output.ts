@@ -6,6 +6,7 @@
 import { TestResult } from '../../database/entity/result';
 import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 import { Timer } from '../../shared/timer';
+import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { TableReporter } from './table';
 
 export interface TestResultOutput {
@@ -32,6 +33,9 @@ export interface TestResultOutput {
   soqlQueries?: number;
   queueableJobs?: number;
   futureCalls?: number;
+
+  // alert info
+  alertInfo?: AlertInfo;
 }
 
 export interface BenchmarkReporter {
