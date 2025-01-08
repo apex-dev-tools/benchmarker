@@ -3,6 +3,8 @@
  * Copyright (c) 2018-2019 FinancialForce.com, inc. All rights reserved.
  */
 import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 dotenv.config({ path: '.env' });
 
 import { PuppeteerNodeLaunchOptions } from 'puppeteer';
@@ -116,4 +118,26 @@ export function getAppLauncherTabSelector(
     ).replace('$tabAttribute', tabAttribute) ||
     `one-app-launcher-tab-item a[data-label="${tabName}"]${tabAttribute}`
   );
+}
+
+/**
+ * Load the range collection from either a custom JSON path or default json file.
+ */
+export function getRangeCollection(): any {
+  const customRangesPath = process.env.CUSTOM_RANGES_PATH;
+  const defaultRangesPath = path.resolve(__dirname, '../../rangeConfig.json');
+
+  let ranges = {};
+
+  try {
+    if (customRangesPath) {
+      return JSON.parse(fs.readFileSync(customRangesPath, 'utf8'));
+    }
+    ranges = JSON.parse(fs.readFileSync(defaultRangesPath, 'utf8'));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+
+  return ranges;
 }
