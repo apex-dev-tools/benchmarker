@@ -22,6 +22,7 @@ describe('getAverageLimitValuesFromDB', () => {
   });
 
   it('should return average limit values for valid data', async () => {
+    //given
     const flowActionPairs = [
       { flowName: 'flow1', actionName: 'action1' },
       { flowName: 'flow2', actionName: 'action2' },
@@ -52,8 +53,10 @@ describe('getAverageLimitValuesFromDB', () => {
 
     mockQuery.resolves(mockResults);
 
+    //when
     const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
+    //then
     expect(mockQuery.calledOnce).to.be.true;
     expect(mockQuery.args[0][0]).to.include('SELECT');
     expect(mockQuery.args[0][0]).to.include(
@@ -81,28 +84,35 @@ describe('getAverageLimitValuesFromDB', () => {
   });
 
   it('should return an empty object when no results are found', async () => {
+    //gven
     const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
 
     mockQuery.resolves([]);
 
+    //when
     const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
+    //then
     expect(mockQuery.calledOnce).to.be.true;
     expect(results).to.deep.equal({});
   });
 
   it('should handle errors and return an empty object', async () => {
+    //given
     const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
 
     mockQuery.rejects(new Error('Database error'));
 
+    //when
     const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
+    //then
     expect(mockQuery.calledOnce).to.be.true;
     expect(results).to.deep.equal({});
   });
 
   it('should handle missing fields and default them to zero', async () => {
+    //given
     const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
 
     const mockResults = [
@@ -120,8 +130,10 @@ describe('getAverageLimitValuesFromDB', () => {
 
     mockQuery.resolves(mockResults);
 
+    //when
     const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
+    //then
     expect(results).to.deep.equal({
       flow1_action1: {
         dmlavg: 0,
@@ -135,13 +147,16 @@ describe('getAverageLimitValuesFromDB', () => {
   });
 
   it('should handle an empty flowActionPairs array and return an empty object', async () => {
+    //given
     const flowActionPairs: { flowName: string; actionName: string }[] = [];
 
     // Simulate no results (empty array)
     mockQuery.resolves([]);
 
+    //when
     const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
+    //then
     expect(results).to.deep.equal({});
   });
 });
