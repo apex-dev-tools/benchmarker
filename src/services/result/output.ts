@@ -9,6 +9,7 @@ import { Timer } from '../../shared/timer';
 import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { TableReporter } from './table';
 import { Alert } from '../../database/entity/alert';
+import { ThresholdRange, RangeCollection } from '../ranges';
 
 export interface TestResultOutput {
   timer: Timer;
@@ -91,50 +92,51 @@ export function convertOutputToTestResult(
 }
 
 function getThresoldsByRange(
-  dmlavg: number,
-  soqlavg: number,
-  cpuavg: number,
-  dmlrowavg: number,
-  heapavg: number,
-  queryrowavg: number,
-  rangeCollection: {
-    dml_ranges: any[];
-    soql_ranges: any[];
-    cpu_ranges: any[];
-    dmlRows_ranges: any[];
-    heap_ranges: any[];
-    queryRows_ranges: any[];
-  }
+  averageResults: {
+    dmlavg: number;
+    soqlavg: number;
+    cpuavg: number;
+    dmlrowavg: number;
+    heapavg: number;
+    queryrowavg: number;
+  },
+  rangeCollection: RangeCollection
 ) {
   //get limit ranges based on the average values
   const dmlRanges = rangeCollection.dml_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      dmlavg >= e.start_range && dmlavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.dmlavg >= e.start_range &&
+      averageResults.dmlavg <= e.end_range
   );
 
   const soqlRanges = rangeCollection.soql_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      soqlavg >= e.start_range && soqlavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.soqlavg >= e.start_range &&
+      averageResults.soqlavg <= e.end_range
   );
 
   const cpuRanges = rangeCollection.cpu_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      cpuavg >= e.start_range && cpuavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.cpuavg >= e.start_range &&
+      averageResults.cpuavg <= e.end_range
   );
 
   const dmlRowRanges = rangeCollection.dmlRows_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      dmlrowavg >= e.start_range && dmlrowavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.dmlrowavg >= e.start_range &&
+      averageResults.dmlrowavg <= e.end_range
   );
 
   const heapRanges = rangeCollection.heap_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      heapavg >= e.start_range && heapavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.heapavg >= e.start_range &&
+      averageResults.heapavg <= e.end_range
   );
 
   const queryRowRanges = rangeCollection.queryRows_ranges.filter(
-    (e: { start_range: number; end_range: number }) =>
-      queryrowavg >= e.start_range && queryrowavg <= e.end_range
+    (e: ThresholdRange) =>
+      averageResults.queryrowavg >= e.start_range &&
+      averageResults.queryrowavg <= e.end_range
   );
 
   //get threasholds based on the ranges
@@ -167,7 +169,7 @@ export async function addAlertByComparingAvg(
       queryrowavg: number;
     };
   },
-  rangeCollection: any
+  rangeCollection: RangeCollection
 ): Promise<Alert> {
   const alert: Alert = new Alert();
   alert.action = output.action;
@@ -219,15 +221,7 @@ export async function addAlertByComparingAvg(
       heapavg: 0,
       queryrowavg: 0,
     };
-    const thresolds = getThresoldsByRange(
-      averageResults.dmlavg,
-      averageResults.soqlavg,
-      averageResults.cpuavg,
-      averageResults.dmlrowavg,
-      averageResults.heapavg,
-      averageResults.queryrowavg,
-      rangeCollection
-    );
+    const thresolds = getThresoldsByRange(averageResults, rangeCollection);
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
         Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
@@ -268,7 +262,7 @@ export async function addAlertByComparingAvg(
         : 0
       : 0;
 
-    alert.soqlRowDegraded = output.queryRows
+    alert.queryRowsDegraded = output.queryRows
       ? output.queryRows >
         Number(thresolds.queryRowThreshold) + Number(averageResults.queryrowavg)
         ? output.queryRows -

@@ -5,6 +5,7 @@
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { RangeCollection } from '../services/ranges';
 dotenv.config({ path: '.env' });
 
 import { PuppeteerNodeLaunchOptions } from 'puppeteer';
@@ -127,17 +128,29 @@ export function getAppLauncherTabSelector(
 /**
  * Load the range collection from either a custom JSON path or default json file.
  */
-export function getRangeCollection(): any {
+export function getRangeCollection(): RangeCollection {
   const customRangesPath = process.env.CUSTOM_RANGES_PATH;
   const defaultRangesPath = path.resolve(__dirname, '../../rangeConfig.json');
 
-  let ranges = {};
+  // Initialize ranges with default empty arrays for all properties
+  let ranges: RangeCollection = {
+    dml_ranges: [],
+    soql_ranges: [],
+    cpu_ranges: [],
+    dmlRows_ranges: [],
+    heap_ranges: [],
+    queryRows_ranges: [],
+  };
 
   try {
     if (customRangesPath) {
-      return JSON.parse(fs.readFileSync(customRangesPath, 'utf8'));
+      return JSON.parse(
+        fs.readFileSync(customRangesPath, 'utf8')
+      ) as RangeCollection;
     }
-    ranges = JSON.parse(fs.readFileSync(defaultRangesPath, 'utf8'));
+    ranges = JSON.parse(
+      fs.readFileSync(defaultRangesPath, 'utf8')
+    ) as RangeCollection;
   } catch (error) {
     console.error(error);
     throw error;

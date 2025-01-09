@@ -69,8 +69,6 @@ export async function getAverageLimitValuesFromDB(
       }
     );
 
-    console.log('resultsMap ' + JSON.stringify(resultsMap));
-
     return resultsMap;
   } catch (error) {
     console.error('Error in fetching the average values: ', error);
