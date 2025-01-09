@@ -73,7 +73,17 @@ export async function reportResults(
                 )
             )
         );
-        console.log(alerts);
+        const validAlerts = alerts.filter(
+          alert =>
+            alert.cpuTimeDegraded > 0 ||
+            alert.dmlRowsDegraded > 0 ||
+            alert.dmlStatementsDegraded > 0 ||
+            alert.heapSizeDegraded > 0 ||
+            alert.queryRowsDegraded > 0 ||
+            alert.queryRowsDegraded > 0
+        );
+
+        console.log(validAlerts);
       }
       await save(results, orgContext);
     } catch (err) {
