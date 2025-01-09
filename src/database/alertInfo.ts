@@ -23,7 +23,7 @@ export async function getAverageLimitValuesFromDB(
       ROUND(AVG(cpu_time)::numeric, 0) AS cpuavg,
       ROUND(AVG(dml_rows)::numeric, 0) AS dmlrowavg,
       ROUND(AVG(heap_size)::numeric, 0) AS heapavg,
-      ROUND(AVG(query_rows)::numeric, 0) AS soqlrowavg
+      ROUND(AVG(query_rows)::numeric, 0) AS queryrowavg
     FROM performance.test_result
     WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS')
       AND (flow_name, action) IN (${flowActionConditions})
@@ -38,7 +38,7 @@ export async function getAverageLimitValuesFromDB(
       cpuavg: number;
       dmlrowavg: number;
       heapavg: number;
-      soqlrowavg: number;
+      queryrowavg: number;
     };
   } = {};
 
@@ -55,7 +55,7 @@ export async function getAverageLimitValuesFromDB(
         cpuavg: number;
         dmlrowavg: number;
         heapavg: number;
-        soqlrowavg: number;
+        queryrowavg: number;
       }) => {
         const key = `${row.flow_name}_${row.action}`;
         resultsMap[key] = {
@@ -64,10 +64,12 @@ export async function getAverageLimitValuesFromDB(
           cpuavg: row.cpuavg ?? 0,
           dmlrowavg: row.dmlrowavg ?? 0,
           heapavg: row.heapavg ?? 0,
-          soqlrowavg: row.soqlrowavg ?? 0,
+          queryrowavg: row.queryrowavg ?? 0,
         };
       }
     );
+
+    console.log('resultsMap ' + JSON.stringify(resultsMap));
 
     return resultsMap;
   } catch (error) {
