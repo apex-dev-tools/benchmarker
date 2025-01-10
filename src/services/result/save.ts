@@ -28,32 +28,25 @@ export async function save(
   const testResultsDB: TestResult[] = await saveTestResults(testResults);
   const orgInfoDB: OrgInfo = await saveOrg(orgContext.orgInfo);
   const packagesDB: PackageInfo[] = await savePackages(orgContext.packagesInfo);
+  const alertsDB: Alert[] = await saveAlert(alerts, testResultsDB);
   const executionInfoRows = generateExecutionInfoRows(
     testResultsDB.map(tr => tr.id),
     orgInfoDB.id,
-    packagesDB.map(pkg => pkg.id)
+    packagesDB.map(pkg => pkg.id),
+    alertsDB
   );
   await saveExecutionInfo(executionInfoRows);
-  alerts.forEach(alert => {
-    const match = testResultsDB.find(
-      result =>
-        result.action === alert.action && result.flowName === alert.flowName
-    );
-    if (match) {
-      alert.testResultId = match.id;
-    }
-  });
-  await saveAlerts(alerts);
 }
 
 function generateExecutionInfoRows(
   testResultsIds: number[],
   orgInfoId: number,
-  packagesId: number[]
+  packagesId: number[],
+  alertsDB: Alert[]
 ): ExecutionInfo[] {
   const externalBuildId = getExternalBuildId();
 
-  return testResultsIds.flatMap((testResultId: number) => {
+  let executionInfo = testResultsIds.flatMap((testResultId: number) => {
     if (packagesId.length) {
       return packagesId.map((packageInfoId: number) =>
         createExecutionInfo(
@@ -70,6 +63,16 @@ function generateExecutionInfoRows(
       createExecutionInfo(testResultId, orgInfoId, null, externalBuildId),
     ];
   });
+
+  executionInfo = executionInfo.map(exc => {
+    const alert = alertsDB.find(
+      alert => exc.testResultId === alert.testResultId
+    );
+    if (alert) exc.alertId = alert.id;
+    return exc;
+  });
+
+  return executionInfo;
 }
 
 function createExecutionInfo(
@@ -89,6 +92,22 @@ function createExecutionInfo(
 
 async function saveTestResults(results: TestResult[]): Promise<TestResult[]> {
   return saveTestResult(results);
+}
+
+async function saveAlert(
+  alerts: Alert[],
+  testResultsDB: TestResult[]
+): Promise<Alert[]> {
+  alerts.forEach(alert => {
+    const match = testResultsDB.find(
+      result =>
+        result.action === alert.action && result.flowName === alert.flowName
+    );
+    if (match) {
+      alert.testResultId = match.id;
+    }
+  });
+  return saveAlerts(alerts);
 }
 
 async function saveOrg(orgInfoToSave: Org): Promise<OrgInfo> {
