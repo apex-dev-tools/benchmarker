@@ -17,6 +17,7 @@ import {
 } from './result/output';
 import { save } from './result/save';
 import { getAverageLimitValuesFromDB } from '../database/alertInfo';
+import { Alert } from '../database/entity/alert';
 
 export async function reportResults(
   testResultOutput: TestResultOutput[],
@@ -51,13 +52,14 @@ export async function reportResults(
           actionName: result.action,
         }));
 
+      let alerts: Alert[] = [];
       // Fetch average values for all flow-action pairs
       if (!(flowActionPairs?.length === 0)) {
         const preFetchedAverages =
           await getAverageLimitValuesFromDB(flowActionPairs);
         const rangeCollection = getRangeCollection();
         // Generate alerts based on pre-fetched averages
-        const alerts = await Promise.all(
+        alerts = await Promise.all(
           testResultOutput
             .filter(
               result =>
@@ -73,9 +75,8 @@ export async function reportResults(
                 )
             )
         );
-        console.log(alerts);
       }
-      await save(results, orgContext);
+      await save(results, orgContext, alerts);
     } catch (err) {
       console.error(
         'Failed to save results to database. Check DATABASE_URL environment variable, unset to skip saving.'
