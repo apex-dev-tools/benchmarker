@@ -52,14 +52,14 @@ export async function reportResults(
           actionName: result.action,
         }));
 
-      let alerts: Alert[] = [];
+      let validAlerts: Alert[] = [];
       // Fetch average values for all flow-action pairs
       if (!(flowActionPairs?.length === 0)) {
         const preFetchedAverages =
           await getAverageLimitValuesFromDB(flowActionPairs);
         const rangeCollection = getRangeCollection();
         // Generate alerts based on pre-fetched averages
-        alerts = await Promise.all(
+        const alerts = await Promise.all(
           testResultOutput
             .filter(
               result =>
@@ -75,8 +75,17 @@ export async function reportResults(
                 )
             )
         );
+        validAlerts = alerts.filter(
+          alert =>
+            alert.cpuTimeDegraded > 0 ||
+            alert.dmlRowsDegraded > 0 ||
+            alert.dmlStatementsDegraded > 0 ||
+            alert.heapSizeDegraded > 0 ||
+            alert.queryRowsDegraded > 0 ||
+            alert.queryRowsDegraded > 0
+        );
       }
-      await save(results, orgContext, alerts);
+      await save(results, orgContext, validAlerts);
     } catch (err) {
       console.error(
         'Failed to save results to database. Check DATABASE_URL environment variable, unset to skip saving.'
