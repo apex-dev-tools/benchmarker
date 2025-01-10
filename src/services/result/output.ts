@@ -225,49 +225,42 @@ export async function addAlertByComparingAvg(
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
         Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
-        ? output.dmlStatements -
-          (Number(thresolds.dmlThresold) + Number(averageResults.dmlavg))
+        ? output.dmlStatements - Number(averageResults.dmlavg)
         : 0
       : 0;
 
     alert.soqlQueriesDegraded = output.soqlQueries
       ? output.soqlQueries >
         Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
-        ? output.soqlQueries -
-          (Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg))
+        ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;
 
     alert.cpuTimeDegraded = output.cpuTime
       ? output.cpuTime >
         Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
-        ? output.cpuTime -
-          (Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg))
+        ? output.cpuTime - Number(averageResults.cpuavg)
         : 0
       : 0;
 
     alert.dmlRowsDegraded = output.dmlRows
       ? output.dmlRows >
         Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
-        ? output.dmlRows -
-          (Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg))
+        ? output.dmlRows - Number(averageResults.dmlrowavg)
         : 0
       : 0;
 
     alert.heapSizeDegraded = output.heapSize
       ? output.heapSize >
         Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
-        ? output.heapSize -
-          (Number(thresolds.heapThreshold) + Number(averageResults.heapavg))
+        ? output.heapSize - Number(averageResults.heapavg)
         : 0
       : 0;
 
     alert.queryRowsDegraded = output.queryRows
       ? output.queryRows >
         Number(thresolds.queryRowThreshold) + Number(averageResults.queryrowavg)
-        ? output.queryRows -
-          (Number(thresolds.queryRowThreshold) +
-            Number(averageResults.queryrowavg))
+        ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
   }

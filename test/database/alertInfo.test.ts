@@ -37,7 +37,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 20,
         dmlrowavg: 25,
         heapavg: 30,
-        soqlrowavg: 35,
+        queryrowavg: 35,
       },
       {
         flow_name: 'flow2',
@@ -47,7 +47,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 22,
         dmlrowavg: 28,
         heapavg: 32,
-        soqlrowavg: 38,
+        queryrowavg: 38,
       },
     ];
 
@@ -70,7 +70,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 20,
         dmlrowavg: 25,
         heapavg: 30,
-        soqlrowavg: 35,
+        queryrowavg: 35,
       },
       flow2_action2: {
         dmlavg: 12,
@@ -78,7 +78,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 22,
         dmlrowavg: 28,
         heapavg: 32,
-        soqlrowavg: 38,
+        queryrowavg: 38,
       },
     });
   });
@@ -124,7 +124,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 20,
         dmlrowavg: 25,
         heapavg: 30,
-        soqlrowavg: null,
+        queryrowavg: null,
       },
     ];
 
@@ -141,7 +141,7 @@ describe('getAverageLimitValuesFromDB', () => {
         cpuavg: 20,
         dmlrowavg: 25,
         heapavg: 30,
-        soqlrowavg: 0,
+        queryrowavg: 0,
       },
     });
   });
