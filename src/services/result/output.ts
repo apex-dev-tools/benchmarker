@@ -175,53 +175,53 @@ export async function addAlertByComparingAvg(
   alert.action = output.action;
   alert.flowName = output.flowName;
 
+  // Construct the key for the current flowName and actionName
+  const key = `${output.flowName}_${output.action}`;
+
+  // Retrieve pre-fetched average values for this flow-action pair
+  const averageResults = preFetchedAverages[key] || {
+    dmlavg: 0,
+    soqlavg: 0,
+    cpuavg: 0,
+    dmlrowavg: 0,
+    heapavg: 0,
+    queryrowavg: 0,
+  };
+  const thresolds = getThresoldsByRange(averageResults, rangeCollection);
+
   //storing alerts if there is a degradation
   if (output.alertInfo?.thresolds) {
     alert.cpuTimeDegraded = output.cpuTime
       ? output.cpuTime > output.alertInfo.thresolds.cpuTimeThreshold
-        ? output.cpuTime - output.alertInfo.thresolds.cpuTimeThreshold
+        ? output.cpuTime - Number(averageResults.cpuavg)
         : 0
       : 0;
     alert.dmlRowsDegraded = output.dmlRows
       ? output.dmlRows > output.alertInfo.thresolds.dmlRowThreshold
-        ? output.dmlRows - output.alertInfo.thresolds.dmlRowThreshold
+        ? output.dmlRows - Number(averageResults.dmlrowavg)
         : 0
       : 0;
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements > output.alertInfo.thresolds.dmlStatementThreshold
-        ? output.dmlStatements -
-          output.alertInfo.thresolds.dmlStatementThreshold
+        ? output.dmlStatements - Number(averageResults.dmlavg)
         : 0
       : 0;
     alert.heapSizeDegraded = output.heapSize
       ? output.heapSize > output.alertInfo.thresolds.heapSizeThreshold
-        ? output.heapSize - output.alertInfo.thresolds.heapSizeThreshold
+        ? output.heapSize - Number(averageResults.heapavg)
         : 0
       : 0;
     alert.queryRowsDegraded = output.queryRows
       ? output.queryRows > output.alertInfo.thresolds.queryRowsThreshold
-        ? output.queryRows - output.alertInfo.thresolds.queryRowsThreshold
+        ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
-    alert.soqlQueriesDegraded = output.soqlQueries
+    alert.queryRowsDegraded = output.soqlQueries
       ? output.soqlQueries > output.alertInfo.thresolds.soqlQueriesThreshold
-        ? output.soqlQueries - output.alertInfo.thresolds.soqlQueriesThreshold
+        ? output.soqlQueries - Number(averageResults.queryrowavg)
         : 0
       : 0;
   } else {
-    // Construct the key for the current flowName and actionName
-    const key = `${output.flowName}_${output.action}`;
-
-    // Retrieve pre-fetched average values for this flow-action pair
-    const averageResults = preFetchedAverages[key] || {
-      dmlavg: 0,
-      soqlavg: 0,
-      cpuavg: 0,
-      dmlrowavg: 0,
-      heapavg: 0,
-      queryrowavg: 0,
-    };
-    const thresolds = getThresoldsByRange(averageResults, rangeCollection);
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
         Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
