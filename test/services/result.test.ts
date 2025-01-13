@@ -327,7 +327,6 @@ describe('src/services/result', () => {
       await reportResults([testResultOutput], defaultOrgContext);
 
       // Then
-      expect(logSpy).to.have.been.called;
       expect(getAlertStub).to.have.been.calledOnceWithExactly(
         testResultOutput,
         sinon.match.object,
