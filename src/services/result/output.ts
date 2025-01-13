@@ -91,7 +91,7 @@ export function convertOutputToTestResult(
   return testResult;
 }
 
-function getThresoldsByRange(
+export function getThresoldsByRange(
   averageResults: {
     dmlavg: number;
     soqlavg: number;
@@ -216,7 +216,7 @@ export async function addAlertByComparingAvg(
         ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
-    alert.queryRowsDegraded = output.soqlQueries
+    alert.soqlQueriesDegraded = output.soqlQueries
       ? output.soqlQueries > output.alertInfo.thresolds.soqlQueriesThreshold
         ? output.soqlQueries - Number(averageResults.queryrowavg)
         : 0
