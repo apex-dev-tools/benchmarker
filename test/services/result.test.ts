@@ -283,7 +283,7 @@ describe('src/services/result', () => {
       expect(errorSpy).to.be.calledOnce;
     });
 
-    it('should generate and log alerts when valid alerts are present1', async () => {
+    it('should generate and log alerts when valid alerts are present', async () => {
       // Given a mock TestResultOutput
       const testResultOutput: outputModule.TestResultOutput = {
         timer: new Timer(''),
@@ -309,6 +309,8 @@ describe('src/services/result', () => {
           storeAlerts: true,
         },
       };
+
+      sinon.stub(envModule, 'shouldStoreAlerts').returns(true);
 
       // Stub getAlertByComparingAverage to return a mock Alert object
       const mockAlert = new Alert();
