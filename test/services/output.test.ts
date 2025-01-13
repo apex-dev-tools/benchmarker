@@ -101,6 +101,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 50,
           heapavg: 100,
           queryrowavg: 400,
+          runcount: 10,
         },
       };
 
@@ -163,6 +164,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 200,
           heapavg: 300,
           queryrowavg: 200,
+          runcount: 10,
         },
       };
 

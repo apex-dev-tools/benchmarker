@@ -48,6 +48,7 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 25,
           heapavg: 30,
           queryrowavg: 35,
+          run_count: 5,
         },
         {
           flow_name: 'flow2',
@@ -58,15 +59,16 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 28,
           heapavg: 32,
           queryrowavg: 38,
+          run_count: 6,
         },
       ];
 
       mockQuery.resolves(mockResults);
 
-      //When
+      // When
       const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
-      //Then
+      // Then
       expect(mockQuery.calledOnce).to.be.true;
       expect(mockQuery.args[0][0]).to.include('SELECT');
       expect(mockQuery.args[0][0]).to.include(
@@ -81,6 +83,7 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 25,
           heapavg: 30,
           queryrowavg: 35,
+          runcount: 5,
         },
         flow2_action2: {
           dmlavg: 12,
@@ -89,6 +92,7 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 28,
           heapavg: 32,
           queryrowavg: 38,
+          runcount: 6,
         },
       });
     });
@@ -98,20 +102,6 @@ describe('src/database/alertInfo', () => {
       const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
 
       mockQuery.resolves([]);
-
-      //When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
-
-      //Then
-      expect(mockQuery.calledOnce).to.be.true;
-      expect(results).to.deep.equal({});
-    });
-
-    it('should handle errors and return an empty object', async () => {
-      //Given
-      const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
-
-      mockQuery.rejects(new Error('Database error'));
 
       //When
       const results = await getAverageLimitValuesFromDB(flowActionPairs);
@@ -135,6 +125,7 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 25,
           heapavg: 30,
           queryrowavg: null,
+          run_count: 6,
         },
       ];
 
@@ -152,6 +143,7 @@ describe('src/database/alertInfo', () => {
           dmlrowavg: 25,
           heapavg: 30,
           queryrowavg: 0,
+          runcount: 6,
         },
       });
     });
@@ -163,7 +155,20 @@ describe('src/database/alertInfo', () => {
       // Simulate no results (empty array)
       mockQuery.resolves([]);
 
-      //When
+      // When
+      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+
+      // Then
+      expect(results).to.deep.equal({});
+    });
+
+    it('should handle errors and return an empty object', async () => {
+      // Given
+      const flowActionPairs = [{ flowName: 'flow1', actionName: 'action1' }];
+
+      mockQuery.rejects(new Error('Database error'));
+
+      // When
       const results = await getAverageLimitValuesFromDB(flowActionPairs);
 
       //Then
