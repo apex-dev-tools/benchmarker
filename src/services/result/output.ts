@@ -167,10 +167,11 @@ export async function addAlertByComparingAvg(
       dmlrowavg: number;
       heapavg: number;
       queryrowavg: number;
+      runcount: number;
     };
   },
   rangeCollection: RangeCollection
-): Promise<Alert> {
+): Promise<Alert | null> {
   const alert: Alert = new Alert();
   alert.action = output.action;
   alert.flowName = output.flowName;
@@ -179,14 +180,12 @@ export async function addAlertByComparingAvg(
   const key = `${output.flowName}_${output.action}`;
 
   // Retrieve pre-fetched average values for this flow-action pair
-  const averageResults = preFetchedAverages[key] || {
-    dmlavg: 0,
-    soqlavg: 0,
-    cpuavg: 0,
-    dmlrowavg: 0,
-    heapavg: 0,
-    queryrowavg: 0,
-  };
+  const averageResults = preFetchedAverages[key];
+
+  if (!averageResults || averageResults.runcount < 5) {
+    return null;
+  }
+
   const thresolds = getThresoldsByRange(averageResults, rangeCollection);
 
   //storing alerts if there is a degradation
