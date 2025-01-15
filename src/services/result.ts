@@ -71,13 +71,12 @@ export async function reportResults(
 
         validAlerts = alerts.filter((alert): alert is Alert => {
           return (
-            alert !== null &&
-            (alert.cpuTimeDegraded > 0 ||
-              alert.dmlRowsDegraded > 0 ||
-              alert.dmlStatementsDegraded > 0 ||
-              alert.heapSizeDegraded > 0 ||
-              alert.queryRowsDegraded > 0 ||
-              alert.queryRowsDegraded > 0)
+            alert.cpuTimeDegraded > 0 ||
+            alert.dmlRowsDegraded > 0 ||
+            alert.dmlStatementsDegraded > 0 ||
+            alert.heapSizeDegraded > 0 ||
+            alert.queryRowsDegraded > 0 ||
+            alert.queryRowsDegraded > 0
           );
         });
       }

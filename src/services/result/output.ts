@@ -171,7 +171,7 @@ export async function addAlertByComparingAvg(
     };
   },
   rangeCollection: RangeCollection
-): Promise<Alert | null> {
+): Promise<Alert> {
   const alert: Alert = new Alert();
   alert.action = output.action;
   alert.flowName = output.flowName;
@@ -182,8 +182,8 @@ export async function addAlertByComparingAvg(
   // Retrieve pre-fetched average values for this flow-action pair
   const averageResults = preFetchedAverages[key];
 
-  if (!averageResults || averageResults.runcount < 5) {
-    return null;
+  if (!averageResults || averageResults.runcount <= 5) {
+    return alert;
   }
 
   //storing alerts if there is a degradation
