@@ -218,7 +218,7 @@ export async function addAlertByComparingAvg(
       : 0;
     alert.soqlQueriesDegraded = output.soqlQueries
       ? output.soqlQueries > output.alertInfo.thresolds.soqlQueriesThreshold
-        ? output.soqlQueries - Number(averageResults.queryrowavg)
+        ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;
   } else {
