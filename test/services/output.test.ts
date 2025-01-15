@@ -174,7 +174,13 @@ describe('Test Utilities', () => {
       );
 
       //Then
-      expect(alert).to.be.null;
+      expect(alert).to.have.property('action').that.equals('testAction');
+      expect(alert).to.have.property('flowName').that.equals('testFlow');
+      expect(alert).to.have.property('cpuTimeDegraded').that.equals(-1);
+      expect(alert).to.have.property('dmlRowsDegraded').that.equals(-1);
+      expect(alert).to.have.property('dmlStatementsDegraded').that.equals(-1);
+      expect(alert).to.have.property('heapSizeDegraded').that.equals(-1);
+      expect(alert).to.have.property('queryRowsDegraded').that.equals(-1);
     });
 
     it('should create an alert when threshold information is provided in alertInfo', async () => {
