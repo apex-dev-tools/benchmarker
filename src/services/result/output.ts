@@ -186,8 +186,6 @@ export async function addAlertByComparingAvg(
     return null;
   }
 
-  const thresolds = getThresoldsByRange(averageResults, rangeCollection);
-
   //storing alerts if there is a degradation
   if (output.alertInfo?.thresolds) {
     alert.cpuTimeDegraded = output.cpuTime
@@ -221,6 +219,8 @@ export async function addAlertByComparingAvg(
         : 0
       : 0;
   } else {
+    const thresolds = getThresoldsByRange(averageResults, rangeCollection);
+
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
         Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
