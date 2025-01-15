@@ -7,6 +7,7 @@ import sinon, { SinonSpy, SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 import * as execInfo from '../../src/database/executionInfo';
+import * as alertInfo from '../../src/database/alertInfo';
 import * as pkgInfo from '../../src/database/packageInfo';
 import * as orgInfo from '../../src/database/orgInfo';
 import * as testResult from '../../src/database/testResult';
@@ -153,6 +154,7 @@ describe('src/services/result', () => {
     let pkgIdStub: SinonStub;
     let pkgSaveStub: SinonStub;
     let execSaveStub: SinonStub;
+    let alertInfoStub: SinonStub;
 
     const defaultTestResults: outputModule.TestResultOutput[] = [
       {
@@ -173,6 +175,7 @@ describe('src/services/result', () => {
       pkgIdStub = sinon.stub(pkgInfo, 'getPackagesByVersionId');
       pkgSaveStub = sinon.stub(pkgInfo, 'savePackageInfo');
       execSaveStub = sinon.stub(execInfo, 'saveExecutionInfo');
+      alertInfoStub = sinon.stub(alertInfo, 'saveAlerts');
 
       testSaveStub.resolvesArg(0);
       orgIdStub.resolves(null);
@@ -180,6 +183,7 @@ describe('src/services/result', () => {
       pkgIdStub.resolves([]);
       pkgSaveStub.resolvesArg(0);
       execSaveStub.resolvesArg(0);
+      alertInfoStub.resolvesArg(0);
     });
 
     it('should save all records from a test run, without packages', async () => {
@@ -314,6 +318,8 @@ describe('src/services/result', () => {
 
       // Stub getAlertByComparingAverage to return a mock Alert object
       const mockAlert = new Alert();
+      mockAlert.action = 'action';
+      mockAlert.flowName = 'flow';
       mockAlert.cpuTimeDegraded = 10;
       mockAlert.dmlRowsDegraded = 0;
       mockAlert.dmlStatementsDegraded = 0;

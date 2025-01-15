@@ -20,6 +20,9 @@ export class ExecutionInfo extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'package_info_id' })
   public packageInfoId = DEFAULT_NUMERIC_VALUE;
 
+  @Column('integer', { nullable: true, name: 'alert_id' })
+  public alertId = DEFAULT_NUMERIC_VALUE;
+
   @Column('text', { nullable: true, name: 'external_build_id' })
   public externalBuildId = '';
 }

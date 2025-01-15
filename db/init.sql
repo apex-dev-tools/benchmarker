@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS performance.execution_info (
     org_info_id integer,
     package_info_id integer,
     test_result_id integer,
+    alert_id integer,
     external_build_id text
 );
 
