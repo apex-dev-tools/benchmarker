@@ -37,7 +37,6 @@ export async function getAverageLimitValuesFromDB(
       AND (error IS NULL OR error = '')
     GROUP BY flow_name, action
     HAVING COUNT(*) >= 5
-
   `;
 
   const resultsMap: {
