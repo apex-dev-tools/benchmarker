@@ -182,7 +182,7 @@ export async function addAlertByComparingAvg(
   // Retrieve pre-fetched average values for this flow-action pair
   const averageResults = preFetchedAverages[key];
 
-  if (!averageResults || averageResults.runcount <= 5) {
+  if (!averageResults || averageResults.runcount < 5) {
     return alert;
   }
 
