@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
+ */
+
 import { expect } from 'chai';
 import {
   convertOutputToTestResult,
@@ -127,6 +131,7 @@ describe('Test Utilities', () => {
       expect(alert).to.have.property('dmlStatementsDegraded').that.equals(60);
       expect(alert).to.have.property('heapSizeDegraded').that.equals(50);
       expect(alert).to.have.property('queryRowsDegraded').that.equals(50);
+      expect(alert).to.have.property('soqlQueriesDegraded').that.equals(10);
     });
 
     it('should return null alert when run count is less than 5', async () => {
@@ -224,7 +229,7 @@ describe('Test Utilities', () => {
 
       const rangeCollection: RangeCollection = {
         dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
         cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 20 }],
         dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
         heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
@@ -244,6 +249,7 @@ describe('Test Utilities', () => {
       expect(alert).to.have.property('dmlStatementsDegraded').that.equals(10);
       expect(alert).to.have.property('heapSizeDegraded').that.equals(50);
       expect(alert).to.have.property('queryRowsDegraded').that.equals(50);
+      expect(alert).to.have.property('soqlQueriesDegraded').that.equals(10);
     });
   });
 
