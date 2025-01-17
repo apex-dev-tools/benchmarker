@@ -22,7 +22,6 @@ describe('Sample Test For Alert Handling', () => {
 
   before(async () => {
     await cleanDatabase();
-    test = await TransactionProcess.build('testProduct');
 
     if (process.env.STORE_ALERTS === undefined) {
       process.env.STORE_ALERTS = 'true';
@@ -46,6 +45,10 @@ describe('Sample Test For Alert Handling', () => {
       'testProduct',
       'unitTest'
     );
+  });
+
+  beforeEach(async () => {
+    test = await TransactionProcess.build('testProduct');
   });
 
   it('should create alert when we used default threshold and store alerts.', async () => {
