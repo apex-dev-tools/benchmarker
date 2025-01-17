@@ -81,8 +81,8 @@ describe('Test Utilities', () => {
   });
 
   describe('addAlertByComparingAvg', () => {
-    //Given
     it('should create an alert based on degradation compared to the average', async () => {
+      //Given
       const output: TestResultOutput = {
         timer: new Timer('1000'),
         action: 'testAction',
@@ -105,6 +105,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 50,
           heapavg: 100,
           queryrowavg: 400,
+          runcount: 10,
         },
       };
 
@@ -131,6 +132,60 @@ describe('Test Utilities', () => {
       expect(alert).to.have.property('heapSizeDegraded').that.equals(50);
       expect(alert).to.have.property('queryRowsDegraded').that.equals(50);
       expect(alert).to.have.property('soqlQueriesDegraded').that.equals(10);
+    });
+
+    it('should return null alert when run count is less than 5', async () => {
+      //Given
+      const output: TestResultOutput = {
+        timer: new Timer('1000'),
+        action: 'testAction',
+        flowName: 'testFlow',
+        product: 'productA',
+        testType: 'unitTest',
+        cpuTime: 120,
+        dmlRows: 250,
+        dmlStatements: 160,
+        heapSize: 150,
+        queryRows: 450,
+        soqlQueries: 60,
+      };
+
+      const preFetchedAverages = {
+        testFlow_testAction: {
+          dmlavg: 100,
+          soqlavg: 50,
+          cpuavg: 100,
+          dmlrowavg: 50,
+          heapavg: 100,
+          queryrowavg: 400,
+          runcount: 3,
+        },
+      };
+
+      const rangeCollection: RangeCollection = {
+        dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
+        cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
+        dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
+        heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
+        queryRows_ranges: [{ start_range: 0, end_range: 100, threshold: 15 }],
+      };
+
+      //When
+      const alert = await addAlertByComparingAvg(
+        output,
+        preFetchedAverages,
+        rangeCollection
+      );
+
+      //Then
+      expect(alert).to.have.property('action').that.equals('testAction');
+      expect(alert).to.have.property('flowName').that.equals('testFlow');
+      expect(alert).to.have.property('cpuTimeDegraded').that.equals(-1);
+      expect(alert).to.have.property('dmlRowsDegraded').that.equals(-1);
+      expect(alert).to.have.property('dmlStatementsDegraded').that.equals(-1);
+      expect(alert).to.have.property('heapSizeDegraded').that.equals(-1);
+      expect(alert).to.have.property('queryRowsDegraded').that.equals(-1);
     });
 
     it('should create an alert when threshold information is provided in alertInfo', async () => {
@@ -168,6 +223,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 200,
           heapavg: 300,
           queryrowavg: 200,
+          runcount: 10,
         },
       };
 

@@ -41,16 +41,15 @@ export async function reportResults(
   if (getDatabaseUrl()) {
     try {
       // Extract flowName and actionName pairs from the test results
-      const flowActionPairs = testResultOutput
-        .filter(
-          result =>
-            !(result.alertInfo && result.alertInfo.storeAlerts === false) &&
-            shouldStoreAlerts()
-        )
-        .map(result => ({
-          flowName: result.flowName,
-          actionName: result.action,
-        }));
+      const needToStoreAlert = testResultOutput.filter(
+        result =>
+          !(result.alertInfo && result.alertInfo.storeAlerts === false) &&
+          shouldStoreAlerts()
+      );
+      const flowActionPairs = needToStoreAlert.map(result => ({
+        flowName: result.flowName,
+        actionName: result.action,
+      }));
 
       let validAlerts: Alert[] = [];
       // Fetch average values for all flow-action pairs
@@ -60,30 +59,26 @@ export async function reportResults(
         const rangeCollection = getRangeCollection();
         // Generate alerts based on pre-fetched averages
         const alerts = await Promise.all(
-          testResultOutput
-            .filter(
-              result =>
-                !(result.alertInfo && result.alertInfo.storeAlerts === false) &&
-                shouldStoreAlerts()
-            )
-            .map(
-              async item =>
-                await addAlertByComparingAvg(
-                  item,
-                  preFetchedAverages,
-                  rangeCollection
-                )
-            )
+          needToStoreAlert.map(
+            async item =>
+              await addAlertByComparingAvg(
+                item,
+                preFetchedAverages,
+                rangeCollection
+              )
+          )
         );
-        validAlerts = alerts.filter(
-          alert =>
+
+        validAlerts = alerts.filter((alert): alert is Alert => {
+          return (
             alert.cpuTimeDegraded > 0 ||
             alert.dmlRowsDegraded > 0 ||
             alert.dmlStatementsDegraded > 0 ||
             alert.heapSizeDegraded > 0 ||
             alert.queryRowsDegraded > 0 ||
             alert.queryRowsDegraded > 0
-        );
+          );
+        });
       }
       await save(results, orgContext, validAlerts);
     } catch (err) {

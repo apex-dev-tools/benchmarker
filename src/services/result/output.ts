@@ -167,6 +167,7 @@ export async function addAlertByComparingAvg(
       dmlrowavg: number;
       heapavg: number;
       queryrowavg: number;
+      runcount: number;
     };
   },
   rangeCollection: RangeCollection
@@ -179,15 +180,11 @@ export async function addAlertByComparingAvg(
   const key = `${output.flowName}_${output.action}`;
 
   // Retrieve pre-fetched average values for this flow-action pair
-  const averageResults = preFetchedAverages[key] || {
-    dmlavg: 0,
-    soqlavg: 0,
-    cpuavg: 0,
-    dmlrowavg: 0,
-    heapavg: 0,
-    queryrowavg: 0,
-  };
-  const thresolds = getThresoldsByRange(averageResults, rangeCollection);
+  const averageResults = preFetchedAverages[key];
+
+  if (!averageResults || averageResults.runcount < 5) {
+    return alert;
+  }
 
   //storing alerts if there is a degradation
   if (output.alertInfo?.thresolds) {
@@ -222,6 +219,8 @@ export async function addAlertByComparingAvg(
         : 0
       : 0;
   } else {
+    const thresolds = getThresoldsByRange(averageResults, rangeCollection);
+
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
         Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
