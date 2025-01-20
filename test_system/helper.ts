@@ -26,11 +26,11 @@ function createTestResultOutput(
     product: product,
     testType: testType,
     cpuTime: Math.floor(Math.random() * 250 + 100),
-    dmlRows: 100,
+    dmlRows: 50,
     dmlStatements: 50,
-    heapSize: 5000,
-    queryRows: 200,
-    soqlQueries: 10,
+    heapSize: 75,
+    queryRows: 0,
+    soqlQueries: 0,
   };
 }
 

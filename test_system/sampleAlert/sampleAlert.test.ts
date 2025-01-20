@@ -31,19 +31,19 @@ describe('Sample Test For Alert Handling', () => {
       'testActionOne',
       'sampleTestFlow',
       'testProduct',
-      'unitTest'
+      'Transaction Process'
     );
     await createSampleAlertTestData(
       'testActionTwo',
       'sampleTestFlow',
       'testProduct',
-      'unitTest'
+      'Transaction Process'
     );
     await createSampleAlertTestData(
       'testActionThree',
       'sampleTestFlow',
       'testProduct',
-      'unitTest'
+      'Transaction Process'
     );
   });
 
