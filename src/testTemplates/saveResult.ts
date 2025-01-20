@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Certinia.com, inc. All rights reserved.
+ * Copyright (c) 2019 Certinia Inc. All rights reserved.
  */
 
 import {
