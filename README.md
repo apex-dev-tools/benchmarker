@@ -18,7 +18,7 @@ Alerts are calculated in two ways:
 
 *Note: For more information, see  `rangeConfig.json` for creating any new ranges JSON file. The format needs to be the same.
 
-2. Giving Custom Thresholds: Another way is to give custom thresholds at the test level. Along with custom thresholds, you can also pass whether you want to store alerts for a particular test using the alertInfo call. For reference, you can see the `sample.test.ts`.
+2. Giving Custom Thresholds: Another way is to give custom thresholds at the test level. Along with custom thresholds, you can also pass whether you want to store alerts for a particular test using the alertInfo call. For reference, you can see the `test_system/sampleAlert/sampleAlert.test.ts`.
 
 ### How the Store Alerts in the database work?
 
