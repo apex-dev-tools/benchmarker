@@ -147,7 +147,5 @@ describe('Sample Test For Alert Handling', () => {
       alert,
       `expected to have 0 item in alert array but received ${alert.length}.`
     ).to.have.lengthOf(0);
-    expect(alert.at(0)?.flow_name).to.be.equal(undefined);
-    expect(alert.at(0)?.action).to.be.equal(undefined);
   });
 });
