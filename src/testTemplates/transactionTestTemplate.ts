@@ -70,7 +70,8 @@ export interface TestStepDescription {
 }
 
 /**
- * Custom thresholds for storing alerts at individual test level
+ * Describes the thresholds for different limits
+ * Thresholds that needs to be defined using this class: cpuTimeThreshold, dmlStatementThreshold, dmlRowThreshold, heapSizeThreshold, queryRowsThreshold, soqlQueriesThreshold
  */
 export class Thresholds {
   cpuTimeThreshold: number;
@@ -85,8 +86,15 @@ export class Thresholds {
  * Defines the thresolds to be used to create alert record and storeAlerts to determine if alert needs to be stored or not.
  */
 export class AlertInfo {
-  storeAlerts: boolean;
-  thresolds: Thresholds;
+  /**
+   * Describes whether alerts need to be stored or not at the test level
+   */
+  public storeAlerts: boolean;
+
+  /**
+   * Describes the custom thresholds at test level. If you define these then thresholds will be read from here instead of the JSON
+   */
+  public thresolds: Thresholds;
 }
 
 export interface TestFlowOutput {
