@@ -4,11 +4,13 @@
  */
 import * as dotenv from 'dotenv';
 import fs from 'fs';
-import path from 'path';
 import { RangeCollection } from '../services/ranges';
 dotenv.config({ path: '.env' });
 
 import { PuppeteerNodeLaunchOptions } from 'puppeteer';
+import { DEFAULT_RANGES } from '../services/defaultRanges';
+
+let cachedRanges: RangeCollection | null = null;
 
 export function getDatabaseUrl() {
   return process.env.DATABASE_URL || '';
@@ -125,36 +127,31 @@ export function getAppLauncherTabSelector(
   );
 }
 
+export function clearCache() {
+  cachedRanges = null;
+}
+
 /**
  * Load the range collection from either a custom JSON path or default json file.
  */
 export function getRangeCollection(): RangeCollection {
+  if (cachedRanges) {
+    return cachedRanges;
+  }
   const customRangesPath = process.env.CUSTOM_RANGES_PATH;
-  const defaultRangesPath = path.resolve(__dirname, '../../rangeConfig.json');
-
-  // Initialize ranges with default empty arrays for all properties
-  let ranges: RangeCollection = {
-    dml_ranges: [],
-    soql_ranges: [],
-    cpu_ranges: [],
-    dmlRows_ranges: [],
-    heap_ranges: [],
-    queryRows_ranges: [],
-  };
 
   try {
     if (customRangesPath) {
-      return JSON.parse(
+      cachedRanges = JSON.parse(
         fs.readFileSync(customRangesPath, 'utf8')
       ) as RangeCollection;
+      return cachedRanges;
     }
-    ranges = JSON.parse(
-      fs.readFileSync(defaultRangesPath, 'utf8')
-    ) as RangeCollection;
   } catch (error) {
     console.error(error);
     throw error;
   }
 
-  return ranges;
+  cachedRanges = DEFAULT_RANGES;
+  return cachedRanges;
 }

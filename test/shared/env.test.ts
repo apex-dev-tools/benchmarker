@@ -535,35 +535,10 @@ describe('shared/env/index', () => {
   });
 
   describe('getRangeCollection', () => {
-    it('range collection from a custom JSON path', () => {
-      // Given
-      const jsonContent =
-        '{"dml_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
-      sinon.stub(fs, 'readFileSync').returns(jsonContent);
-      process.env.CUSTOM_RANGES_PATH = '../../temp.json';
-
-      // When
-      const ranges = env.getRangeCollection();
-
-      // Then
-      expect(ranges).to.not.be.undefined;
-      expect(Object.keys(ranges).length).to.eql(1);
-      expect(Object.keys(ranges)).to.eql(['dml_ranges']);
+    beforeEach(() => {
+      env.clearCache();
     });
-    it('range collection from a default JSON file', () => {
-      // Given
-      const jsonContent =
-        '{"soql_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
-      sinon.stub(fs, 'readFileSync').returns(jsonContent);
 
-      // When
-      const ranges = env.getRangeCollection();
-
-      // Then
-      expect(ranges).to.not.be.undefined;
-      expect(Object.keys(ranges).length).to.eql(1);
-      expect(Object.keys(ranges)).to.eql(['soql_ranges']);
-    });
     it('throws an error when file content is not vaild', async () => {
       // Given
       process.env.CUSTOM_RANGES_PATH = '../../temp.json';
@@ -576,6 +551,29 @@ describe('shared/env/index', () => {
       } catch (e) {
         expect(e.message).contains('is not valid JSON');
       }
+    });
+
+    it('returns default ranges when CUSTOM_RANGES_PATH is not set', () => {
+      delete process.env.CUSTOM_RANGES_PATH;
+      const defaultRanges = env.getRangeCollection(); // Should return defaults
+
+      expect(defaultRanges).to.be.an('object');
+      expect(defaultRanges).to.have.property('dml_ranges');
+      expect(defaultRanges.dml_ranges).to.be.an('array');
+    });
+
+    it('returns custom ranges when CUSTOM_RANGES_PATH is set', () => {
+      process.env.CUSTOM_RANGES_PATH = '/fake/path.json';
+
+      const jsonContent =
+        '{"soql_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
+      sinon.stub(fs, 'readFileSync').returns(jsonContent);
+
+      const customRanges = env.getRangeCollection();
+
+      expect(customRanges).to.be.an('object');
+      expect(customRanges).to.have.property('soql_ranges');
+      expect(customRanges.soql_ranges).to.be.an('array');
     });
   });
 });
