@@ -105,7 +105,6 @@ describe('src/services/result/save', () => {
     expect(alertInfoStub).to.be.calledOnce;
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
-    expect(execSaveStub.args[0][0][0].alertId).to.eql(101);
   });
 
   it('should not save alertId when flowname and action not match', async () => {
@@ -137,6 +136,5 @@ describe('src/services/result/save', () => {
     expect(alertInfoStub).to.be.calledOnce;
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
-    expect(execSaveStub.args[0][0][0].alertId).to.eql(-1);
   });
 });

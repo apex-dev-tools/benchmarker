@@ -28,12 +28,11 @@ export async function save(
   const testResultsDB: TestResult[] = await saveTestResults(testResults);
   const orgInfoDB: OrgInfo = await saveOrg(orgContext.orgInfo);
   const packagesDB: PackageInfo[] = await savePackages(orgContext.packagesInfo);
-  const alertsDB: Alert[] = await saveAlert(alerts, testResultsDB);
+  await saveAlert(alerts, testResultsDB);
   const executionInfoRows = generateExecutionInfoRows(
     testResultsDB.map(tr => tr.id),
     orgInfoDB.id,
-    packagesDB.map(pkg => pkg.id),
-    alertsDB
+    packagesDB.map(pkg => pkg.id)
   );
   await saveExecutionInfo(executionInfoRows);
 }
@@ -41,12 +40,10 @@ export async function save(
 function generateExecutionInfoRows(
   testResultsIds: number[],
   orgInfoId: number,
-  packagesId: number[],
-  alertsDB: Alert[]
+  packagesId: number[]
 ): ExecutionInfo[] {
   const externalBuildId = getExternalBuildId();
-
-  let executionInfo = testResultsIds.flatMap((testResultId: number) => {
+  return testResultsIds.flatMap((testResultId: number) => {
     if (packagesId.length) {
       return packagesId.map((packageInfoId: number) =>
         createExecutionInfo(
@@ -57,22 +54,11 @@ function generateExecutionInfoRows(
         )
       );
     }
-
     // packagesId could be empty for completely unmanaged org
     return [
       createExecutionInfo(testResultId, orgInfoId, null, externalBuildId),
     ];
   });
-
-  executionInfo = executionInfo.map(exc => {
-    const alert = alertsDB.find(
-      alert => exc.testResultId === alert.testResultId
-    );
-    if (alert) exc.alertId = alert.id;
-    return exc;
-  });
-
-  return executionInfo;
 }
 
 function createExecutionInfo(
