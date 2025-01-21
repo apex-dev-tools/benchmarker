@@ -5,7 +5,7 @@
 import { expect } from 'chai';
 import {
   convertOutputToTestResult,
-  getThresoldsByRange,
+  getThresholdsByRange,
   addAlertByComparingAvg,
   addReporter,
   clearReporters,
@@ -46,7 +46,7 @@ describe('Test Utilities', () => {
     });
   });
 
-  describe('getThresoldsByRange', () => {
+  describe('getThresholdsByRange', () => {
     it('should return the correct thresholds based on the given averages and ranges', () => {
       //Given
       const rangeCollection: RangeCollection = {
@@ -68,10 +68,10 @@ describe('Test Utilities', () => {
       };
 
       //When
-      const thresholds = getThresoldsByRange(averageResults, rangeCollection);
+      const thresholds = getThresholdsByRange(averageResults, rangeCollection);
 
       //Then
-      expect(thresholds.dmlThresold).to.equal(10);
+      expect(thresholds.dmlThreshold).to.equal(10);
       expect(thresholds.soqlThreshold).to.equal(5);
       expect(thresholds.cpuThreshold).to.equal(20);
       expect(thresholds.dmlRowThreshold).to.equal(10);
@@ -203,7 +203,7 @@ describe('Test Utilities', () => {
         queryRows: 250,
         soqlQueries: 60,
         alertInfo: {
-          thresolds: {
+          customThresholds: {
             cpuTimeThreshold: 110,
             dmlRowThreshold: 240,
             dmlStatementThreshold: 55,

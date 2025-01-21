@@ -41,7 +41,7 @@ describe('src/testTemplates/saveResult', () => {
           },
           alertInfo: {
             storeAlerts: true,
-            thresolds: {
+            customThresholds: {
               cpuTimeThreshold: 1,
               dmlStatementThreshold: 2,
               dmlRowThreshold: 3,
@@ -73,23 +73,28 @@ describe('src/testTemplates/saveResult', () => {
         true
       );
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds.cpuTimeThreshold
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
+          .cpuTimeThreshold
       ).to.be.equal(1);
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
           .dmlStatementThreshold
       ).to.be.equal(2);
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds.dmlRowThreshold
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
+          .dmlRowThreshold
       ).to.be.equal(3);
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds.heapSizeThreshold
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
+          .heapSizeThreshold
       ).to.be.equal(4);
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds.queryRowsThreshold
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
+          .queryRowsThreshold
       ).to.be.equal(5);
       expect(
-        reportResultsStub.args[0][0][0].alertInfo.thresolds.soqlQueriesThreshold
+        reportResultsStub.args[0][0][0].alertInfo.customThresholds
+          .soqlQueriesThreshold
       ).to.be.equal(6);
     });
 

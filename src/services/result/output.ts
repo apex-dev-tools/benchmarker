@@ -91,7 +91,7 @@ export function convertOutputToTestResult(
   return testResult;
 }
 
-export function getThresoldsByRange(
+export function getThresholdsByRange(
   averageResults: {
     dmlavg: number;
     soqlavg: number;
@@ -140,7 +140,7 @@ export function getThresoldsByRange(
   );
 
   //get threasholds based on the ranges
-  const dmlThresold = dmlRanges[0]?.threshold || 0;
+  const dmlThreshold = dmlRanges[0]?.threshold || 0;
   const soqlThreshold = soqlRanges[0]?.threshold || 0;
   const cpuThreshold = cpuRanges[0]?.threshold || 0;
   const dmlRowThreshold = dmlRowRanges[0]?.threshold || 0;
@@ -148,7 +148,7 @@ export function getThresoldsByRange(
   const queryRowThreshold = queryRowRanges[0]?.threshold || 0;
 
   return {
-    dmlThresold,
+    dmlThreshold,
     soqlThreshold,
     cpuThreshold,
     dmlRowThreshold,
@@ -187,78 +187,81 @@ export async function addAlertByComparingAvg(
   }
 
   //storing alerts if there is a degradation
-  if (output.alertInfo?.thresolds) {
+  if (output.alertInfo?.customThresholds) {
     alert.cpuTimeDegraded = output.cpuTime
-      ? output.cpuTime > output.alertInfo.thresolds.cpuTimeThreshold
+      ? output.cpuTime > output.alertInfo.customThresholds.cpuTimeThreshold
         ? output.cpuTime - Number(averageResults.cpuavg)
         : 0
       : 0;
     alert.dmlRowsDegraded = output.dmlRows
-      ? output.dmlRows > output.alertInfo.thresolds.dmlRowThreshold
+      ? output.dmlRows > output.alertInfo.customThresholds.dmlRowThreshold
         ? output.dmlRows - Number(averageResults.dmlrowavg)
         : 0
       : 0;
     alert.dmlStatementsDegraded = output.dmlStatements
-      ? output.dmlStatements > output.alertInfo.thresolds.dmlStatementThreshold
+      ? output.dmlStatements >
+        output.alertInfo.customThresholds.dmlStatementThreshold
         ? output.dmlStatements - Number(averageResults.dmlavg)
         : 0
       : 0;
     alert.heapSizeDegraded = output.heapSize
-      ? output.heapSize > output.alertInfo.thresolds.heapSizeThreshold
+      ? output.heapSize > output.alertInfo.customThresholds.heapSizeThreshold
         ? output.heapSize - Number(averageResults.heapavg)
         : 0
       : 0;
     alert.queryRowsDegraded = output.queryRows
-      ? output.queryRows > output.alertInfo.thresolds.queryRowsThreshold
+      ? output.queryRows > output.alertInfo.customThresholds.queryRowsThreshold
         ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
     alert.soqlQueriesDegraded = output.soqlQueries
-      ? output.soqlQueries > output.alertInfo.thresolds.soqlQueriesThreshold
+      ? output.soqlQueries >
+        output.alertInfo.customThresholds.soqlQueriesThreshold
         ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;
   } else {
-    const thresolds = getThresoldsByRange(averageResults, rangeCollection);
+    const thresholds = getThresholdsByRange(averageResults, rangeCollection);
 
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >
-        Number(thresolds.dmlThresold) + Number(averageResults.dmlavg)
+        Number(thresholds.dmlThreshold) + Number(averageResults.dmlavg)
         ? output.dmlStatements - Number(averageResults.dmlavg)
         : 0
       : 0;
 
     alert.soqlQueriesDegraded = output.soqlQueries
       ? output.soqlQueries >
-        Number(thresolds.soqlThreshold) + Number(averageResults.soqlavg)
+        Number(thresholds.soqlThreshold) + Number(averageResults.soqlavg)
         ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;
 
     alert.cpuTimeDegraded = output.cpuTime
       ? output.cpuTime >
-        Number(thresolds.cpuThreshold) + Number(averageResults.cpuavg)
+        Number(thresholds.cpuThreshold) + Number(averageResults.cpuavg)
         ? output.cpuTime - Number(averageResults.cpuavg)
         : 0
       : 0;
 
     alert.dmlRowsDegraded = output.dmlRows
       ? output.dmlRows >
-        Number(thresolds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
+        Number(thresholds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
         ? output.dmlRows - Number(averageResults.dmlrowavg)
         : 0
       : 0;
 
     alert.heapSizeDegraded = output.heapSize
       ? output.heapSize >
-        Number(thresolds.heapThreshold) + Number(averageResults.heapavg)
+        Number(thresholds.heapThreshold) + Number(averageResults.heapavg)
         ? output.heapSize - Number(averageResults.heapavg)
         : 0
       : 0;
 
     alert.queryRowsDegraded = output.queryRows
       ? output.queryRows >
-        Number(thresolds.queryRowThreshold) + Number(averageResults.queryrowavg)
+        Number(thresholds.queryRowThreshold) +
+          Number(averageResults.queryrowavg)
         ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
