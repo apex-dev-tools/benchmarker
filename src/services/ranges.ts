@@ -6,7 +6,7 @@
 export interface OffsetThresholdRange {
   start_range: number;
   end_range: number;
-  offsetThreshold: number;
+  offset_Threshold: number;
 }
 
 export interface RangeCollection {

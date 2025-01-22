@@ -86,7 +86,6 @@ describe('src/services/result/save', () => {
     alert.id = 101;
     alert.flowName = 'test flow';
     alert.action = 'test action';
-    alert.testResultId = 100;
 
     // When
     await save(
@@ -105,9 +104,10 @@ describe('src/services/result/save', () => {
     expect(alertInfoStub).to.be.calledOnce;
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
+    expect(alertInfoStub.args[0][0][0].testResultId).to.equal(100);
   });
 
-  it('should not save alertId when flowname and action not match', async () => {
+  it('should not save testResultId when flowname and action not match', async () => {
     // Given
     const result = new TestResult();
     result.flowName = 'test flow 1';
@@ -136,5 +136,6 @@ describe('src/services/result/save', () => {
     expect(alertInfoStub).to.be.calledOnce;
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
+    expect(alertInfoStub.args[0][0][0].testResultId).to.equal(-1);
   });
 });
