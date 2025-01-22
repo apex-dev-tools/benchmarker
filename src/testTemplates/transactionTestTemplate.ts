@@ -70,10 +70,10 @@ export interface TestStepDescription {
 }
 
 /**
- * Describes the customThresholds for different limits
- * CustomThresholds that needs to be defined using this class: cpuTimeThreshold, dmlStatementThreshold, dmlRowThreshold, heapSizeThreshold, queryRowsThreshold, soqlQueriesThreshold
+ * Describes the Thresholds for different limits
+ * Thresholds that needs to be defined using this class: cpuTimeThreshold, dmlStatementThreshold, dmlRowThreshold, heapSizeThreshold, queryRowsThreshold, soqlQueriesThreshold
  */
-export class CustomThresholds {
+export class Thresholds {
   cpuTimeThreshold: number;
   dmlStatementThreshold: number;
   dmlRowThreshold: number;
@@ -94,7 +94,7 @@ export class AlertInfo {
   /**
    * Describes the custom thresholds at test level. If you define these then thresholds will be read from here instead of the JSON
    */
-  public customThresholds: CustomThresholds;
+  public thresholds: Thresholds;
 }
 
 export interface TestFlowOutput {

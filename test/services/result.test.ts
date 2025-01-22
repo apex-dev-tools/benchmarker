@@ -302,7 +302,7 @@ describe('src/services/result', () => {
         queryRows: 200,
         soqlQueries: 10,
         alertInfo: {
-          customThresholds: {
+          thresholds: {
             cpuTimeThreshold: 50,
             dmlRowThreshold: 10,
             dmlStatementThreshold: 8,

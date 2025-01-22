@@ -7,7 +7,7 @@ import {
   AlertInfo,
   createApexExecutionTestStepFlow,
   saveResults,
-  CustomThresholds,
+  Thresholds,
   TransactionProcess,
   TransactionTestTemplate,
 } from '../../src';
@@ -80,17 +80,17 @@ describe('Sample Test For Alert Handling', () => {
 
   it('should create alert when we provide a custom threshold and store alerts as true.', async () => {
     // Arrange
-    const customThresolds: CustomThresholds = new CustomThresholds();
-    customThresolds.cpuTimeThreshold = 0;
-    customThresolds.dmlRowThreshold = 0;
-    customThresolds.dmlStatementThreshold = 10;
-    customThresolds.heapSizeThreshold = 0;
-    customThresolds.queryRowsThreshold = 0;
-    customThresolds.soqlQueriesThreshold = 0;
+    const customThresholds: Thresholds = new Thresholds();
+    customThresholds.cpuTimeThreshold = 0;
+    customThresholds.dmlRowThreshold = 0;
+    customThresholds.dmlStatementThreshold = 10;
+    customThresholds.heapSizeThreshold = 0;
+    customThresholds.queryRowsThreshold = 0;
+    customThresholds.soqlQueriesThreshold = 0;
 
     const alertInfo: AlertInfo = new AlertInfo();
     alertInfo.storeAlerts = true;
-    alertInfo.customThresholds = customThresolds;
+    alertInfo.thresholds = customThresholds;
 
     // Act
     await TransactionProcess.executeTestStep(

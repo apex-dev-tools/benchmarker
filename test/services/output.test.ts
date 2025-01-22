@@ -218,7 +218,7 @@ describe('Test Utilities', () => {
         queryRows: 250,
         soqlQueries: 60,
         alertInfo: {
-          customThresholds: {
+          thresholds: {
             cpuTimeThreshold: 110,
             dmlRowThreshold: 240,
             dmlStatementThreshold: 55,

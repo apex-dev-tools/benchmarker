@@ -13,7 +13,7 @@ import {
   TransactionProcess,
   FlowStep,
   TestFlowOutput,
-  CustomThresholds,
+  Thresholds,
   AlertInfo,
 } from '../../src/testTemplates/transactionTestTemplate';
 import * as utils from '../../src/services/salesforce/utils';
@@ -125,7 +125,7 @@ describe('src/testTemplates/transactionTestTemplate', () => {
       };
       const alertInfo: AlertInfo = {
         storeAlerts: true,
-        customThresholds: {
+        thresholds: {
           cpuTimeThreshold: 1,
           dmlStatementThreshold: 2,
           dmlRowThreshold: 3,
@@ -147,23 +147,17 @@ describe('src/testTemplates/transactionTestTemplate', () => {
       );
       expect(test.flowStepsResults[0].result).to.be.not.null;
 
-      const thresholds = test.flowStepsResults[0].alertInfo?.customThresholds;
+      const thresholds = test.flowStepsResults[0].alertInfo?.thresholds;
 
       expect(
         (test.flowStepsResults[0].alertInfo as AlertInfo).storeAlerts
       ).to.be.equal(true);
-      expect((thresholds as CustomThresholds).cpuTimeThreshold).to.be.equal(1);
-      expect(
-        (thresholds as CustomThresholds).dmlStatementThreshold
-      ).to.be.equal(2);
-      expect((thresholds as CustomThresholds).dmlRowThreshold).to.be.equal(3);
-      expect((thresholds as CustomThresholds).heapSizeThreshold).to.be.equal(4);
-      expect((thresholds as CustomThresholds).queryRowsThreshold).to.be.equal(
-        5
-      );
-      expect((thresholds as CustomThresholds).soqlQueriesThreshold).to.be.equal(
-        6
-      );
+      expect((thresholds as Thresholds).cpuTimeThreshold).to.be.equal(1);
+      expect((thresholds as Thresholds).dmlStatementThreshold).to.be.equal(2);
+      expect((thresholds as Thresholds).dmlRowThreshold).to.be.equal(3);
+      expect((thresholds as Thresholds).heapSizeThreshold).to.be.equal(4);
+      expect((thresholds as Thresholds).queryRowsThreshold).to.be.equal(5);
+      expect((thresholds as Thresholds).soqlQueriesThreshold).to.be.equal(6);
     });
 
     it('fails and save the result as status is failed', async () => {

@@ -187,36 +187,34 @@ export async function addAlertByComparingAvg(
   }
 
   //storing alerts if there is a degradation
-  if (output.alertInfo?.customThresholds) {
+  if (output.alertInfo?.thresholds) {
     alert.cpuTimeDegraded = output.cpuTime
-      ? output.cpuTime > output.alertInfo.customThresholds.cpuTimeThreshold
+      ? output.cpuTime > output.alertInfo.thresholds.cpuTimeThreshold
         ? output.cpuTime - Number(averageResults.cpuavg)
         : 0
       : 0;
     alert.dmlRowsDegraded = output.dmlRows
-      ? output.dmlRows > output.alertInfo.customThresholds.dmlRowThreshold
+      ? output.dmlRows > output.alertInfo.thresholds.dmlRowThreshold
         ? output.dmlRows - Number(averageResults.dmlrowavg)
         : 0
       : 0;
     alert.dmlStatementsDegraded = output.dmlStatements
-      ? output.dmlStatements >
-        output.alertInfo.customThresholds.dmlStatementThreshold
+      ? output.dmlStatements > output.alertInfo.thresholds.dmlStatementThreshold
         ? output.dmlStatements - Number(averageResults.dmlavg)
         : 0
       : 0;
     alert.heapSizeDegraded = output.heapSize
-      ? output.heapSize > output.alertInfo.customThresholds.heapSizeThreshold
+      ? output.heapSize > output.alertInfo.thresholds.heapSizeThreshold
         ? output.heapSize - Number(averageResults.heapavg)
         : 0
       : 0;
     alert.queryRowsDegraded = output.queryRows
-      ? output.queryRows > output.alertInfo.customThresholds.queryRowsThreshold
+      ? output.queryRows > output.alertInfo.thresholds.queryRowsThreshold
         ? output.queryRows - Number(averageResults.queryrowavg)
         : 0
       : 0;
     alert.soqlQueriesDegraded = output.soqlQueries
-      ? output.soqlQueries >
-        output.alertInfo.customThresholds.soqlQueriesThreshold
+      ? output.soqlQueries > output.alertInfo.thresholds.soqlQueriesThreshold
         ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;

@@ -77,7 +77,7 @@ export {
   FlowStep,
   TransactionProcess,
   AlertInfo,
-  CustomThresholds,
+  Thresholds,
 } from './testTemplates/transactionTestTemplate';
 
 /**
