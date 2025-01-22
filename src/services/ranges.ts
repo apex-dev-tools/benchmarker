@@ -3,17 +3,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-export interface ThresholdRange {
+export interface OffsetThresholdRange {
   start_range: number;
   end_range: number;
-  threshold: number;
+  offsetThreshold: number;
 }
 
 export interface RangeCollection {
-  dml_ranges: ThresholdRange[];
-  soql_ranges: ThresholdRange[];
-  cpu_ranges: ThresholdRange[];
-  dmlRows_ranges: ThresholdRange[];
-  heap_ranges: ThresholdRange[];
-  queryRows_ranges: ThresholdRange[];
+  dml_ranges: OffsetThresholdRange[];
+  soql_ranges: OffsetThresholdRange[];
+  cpu_ranges: OffsetThresholdRange[];
+  dmlRows_ranges: OffsetThresholdRange[];
+  heap_ranges: OffsetThresholdRange[];
+  queryRows_ranges: OffsetThresholdRange[];
 }

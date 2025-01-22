@@ -9,7 +9,7 @@ import { Timer } from '../../shared/timer';
 import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { TableReporter } from './table';
 import { Alert } from '../../database/entity/alert';
-import { ThresholdRange, RangeCollection } from '../ranges';
+import { RangeCollection, OffsetThresholdRange } from '../ranges';
 
 export interface TestResultOutput {
   timer: Timer;
@@ -91,7 +91,7 @@ export function convertOutputToTestResult(
   return testResult;
 }
 
-export function getThresholdsByRange(
+export function getOffsetThresholdsByRange(
   averageResults: {
     dmlavg: number;
     soqlavg: number;
@@ -104,48 +104,48 @@ export function getThresholdsByRange(
 ) {
   //get limit ranges based on the average values
   const dmlRanges = rangeCollection.dml_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.dmlavg >= e.start_range &&
       averageResults.dmlavg <= e.end_range
   );
 
   const soqlRanges = rangeCollection.soql_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.soqlavg >= e.start_range &&
       averageResults.soqlavg <= e.end_range
   );
 
   const cpuRanges = rangeCollection.cpu_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.cpuavg >= e.start_range &&
       averageResults.cpuavg <= e.end_range
   );
 
   const dmlRowRanges = rangeCollection.dmlRows_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.dmlrowavg >= e.start_range &&
       averageResults.dmlrowavg <= e.end_range
   );
 
   const heapRanges = rangeCollection.heap_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.heapavg >= e.start_range &&
       averageResults.heapavg <= e.end_range
   );
 
   const queryRowRanges = rangeCollection.queryRows_ranges.filter(
-    (e: ThresholdRange) =>
+    (e: OffsetThresholdRange) =>
       averageResults.queryrowavg >= e.start_range &&
       averageResults.queryrowavg <= e.end_range
   );
 
   //get threasholds based on the ranges
-  const dmlThreshold = dmlRanges[0]?.threshold || 0;
-  const soqlThreshold = soqlRanges[0]?.threshold || 0;
-  const cpuThreshold = cpuRanges[0]?.threshold || 0;
-  const dmlRowThreshold = dmlRowRanges[0]?.threshold || 0;
-  const heapThreshold = heapRanges[0]?.threshold || 0;
-  const queryRowThreshold = queryRowRanges[0]?.threshold || 0;
+  const dmlThreshold = dmlRanges[0]?.offsetThreshold || 0;
+  const soqlThreshold = soqlRanges[0]?.offsetThreshold || 0;
+  const cpuThreshold = cpuRanges[0]?.offsetThreshold || 0;
+  const dmlRowThreshold = dmlRowRanges[0]?.offsetThreshold || 0;
+  const heapThreshold = heapRanges[0]?.offsetThreshold || 0;
+  const queryRowThreshold = queryRowRanges[0]?.offsetThreshold || 0;
 
   return {
     dmlThreshold,
@@ -221,7 +221,10 @@ export async function addAlertByComparingAvg(
         : 0
       : 0;
   } else {
-    const thresholds = getThresholdsByRange(averageResults, rangeCollection);
+    const thresholds = getOffsetThresholdsByRange(
+      averageResults,
+      rangeCollection
+    );
 
     alert.dmlStatementsDegraded = output.dmlStatements
       ? output.dmlStatements >

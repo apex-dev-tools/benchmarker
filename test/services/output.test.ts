@@ -5,7 +5,7 @@
 import { expect } from 'chai';
 import {
   convertOutputToTestResult,
-  getThresholdsByRange,
+  getOffsetThresholdsByRange,
   addAlertByComparingAvg,
   addReporter,
   clearReporters,
@@ -47,15 +47,19 @@ describe('Test Utilities', () => {
   });
 
   describe('getThresholdsByRange', () => {
-    it('should return the correct thresholds based on the given averages and ranges', () => {
+    it('should return the correct offsetThreshold based on the given averages and ranges', () => {
       //Given
       const rangeCollection: RangeCollection = {
-        dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 20 }],
-        dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        queryRows_ranges: [{ start_range: 0, end_range: 100, threshold: 15 }],
+        dml_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        cpu_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 20 }],
+        dmlRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 10 },
+        ],
+        heap_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        queryRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 15 },
+        ],
       };
 
       const averageResults = {
@@ -68,7 +72,10 @@ describe('Test Utilities', () => {
       };
 
       //When
-      const thresholds = getThresholdsByRange(averageResults, rangeCollection);
+      const thresholds = getOffsetThresholdsByRange(
+        averageResults,
+        rangeCollection
+      );
 
       //Then
       expect(thresholds.dmlThreshold).to.equal(10);
@@ -110,12 +117,16 @@ describe('Test Utilities', () => {
       };
 
       const rangeCollection: RangeCollection = {
-        dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        queryRows_ranges: [{ start_range: 0, end_range: 100, threshold: 15 }],
+        dml_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        cpu_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        dmlRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 10 },
+        ],
+        heap_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        queryRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 15 },
+        ],
       };
 
       //When
@@ -163,12 +174,16 @@ describe('Test Utilities', () => {
       };
 
       const rangeCollection: RangeCollection = {
-        dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        queryRows_ranges: [{ start_range: 0, end_range: 100, threshold: 15 }],
+        dml_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        cpu_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        dmlRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 10 },
+        ],
+        heap_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        queryRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 15 },
+        ],
       };
 
       //When
@@ -228,12 +243,16 @@ describe('Test Utilities', () => {
       };
 
       const rangeCollection: RangeCollection = {
-        dml_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        soql_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        cpu_ranges: [{ start_range: 0, end_range: 100, threshold: 20 }],
-        dmlRows_ranges: [{ start_range: 0, end_range: 100, threshold: 10 }],
-        heap_ranges: [{ start_range: 0, end_range: 100, threshold: 5 }],
-        queryRows_ranges: [{ start_range: 0, end_range: 100, threshold: 15 }],
+        dml_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        soql_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 10 }],
+        cpu_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 20 }],
+        dmlRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 10 },
+        ],
+        heap_ranges: [{ start_range: 0, end_range: 100, offsetThreshold: 5 }],
+        queryRows_ranges: [
+          { start_range: 0, end_range: 100, offsetThreshold: 15 },
+        ],
       };
 
       //When

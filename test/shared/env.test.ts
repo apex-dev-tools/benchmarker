@@ -566,7 +566,7 @@ describe('shared/env/index', () => {
       process.env.CUSTOM_RANGES_PATH = '/fake/path.json';
 
       const jsonContent =
-        '{"soql_ranges":[{"start_range":0,"end_range":60,"threshold":5}]}';
+        '{"soql_ranges":[{"start_range":0,"end_range":60,"offsetThreshold":5}]}';
       sinon.stub(fs, 'readFileSync').returns(jsonContent);
 
       const customRanges = env.getRangeCollection();
