@@ -140,12 +140,12 @@ export function getOffsetThresholdsByRange(
   );
 
   //get threasholds based on the ranges
-  const dmlThreshold = dmlRanges[0]?.offset_Threshold || 0;
-  const soqlThreshold = soqlRanges[0]?.offset_Threshold || 0;
-  const cpuThreshold = cpuRanges[0]?.offset_Threshold || 0;
-  const dmlRowThreshold = dmlRowRanges[0]?.offset_Threshold || 0;
-  const heapThreshold = heapRanges[0]?.offset_Threshold || 0;
-  const queryRowThreshold = queryRowRanges[0]?.offset_Threshold || 0;
+  const dmlThreshold = dmlRanges[0]?.offset_threshold || 0;
+  const soqlThreshold = soqlRanges[0]?.offset_threshold || 0;
+  const cpuThreshold = cpuRanges[0]?.offset_threshold || 0;
+  const dmlRowThreshold = dmlRowRanges[0]?.offset_threshold || 0;
+  const heapThreshold = heapRanges[0]?.offset_threshold || 0;
+  const queryRowThreshold = queryRowRanges[0]?.offset_threshold || 0;
 
   return {
     dmlThreshold,
