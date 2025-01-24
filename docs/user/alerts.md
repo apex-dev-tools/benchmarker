@@ -1,6 +1,6 @@
 # Alerts
 
-Alerts are stored in a database to track performance degradation. The `STORE_ALERTS` in the environment file must be `true` for alerts to be stored in the database.
+Alerts are stored in a database to track performance degradation. The `STORE_ALERTS` variable in the environment file must be `true` for alerts to be stored in the database.
 
 ## Usage
 
