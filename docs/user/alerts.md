@@ -1,16 +1,16 @@
 # Alerts
 
-Alerts can be stored in the database to track performance degradation over time. The degradation values in each record are the difference from the average result value saved in the last 10 days. If there have not been at least 5 results in the last 10 days, an alert is not stored.
+Alerts can be stored in the database to track performance degradation over time. The degradation values in each record are the difference from the average result values saved in the last 10 days. If there have not been at least 5 results in the last 10 days, an alert is not stored.
 
 ## Usage
 
 ### Global Offset Thresholds
 
-Set `STORE_ALERTS` variable in the environment file to `true` to enable alerts globally. If you want to enable/disable by individual tests:
+Set `STORE_ALERTS` variable in the environment file to `true` to enable alerts globally. If you want to instead enable/disable by individual tests:
 
 ```ts
 const alertInfo: AlertInfo = new AlertInfo();
-alertInfo.storeAlerts = false;
+alertInfo.storeAlerts = true;
 
 await TransactionProcess.executeTestStep(..., alertInfo);
 ```
@@ -94,6 +94,7 @@ customThresholds.heapSizeThreshold = 0;
 customThresholds.queryRowsThreshold = 0;
 customThresholds.soqlQueriesThreshold = 0;
 
+// Enable alerting for this test if not already active
 const alertInfo: AlertInfo = new AlertInfo();
 alertInfo.storeAlerts = true;
 alertInfo.thresholds = customThresholds;
