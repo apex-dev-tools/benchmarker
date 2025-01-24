@@ -1,16 +1,25 @@
 # Alerts
 
-Alerts are stored in a database to track performance degradation. The `STORE_ALERTS` variable in the environment file must be `true` for alerts to be stored in the database.
+Alerts can be stored in the database to track performance degradation over time. The degradation values in each record are the difference from the average result value saved in the last 10 days. If there have not been at least 5 results in the last 10 days, an alert is not stored.
 
 ## Usage
 
 ### Global Offset Thresholds
 
+Set `STORE_ALERTS` variable in the environment file to `true` to enable alerts globally. If you want to enable/disable by individual tests:
+
+```ts
+const alertInfo: AlertInfo = new AlertInfo();
+alertInfo.storeAlerts = false;
+
+await TransactionProcess.executeTestStep(..., alertInfo);
+```
+
 By default, the alert system will use a pre-defined threshold (`offset_threshold`) that applies on top of the 10 day average when it is within a set range (`start_range`, `end_range`). If the limit value is greater than the sum of the 10 day average and the offset threshold, then an alert will be stored.
 
 If you do not want to use the [default ranges](https://github.com/apex-dev-tools/benchmarker/blob/797a57ac45712f079b4a0ce86a15a02f0f12a3b8/src/services/defaultRanges.ts), create your own JSON file with different ranges and give its path via the env file `CUSTOM_RANGES_PATH` variable.
 
-#### Example
+#### Example Scenario
 
 * The measured average CPU Time in the last 10 days was 1500, within a set custom range of 0 - 2000.
 * Offset threshold for the range is 3000, applied to the average CPU Time.
@@ -73,11 +82,10 @@ Must be at least one range per limit type.
 
 ### Test Level Thresholds
 
-Another way is to give thresholds at the test level. Along with custom thresholds, you can also pass whether you want to store alerts for a particular test using the alertInfo class.
-
-If the limit value exceeds the custom threshold defined, an alert will be stored. The degradation value is the difference to the 10 day average.
+Another way is to set thresholds at the test level. If the limit value exceeds the custom threshold defined, an alert will be stored. The degradation value is still the difference to the 10 day average, not the threshold value which only determines when an alert is created.
 
 ```ts
+// Replace global alert behaviour with exact thresholds
 const customThresholds: Thresholds = new Thresholds();
 customThresholds.cpuTimeThreshold = 0;
 customThresholds.dmlRowThreshold = 0;
@@ -93,7 +101,7 @@ alertInfo.thresholds = customThresholds;
 await TransactionProcess.executeTestStep(..., alertInfo);
 ```
 
-#### Example
+#### Example Scenario
 
 * Threshold at test level for CPU was 4000.
 * You will get an alert on any value 4000+, saying it has degraded by X above the average.
@@ -101,7 +109,3 @@ await TransactionProcess.executeTestStep(..., alertInfo);
 ```txt
 Note: If the test level threshold is misconfigured below the average, you get an alert with a value of 0. Recommend filtering out zero alerts when querying for new records.
 ```
-
-### Alerts For New Tests
-
-When a new test is added, at that time its previous test run values will not be present in the database. So, alerts will be calculated only if at least 5 test runs are present in the database. Before that, alerts will not be calculated.
