@@ -22,6 +22,8 @@ interface BulkDocumentProcessResult {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * BulkDocumentProcessTestTemplate interface to handle the connection to the org
  */
 export interface BulkDocumentProcessParams {
@@ -29,6 +31,8 @@ export interface BulkDocumentProcessParams {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * Test Template to create and performs actions over objects with multiple headers and lines
  */
 export class BulkDocumentProcessTestTemplate {
@@ -106,9 +110,13 @@ export class BulkDocumentProcessTestTemplate {
    */
   public performFlow: (param: BulkDocumentProcessParams) => Promise<Timer>;
 }
-
+/**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ */
 export namespace BulkDocumentProcess {
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Sets the configuration for the Test Template
    * @param product Product name
    * @param nDocumentsInitial initial number of documents to be created
@@ -151,6 +159,8 @@ export namespace BulkDocumentProcess {
   };
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed for the test, performs actions with the data creted, clean the data created for the tests and retrieve the performance results
    * @param dpTestTemplate object with the information required to execute a test
    */

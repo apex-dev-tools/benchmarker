@@ -23,6 +23,8 @@ interface DocumentLinesProcessResults {
   lines: number;
 }
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * DocumentLineProcessTestTemplate interface to handle the connection to the org
  */
 export interface DocumentLinesProcessParams {
@@ -30,6 +32,8 @@ export interface DocumentLinesProcessParams {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * Test Template to create and performs actions over objects with one headers and multiple lines
  */
 export class DocumentLineProcessTestTemplate {
@@ -96,8 +100,14 @@ export class DocumentLineProcessTestTemplate {
    */
   public performFlow: (param: DocumentLinesProcessParams) => Promise<Timer>;
 }
+
+/**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ */
 export namespace DocumentLineProcess {
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Sets the configuration for the Test Template
    * @param product Product name
    * @param linesInitial initial number of lines to be created
@@ -131,6 +141,8 @@ export namespace DocumentLineProcess {
   };
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed for the test, performs actions with the data creted, clean the data created for the tests and retrieve the performance results
    * @param dlpTestTemplate object with the information required to execute a test
    */
