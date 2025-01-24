@@ -7,21 +7,19 @@ import sinon, { SinonSpy, SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 import * as execInfo from '../../src/database/executionInfo';
+import * as alertInfo from '../../src/database/alertInfo';
 import * as pkgInfo from '../../src/database/packageInfo';
 import * as orgInfo from '../../src/database/orgInfo';
 import * as testResult from '../../src/database/testResult';
-import {
-  BenchmarkReporter,
-  TestResultOutput,
-  addReporter,
-  clearReporters,
-} from '../../src/services/result/output';
+import * as outputModule from '../../src/services/result/output';
 import { Timer } from '../../src/shared/timer';
 import { reportResults } from '../../src/services/result';
 import { OrgContext } from '../../src/services/org/context';
 import { TableReporter } from '../../src/services/result/table';
 import { PackageInfo } from '../../src/database/entity/package';
 import { Package } from '../../src/services/org/packages';
+import * as envModule from '../../src/shared/env';
+import { Alert } from '../../src/database/entity/alert';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -47,7 +45,7 @@ describe('src/services/result', () => {
 
   beforeEach(() => {
     delete process.env.DATABASE_URL;
-    clearReporters();
+    outputModule.clearReporters();
 
     logSpy = sinon.spy(console, 'log');
     errorSpy = sinon.spy(console, 'error');
@@ -60,9 +58,9 @@ describe('src/services/result', () => {
   describe('Reporters', () => {
     it('TableReporter should print available data', async () => {
       // Given
-      addReporter(new TableReporter());
+      outputModule.addReporter(new TableReporter());
       const timer = new Timer('');
-      const testResult: TestResultOutput = {
+      const testResult: outputModule.TestResultOutput = {
         timer: timer,
         action: 'action',
         flowName: 'flow',
@@ -80,15 +78,15 @@ describe('src/services/result', () => {
 
     it('TableReporter should print all tables', async () => {
       // Given
-      addReporter(new TableReporter());
-      const testResult: TestResultOutput = {
+      outputModule.addReporter(new TableReporter());
+      const testResult: outputModule.TestResultOutput = {
         timer: new Timer(''),
         action: 'action',
         flowName: 'flow',
         product: '',
         testType: '',
       };
-      const testResult2: TestResultOutput = {
+      const testResult2: outputModule.TestResultOutput = {
         timer: new Timer(''),
         action: 'action2',
         flowName: 'flow2',
@@ -103,7 +101,7 @@ describe('src/services/result', () => {
         queryRows: 3,
         soqlQueries: 1,
       };
-      const testResult3: TestResultOutput = {
+      const testResult3: outputModule.TestResultOutput = {
         timer: new Timer(''),
         action: 'action3',
         flowName: 'flow3',
@@ -129,14 +127,14 @@ describe('src/services/result', () => {
 
     it('should display errors with reporter', async () => {
       // Given
-      const errReporter: BenchmarkReporter = {
+      const errReporter: outputModule.BenchmarkReporter = {
         name: 'Error',
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async report(results) {
           throw new Error('problem');
         },
       };
-      addReporter(errReporter);
+      outputModule.addReporter(errReporter);
 
       // When
       await reportResults([], defaultOrgContext);
@@ -156,8 +154,9 @@ describe('src/services/result', () => {
     let pkgIdStub: SinonStub;
     let pkgSaveStub: SinonStub;
     let execSaveStub: SinonStub;
+    let alertInfoStub: SinonStub;
 
-    const defaultTestResults: TestResultOutput[] = [
+    const defaultTestResults: outputModule.TestResultOutput[] = [
       {
         timer: new Timer(''),
         action: 'action',
@@ -176,6 +175,7 @@ describe('src/services/result', () => {
       pkgIdStub = sinon.stub(pkgInfo, 'getPackagesByVersionId');
       pkgSaveStub = sinon.stub(pkgInfo, 'savePackageInfo');
       execSaveStub = sinon.stub(execInfo, 'saveExecutionInfo');
+      alertInfoStub = sinon.stub(alertInfo, 'saveAlerts');
 
       testSaveStub.resolvesArg(0);
       orgIdStub.resolves(null);
@@ -183,6 +183,7 @@ describe('src/services/result', () => {
       pkgIdStub.resolves([]);
       pkgSaveStub.resolvesArg(0);
       execSaveStub.resolvesArg(0);
+      alertInfoStub.resolvesArg(0);
     });
 
     it('should save all records from a test run, without packages', async () => {
@@ -284,6 +285,130 @@ describe('src/services/result', () => {
       // Then
       expect(testSaveStub).to.be.calledOnce;
       expect(errorSpy).to.be.calledOnce;
+    });
+
+    it('should generate and log alerts when valid alerts are present', async () => {
+      // Given a mock TestResultOutput
+      const testResultOutput: outputModule.TestResultOutput = {
+        timer: new Timer(''),
+        action: 'action',
+        flowName: 'flow',
+        product: 'product',
+        testType: 'test',
+        cpuTime: 60,
+        dmlRows: 150,
+        dmlStatements: 100,
+        heapSize: 400,
+        queryRows: 200,
+        soqlQueries: 10,
+        alertInfo: {
+          thresholds: {
+            cpuTimeThreshold: 50,
+            dmlRowThreshold: 10,
+            dmlStatementThreshold: 8,
+            heapSizeThreshold: 35,
+            queryRowsThreshold: 15,
+            soqlQueriesThreshold: 2,
+          },
+          storeAlerts: true,
+        },
+      };
+
+      sinon.stub(envModule, 'shouldStoreAlerts').returns(true);
+
+      // Stub getAlertByComparingAverage to return a mock Alert object
+      const mockAlert = new Alert();
+      mockAlert.action = 'action';
+      mockAlert.flowName = 'flow';
+      mockAlert.cpuTimeDegraded = 10;
+      mockAlert.dmlRowsDegraded = 0;
+      mockAlert.dmlStatementsDegraded = 0;
+      mockAlert.heapSizeDegraded = 0;
+      mockAlert.queryRowsDegraded = 0;
+      mockAlert.soqlQueriesDegraded = 0;
+
+      const getAlertStub = sinon
+        .stub(outputModule, 'addAlertByComparingAvg')
+        .resolves(mockAlert);
+
+      // When
+      await reportResults([testResultOutput], defaultOrgContext);
+
+      // Then
+      expect(getAlertStub).to.have.been.calledOnceWithExactly(
+        testResultOutput,
+        sinon.match.object,
+        sinon.match.object
+      );
+
+      getAlertStub.restore();
+    });
+
+    it('should skip generating alerts when storeAlerts is false', async () => {
+      // Given
+      const testResultOutput: outputModule.TestResultOutput = {
+        timer: new Timer(''),
+        action: 'action',
+        flowName: 'flow',
+        product: '',
+        testType: '',
+      };
+
+      sinon.stub(envModule, 'shouldStoreAlerts').returns(false);
+
+      // Stub getAlertByComparingAverage to return a mock Alert object
+      const mockAlert = new Alert();
+      mockAlert.cpuTimeDegraded = 10;
+      mockAlert.dmlRowsDegraded = 0;
+      mockAlert.dmlStatementsDegraded = 0;
+      mockAlert.heapSizeDegraded = 0;
+      mockAlert.queryRowsDegraded = 0;
+      mockAlert.soqlQueriesDegraded = 0;
+
+      const getAlertStub = sinon
+        .stub(outputModule, 'addAlertByComparingAvg')
+        .resolves(mockAlert);
+
+      // When
+      await reportResults([testResultOutput], defaultOrgContext);
+
+      // Then
+      expect(getAlertStub).not.to.be.called;
+      expect(logSpy).not.to.be.calledWithMatch(/cpuTimeDegraded/);
+    });
+
+    it('should handle no alerts gracefully', async () => {
+      // Given
+      const testResultOutput: outputModule.TestResultOutput = {
+        timer: new Timer(''),
+        action: 'action',
+        flowName: 'flow',
+        product: '',
+        testType: '',
+      };
+
+      sinon.stub(envModule, 'shouldStoreAlerts').returns(true);
+
+      // Stub getAlertByComparingAverage to return a mock Alert object
+      const mockAlert = new Alert();
+      mockAlert.cpuTimeDegraded = 0;
+      mockAlert.dmlRowsDegraded = 0;
+      mockAlert.dmlStatementsDegraded = 0;
+      mockAlert.heapSizeDegraded = 0;
+      mockAlert.queryRowsDegraded = 0;
+      mockAlert.soqlQueriesDegraded = 0;
+
+      const getAlertStub = sinon
+        .stub(outputModule, 'addAlertByComparingAvg')
+        .resolves(mockAlert);
+
+      // When
+      await reportResults([testResultOutput], defaultOrgContext);
+
+      // Then
+      expect(getAlertStub).to.be.called;
+      expect(logSpy).not.to.be.calledWithMatch(/Degraded/);
+      getAlertStub.restore();
     });
   });
 });

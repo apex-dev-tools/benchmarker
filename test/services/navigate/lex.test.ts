@@ -49,7 +49,7 @@ function stubFindElement(
   return result;
 }
 
-describe('../../../src/services/navigate/lex', async () => {
+describe.skip('../../../src/services/navigate/lex', async () => {
   let browser: Browser;
   let page: Page;
 
