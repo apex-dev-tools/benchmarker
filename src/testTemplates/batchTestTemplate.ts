@@ -31,6 +31,8 @@ interface BatchProcessParams {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * BatchProcessTestTemplate interface to handle the connection with and org and the status of a background process execution
  */
 export interface BatchProcessCheckerParams extends BatchProcessParams {
@@ -38,6 +40,8 @@ export interface BatchProcessCheckerParams extends BatchProcessParams {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * BatchProcessTestTemplate interface to handle the status of a background process execution
  */
 export interface BatchProcessStatusResult {
@@ -49,6 +53,8 @@ export interface BatchProcessStatusResult {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * BatchProcessTestTemplate interface to handle the result when a background process starts
  */
 export interface ProcessStartResult {
@@ -56,6 +62,8 @@ export interface ProcessStartResult {
   customParameter?: any;
 }
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * Test Template to create scenarios over batch processes
  */
 export class BatchProcessTestTemplate {
@@ -90,12 +98,16 @@ export class BatchProcessTestTemplate {
   public testType: string;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Set an initial metadata configuration if the test requires it
    * @param connection object to handle the connection to a Salesforce Org
    */
   public initialData: (connection: SalesforceConnection) => Promise<void>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed in the test
    * @param ndocuments number of records to be created
    * @param nlines number of child records to be created
@@ -108,12 +120,16 @@ export class BatchProcessTestTemplate {
   ) => Promise<boolean>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Deletes the data created in the test
    * @param connection object to handle the connection to a Salesforce Org
    */
   public dataDeletion: (connection: SalesforceConnection) => Promise<any>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Starts an asynchronous background process
    * @param param object to handle the connection to a Salesforce Org
    */
@@ -122,6 +138,8 @@ export class BatchProcessTestTemplate {
   ) => Promise<void | ProcessStartResult>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Checks if the current background process can be executed
    * @param connection object to handle the connection to a Salesforce Org
    */
@@ -130,6 +148,8 @@ export class BatchProcessTestTemplate {
   ) => Promise<boolean>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Checks job status for the current background process
    * @param batchProcessParams object to gather the information related to batch process status
    */
@@ -141,8 +161,13 @@ export class BatchProcessTestTemplate {
     +getAsyncMonitorTimeout() * 1000;
 }
 
+/**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ */
 export namespace BatchProcess {
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Sets the configuration for the Test Template
    * @param product Product name
    * @param nDocumentsInitial initial number of records to be processed
@@ -175,6 +200,8 @@ export namespace BatchProcess {
   };
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed for the test, performs actions with the data created, clean the data created for the tests and retrieve the performance results
    * @param batchTestTemplate object with all the information required to execute a test
    */

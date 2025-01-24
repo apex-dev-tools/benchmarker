@@ -27,6 +27,8 @@ export interface GovernorMetricsResult {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * DocumentLineProcessExtendedMetricsTestTemplate interface to handle the connection to the org
  */
 export interface DocumentLinesProcessExtendedMetricsParams {
@@ -34,6 +36,8 @@ export interface DocumentLinesProcessExtendedMetricsParams {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * Test Template to create and performs actions over objects with one headers and multiple lines
  */
 export class DocumentLineProcessExtendedMetricsTestTemplate {
@@ -82,12 +86,16 @@ export class DocumentLineProcessExtendedMetricsTestTemplate {
   public testType: string;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Set an initial metadata configuration if the test requires it
    * @param connection object to handle the connection to a Salesforce Org
    */
   public initialData: (connection: SalesforceConnection) => Promise<void>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed in the test
    * @param nldocumentLinesines number of lines to be created
    * @param connection object to handle the connection to a Salesforce Org
@@ -98,12 +106,16 @@ export class DocumentLineProcessExtendedMetricsTestTemplate {
   ) => Promise<void>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Deletes the data created in the test
    * @param connection object to handle the connection to a Salesforce Org
    */
   public dataDeletion: (connection: SalesforceConnection) => Promise<any>;
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Performs operations with the data created in the test
    * @param param object to handle the connection to a Salesforce Org
    */
@@ -113,12 +125,18 @@ export class DocumentLineProcessExtendedMetricsTestTemplate {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * DocumentLineProcessExtendedMetricsTestTemplate to add information about the name of the flow to be executed and the action perfromed
  */
 export interface TestStepDescription {
   action: string;
   flowName: string;
 }
+
+/**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ */
 export interface TestFlowResult {
   testStepDescription: TestStepDescription;
   result: GovernorMetricsResult;
@@ -128,11 +146,19 @@ export interface TestFlowResult {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * A function to gather information about a test step
  */
 export type TestFlowStep = () => Promise<TestFlowResult>;
+
+/**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ */
 export namespace DocumentLineProcessExtendedMetrics {
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Sets the configuration for the Test Template
    * @param product Product name
    * @param linesInitial initial number of lines to be created
@@ -169,6 +195,8 @@ export namespace DocumentLineProcessExtendedMetrics {
   };
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Creates the data needed for the test, performs actions with the data creted, clean the data created for the tests and retrieve the performance results
    * @param dlpTestTemplate object with the information required to execute a test
    */

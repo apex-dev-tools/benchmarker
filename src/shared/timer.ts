@@ -7,6 +7,8 @@ import { TestPerformanceErrorI } from './uiHelper';
 import { DEFAULT_NUMERIC_VALUE } from './constants';
 
 /**
+ * @deprecated This API will be removed in a future version.
+ *
  * The Timer for measure the time in the performance tests
  */
 export class Timer {

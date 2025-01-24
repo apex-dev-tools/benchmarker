@@ -10,11 +10,10 @@ import { addAlertByComparingAvg, TestResultOutput } from './output';
 export async function generateValidAlerts(
   testResultOutput: TestResultOutput[]
 ): Promise<Alert[]> {
-  const needToStoreAlert = testResultOutput.filter(
-    result =>
-      !(result.alertInfo && result.alertInfo.storeAlerts === false) &&
-      shouldStoreAlerts()
-  );
+  const needToStoreAlert = testResultOutput.filter(result => {
+    const testLevel = result.alertInfo?.storeAlerts;
+    return testLevel || (testLevel !== false && shouldStoreAlerts());
+  });
 
   if (needToStoreAlert.length === 0) {
     return [];

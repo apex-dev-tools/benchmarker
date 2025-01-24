@@ -1,6 +1,6 @@
 {
   "name": "@apexdevtools/benchmarker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Benchmarks performance of processes on Salesforce Orgs",
   "author": {
     "name": "Apex Dev Tools Team",
@@ -15,13 +15,14 @@
     "db/migrations",
     "dist/src",
     "dist/types/src",
+    "docs/user",
     "CHANGELOG.md"
   ],
   "scripts": {
     "build": "npm run build:clean && npm run compile",
     "build:clean": "rm -rf dist",
     "compile": "tsc",
-    "doc:generate": "typedoc --out doc ./src",
+    "doc:generate": "typedoc --out docs/api ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "ts-patch install -s && husky",
     "postversion": "npm run doc:generate",

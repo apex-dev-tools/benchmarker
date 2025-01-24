@@ -44,6 +44,8 @@ interface MetricsSuite {
 }
 
 /**
+ * @deprecated This API is unsupported and will be removed in a future version.
+ *
  * Test Template to perform UI testing using Chromium
  */
 export class FormLoadTestTemplate {
@@ -61,6 +63,8 @@ export class FormLoadTestTemplate {
   private _metricsArray: MetricsSuite[] = [];
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Constructs a new FormLoadTestTemplate given a product and a testType
    * @param product Product name
    * @param testType defines the use case the test is going to cover, by default Form Load
@@ -118,6 +122,8 @@ export class FormLoadTestTemplate {
   }
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Function to be called before the test run to connect to an Org and configure the browser to run the UI tests
    */
   public async before() {
@@ -158,6 +164,8 @@ export class FormLoadTestTemplate {
   }
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Function to place the UI test code
    * @param callback function to perform test UI flow
    */
@@ -227,6 +235,8 @@ export class FormLoadTestTemplate {
   }
 
   /**
+   * @deprecated This API is unsupported and will be removed in a future version.
+   *
    * Function to be called after the test execution in order to retrieve the test results and save them
    */
   public async after() {

@@ -237,6 +237,8 @@ export namespace SFData {
 }
 
 /**
+ * @deprecated This export will be removed in a future version.
+ *
  * Handles connections and credentials to Salesforce Orgs
  */
 export {
@@ -245,11 +247,15 @@ export {
 } from './services/salesforce/connection';
 export namespace SFConnection {
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Connects to Salesforce org given an org credentials
    */
   export const connectToSalesforceOrg = Connection.connectToSalesforceOrg;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Returns Salesforce login credentials from environment variables
    */
   export const getSalesforceAuthInfoFromEnvVars =
@@ -265,22 +271,30 @@ export { TokenReplacement } from './services/tokenReplacement';
 
 export namespace SFUtils {
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Executes anonymous Apex code
    */
   export const executeAnonymous = Utils.executeAnonymous;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Executes SOQL query
    */
   export const query = Utils.query;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Extracts time elapsed during Apex code execution
    */
   export const extractMatchTimeFromExecuteAnonymousResult =
     Utils.extractMatchTimeFromExecuteAnonymousResult;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Gets URL for a SObject record
    */
   export const getSObjectRecordPageURL = Utils.getSObjectRecordPageURL;
@@ -288,34 +302,45 @@ export namespace SFUtils {
 
 export namespace UIHelper {
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Searches for element to be present in DOM
    */
   export const searchSelector = UiHelper.searchSelector;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Waits for a spinner to appear & dissapear
    */
   export const switchView = UiHelper.switchView;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Waits to Home page to appear
    */
   export const retryWaitToHomePage = UiHelper.retryWaitToHomePage;
 
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Waits to page/tab/button to appear
    */
   export const retryWaitToPageTabButton = UiHelper.retryWaitToPageTabButton;
 
   /**
-   * Adds a time delay given a number of milliseconds
+   * @deprecated This API will be removed in a future version.
    *
+   * Adds a time delay given a number of milliseconds
    */
   export const delay = UiHelper.delay;
 }
 
 export namespace FileSystemUtils {
   /**
+   * @deprecated This API will be removed in a future version.
+   *
    * Read the content of a file given its path
    */
   export const readFile = FSUtils.readFile;
