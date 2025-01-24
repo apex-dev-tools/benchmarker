@@ -4,7 +4,7 @@ A performance testing framework, which orchestrates, profiles, and persists stat
 
 ## Usage
 
-Tests are executed using different templates in a JavaScript testing framework (For example, Mocha, Jest). Results are saved to a provided PostgreSQL database. Alerts for performance degradations can be stored in the database by setting `STORE_ALERTS` in the env file. See [the alerts documentation](./docs/user/alerts.md) for more details.
+Tests are executed using different templates in a JavaScript testing framework (For example, Mocha, Jest). Results are saved to a provided PostgreSQL database. Alerts for performance degradations can be stored in the database as well. See [the alerts documentation](./docs/user/alerts.md) for more details.
 
 The `TransactionTestTemplate` calls a function (`FlowStep`, most often created by helpers) to execute some anonymous Apex code provided for the test. The Apex can come from a file or inline as a string. This Apex code can also collect Governor limit metrics which will be extracted at the end of the test. After all tests are complete, data attributed to the template can be saved. For a sample execution, see `test_system/basic.test.ts`.
 
