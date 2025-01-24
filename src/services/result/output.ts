@@ -6,7 +6,10 @@
 import { TestResult } from '../../database/entity/result';
 import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 import { Timer } from '../../shared/timer';
+import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { TableReporter } from './table';
+import { Alert } from '../../database/entity/alert';
+import { RangeCollection, OffsetThresholdRange } from '../ranges';
 
 export interface TestResultOutput {
   timer: Timer;
@@ -32,6 +35,9 @@ export interface TestResultOutput {
   soqlQueries?: number;
   queueableJobs?: number;
   futureCalls?: number;
+
+  // alert info
+  alertInfo?: AlertInfo;
 }
 
 export interface BenchmarkReporter {
@@ -83,6 +89,185 @@ export function convertOutputToTestResult(
       : DEFAULT_NUMERIC_VALUE;
 
   return testResult;
+}
+
+export function getOffsetThresholdsByRange(
+  averageResults: {
+    dmlavg: number;
+    soqlavg: number;
+    cpuavg: number;
+    dmlrowavg: number;
+    heapavg: number;
+    queryrowavg: number;
+  },
+  rangeCollection: RangeCollection
+) {
+  //get limit ranges based on the average values
+  const dmlRanges = rangeCollection.dml_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.dmlavg >= e.start_range &&
+      averageResults.dmlavg <= e.end_range
+  );
+
+  const soqlRanges = rangeCollection.soql_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.soqlavg >= e.start_range &&
+      averageResults.soqlavg <= e.end_range
+  );
+
+  const cpuRanges = rangeCollection.cpu_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.cpuavg >= e.start_range &&
+      averageResults.cpuavg <= e.end_range
+  );
+
+  const dmlRowRanges = rangeCollection.dmlRows_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.dmlrowavg >= e.start_range &&
+      averageResults.dmlrowavg <= e.end_range
+  );
+
+  const heapRanges = rangeCollection.heap_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.heapavg >= e.start_range &&
+      averageResults.heapavg <= e.end_range
+  );
+
+  const queryRowRanges = rangeCollection.queryRows_ranges.filter(
+    (e: OffsetThresholdRange) =>
+      averageResults.queryrowavg >= e.start_range &&
+      averageResults.queryrowavg <= e.end_range
+  );
+
+  //get threasholds based on the ranges
+  const dmlThreshold = dmlRanges[0]?.offset_threshold || 0;
+  const soqlThreshold = soqlRanges[0]?.offset_threshold || 0;
+  const cpuThreshold = cpuRanges[0]?.offset_threshold || 0;
+  const dmlRowThreshold = dmlRowRanges[0]?.offset_threshold || 0;
+  const heapThreshold = heapRanges[0]?.offset_threshold || 0;
+  const queryRowThreshold = queryRowRanges[0]?.offset_threshold || 0;
+
+  return {
+    dmlThreshold,
+    soqlThreshold,
+    cpuThreshold,
+    dmlRowThreshold,
+    heapThreshold,
+    queryRowThreshold,
+  };
+}
+
+export async function addAlertByComparingAvg(
+  output: TestResultOutput,
+  preFetchedAverages: {
+    [key: string]: {
+      dmlavg: number;
+      soqlavg: number;
+      cpuavg: number;
+      dmlrowavg: number;
+      heapavg: number;
+      queryrowavg: number;
+      runcount: number;
+    };
+  },
+  rangeCollection: RangeCollection
+): Promise<Alert> {
+  const alert: Alert = new Alert();
+  alert.action = output.action;
+  alert.flowName = output.flowName;
+
+  // Construct the key for the current flowName and actionName
+  const key = `${output.flowName}_${output.action}`;
+
+  // Retrieve pre-fetched average values for this flow-action pair
+  const averageResults = preFetchedAverages[key];
+
+  if (!averageResults || averageResults.runcount < 5) {
+    return alert;
+  }
+
+  //storing alerts if there is a degradation
+  if (output.alertInfo?.thresholds) {
+    alert.cpuTimeDegraded = output.cpuTime
+      ? output.cpuTime > output.alertInfo.thresholds.cpuTimeThreshold
+        ? output.cpuTime - Number(averageResults.cpuavg)
+        : 0
+      : 0;
+    alert.dmlRowsDegraded = output.dmlRows
+      ? output.dmlRows > output.alertInfo.thresholds.dmlRowThreshold
+        ? output.dmlRows - Number(averageResults.dmlrowavg)
+        : 0
+      : 0;
+    alert.dmlStatementsDegraded = output.dmlStatements
+      ? output.dmlStatements > output.alertInfo.thresholds.dmlStatementThreshold
+        ? output.dmlStatements - Number(averageResults.dmlavg)
+        : 0
+      : 0;
+    alert.heapSizeDegraded = output.heapSize
+      ? output.heapSize > output.alertInfo.thresholds.heapSizeThreshold
+        ? output.heapSize - Number(averageResults.heapavg)
+        : 0
+      : 0;
+    alert.queryRowsDegraded = output.queryRows
+      ? output.queryRows > output.alertInfo.thresholds.queryRowsThreshold
+        ? output.queryRows - Number(averageResults.queryrowavg)
+        : 0
+      : 0;
+    alert.soqlQueriesDegraded = output.soqlQueries
+      ? output.soqlQueries > output.alertInfo.thresholds.soqlQueriesThreshold
+        ? output.soqlQueries - Number(averageResults.soqlavg)
+        : 0
+      : 0;
+  } else {
+    const thresholds = getOffsetThresholdsByRange(
+      averageResults,
+      rangeCollection
+    );
+
+    alert.dmlStatementsDegraded = output.dmlStatements
+      ? output.dmlStatements >
+        Number(thresholds.dmlThreshold) + Number(averageResults.dmlavg)
+        ? output.dmlStatements - Number(averageResults.dmlavg)
+        : 0
+      : 0;
+
+    alert.soqlQueriesDegraded = output.soqlQueries
+      ? output.soqlQueries >
+        Number(thresholds.soqlThreshold) + Number(averageResults.soqlavg)
+        ? output.soqlQueries - Number(averageResults.soqlavg)
+        : 0
+      : 0;
+
+    alert.cpuTimeDegraded = output.cpuTime
+      ? output.cpuTime >
+        Number(thresholds.cpuThreshold) + Number(averageResults.cpuavg)
+        ? output.cpuTime - Number(averageResults.cpuavg)
+        : 0
+      : 0;
+
+    alert.dmlRowsDegraded = output.dmlRows
+      ? output.dmlRows >
+        Number(thresholds.dmlRowThreshold) + Number(averageResults.dmlrowavg)
+        ? output.dmlRows - Number(averageResults.dmlrowavg)
+        : 0
+      : 0;
+
+    alert.heapSizeDegraded = output.heapSize
+      ? output.heapSize >
+        Number(thresholds.heapThreshold) + Number(averageResults.heapavg)
+        ? output.heapSize - Number(averageResults.heapavg)
+        : 0
+      : 0;
+
+    alert.queryRowsDegraded = output.queryRows
+      ? output.queryRows >
+        Number(thresholds.queryRowThreshold) +
+          Number(averageResults.queryrowavg)
+        ? output.queryRows - Number(averageResults.queryrowavg)
+        : 0
+      : 0;
+  }
+  return alert;
 }
 
 let reporters: BenchmarkReporter[] = [new TableReporter()];

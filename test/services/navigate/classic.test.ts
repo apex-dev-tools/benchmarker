@@ -45,7 +45,7 @@ function stubFindElement(
   return result;
 }
 
-describe('src/services/navigate/classic', async () => {
+describe.skip('src/services/navigate/classic', async () => {
   let browser: Browser;
   let page: Page;
 

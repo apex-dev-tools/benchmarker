@@ -9,8 +9,15 @@ import { OrgInfo } from './entity/org';
 import { PackageInfo } from './entity/package';
 import { TestResult } from './entity/result';
 import { ExecutionInfo } from './entity/execution';
+import { Alert } from './entity/alert';
 
-export const DB_ENTITIES = [TestResult, OrgInfo, PackageInfo, ExecutionInfo];
+export const DB_ENTITIES = [
+  TestResult,
+  OrgInfo,
+  PackageInfo,
+  ExecutionInfo,
+  Alert,
+];
 
 let connection: DataSource | null = null;
 

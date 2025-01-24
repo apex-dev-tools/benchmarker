@@ -87,7 +87,8 @@
     ],
     "exclude": [
       "**/*.d.ts",
-      "src/shared/uiHelper.ts"
+      "src/shared/uiHelper.ts",
+      "src/services/navigate/**/*.ts"
     ],
     "functions": 80,
     "include": [

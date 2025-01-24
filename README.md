@@ -1,12 +1,12 @@
 # Benchmarker
 
-A performance testing framework, which orchestrates, profiles and persists stats from test scenarios run on Salesforce Orgs.
+A performance testing framework, which orchestrates, profiles, and persists stats from test scenarios run on Salesforce orgs.
 
 ## Usage
 
-Tests execute using different templates in a JavaScript testing framework (e.g. mocha, jest). Results are can be saved to a provided PostgresSQL database.
+Tests are executed using different templates in a JavaScript testing framework (For example, Mocha, Jest). Results are saved to a provided PostgreSQL database. Also if you want to store alerts for performance degradations, then that can be also stored in the database by enabling the `STORE_ALERTS` in the env file. See `Alerts.md` for more details related to alerts.
 
-The `TransactionTestTemplate` calls a function (`FlowStep`, most often created by helpers) to execute some anonymous Apex code provided for the test. The Apex can come from a file or inline as a string. This Apex code can also collect Governor limit metrics which will be extracted at the end of the test. After all tests complete, data attributed to the template can be saved. For a sample execution, see `test_system/basic.test.ts`. Other test templates include boilerplate for running async batch processes and form/page loading.
+The `TransactionTestTemplate` calls a function (`FlowStep`, most often created by helpers) to execute some anonymous Apex code provided for the test. The Apex can come from a file or inline as a string. This Apex code can also collect Governor limit metrics which will be extracted at the end of the test. After all tests are complete, data attributed to the template can be saved. For a sample execution, see `test_system/basic.test.ts`. Other test templates include a boilerplate for running asynchronous batch processes and form or page loading.
 
 ## Development
 
@@ -23,7 +23,7 @@ Available scripts:
 
 ### Testing
 
-Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI and have a Dev Hub set up. To use another type of org, multiple environment variables need setting with credentials, see `.env.example` and `test_system/.env`.
+Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI, and have a Dev Hub set up. To use another type of org, multiple environment variables need setting with credentials, see `.env.example` and `test_system/.env`.
 
 1. Create a scratch org:
 
@@ -33,7 +33,7 @@ Running system tests requires a Salesforce Org and Docker. The instructions belo
 
 1. Start the docker database with `docker compose up -d`. It is accessible by the host on port 5433, and via adminer control panel at `localhost:8081` to review results.
 
-1. (Run once) Init system test env file with `npm run test:system:init`. Uncomment `SFDX_USERNAME=` and update to `SFDX_USERNAME=bench_testing`.
+1. (Run once) Init system test env file with `npm run test:system:init`. Uncomment `SFDX_USERNAME=` and update to `SFDX_USERNAME=bench_testing`, Uncomment `STORE_ALERTS` and update to `STORE_ALERTS=true` if you want to store alerts in case of performance degradation. 
 
 1. Finally, run tests:
 
