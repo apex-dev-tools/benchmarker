@@ -44,7 +44,7 @@ export async function getConnection() {
       type: 'postgres',
       entities: DB_ENTITIES,
       schema: 'performance',
-      synchronize: true,
+      synchronize: false,
       logging: false,
       host,
       port,

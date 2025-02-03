@@ -1,5 +1,5 @@
-ALTER TABLE test_result add column IF NOT EXISTS queueable_jobs integer;
-ALTER TABLE test_result add column IF NOT EXISTS future_calls integer;
+ALTER TABLE performance.test_result add column IF NOT EXISTS queueable_jobs integer;
+ALTER TABLE performance.test_result add column IF NOT EXISTS future_calls integer;
 
 CREATE TABLE IF NOT EXISTS performance.alert (
     id serial PRIMARY KEY,
