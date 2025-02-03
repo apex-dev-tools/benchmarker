@@ -1,5 +1,9 @@
 # Benchmarker - Changelog
 
+## 2.0.1
+
+- Fix `typeorm` - `DataSource` `synchronize` option doing database schema overwrite.
+
 ## 2.0.0
 
 ### Breaking Changes
