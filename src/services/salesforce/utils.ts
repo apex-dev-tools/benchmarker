@@ -43,7 +43,10 @@ export const replaceNamespace = (text: string) => {
 export const executeAnonymous = async (
   connection: SalesforceConnection,
   apexCode: string
-) => executeAnonymousBySoap(connection, replaceNamespace(apexCode));
+) =>
+  await retry(() =>
+    executeAnonymousBySoap(connection, replaceNamespace(apexCode))
+  );
 
 /**
  * Extracts time elapsed during Apex code execution
