@@ -25,7 +25,7 @@ describe('System Test Process', () => {
         test,
         await createApexExecutionTestStepFlow(
           test.connection,
-          __dirname + '/async.apex',
+          __dirname + '/scripts/async.apex',
           { flowName: 'System Test', action: 'run system test' }
         )
       );
