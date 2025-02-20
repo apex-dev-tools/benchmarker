@@ -322,7 +322,7 @@ describe('src/services/salesforce/utils', () => {
       stub(
         salesforceUtilsHelper,
         'extractJSONFromExecuteAnonymousResult'
-      ).returns(null);
+      ).returns(undefined);
       try {
         await extractGovernorMetricsFromGenericApexFlow(
           {} as SalesforceConnection,

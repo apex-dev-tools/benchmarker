@@ -1,5 +1,10 @@
 # Benchmarker - Changelog
 
+## 2.0.2
+
+- Add retry to `executeAnonymous` call.
+- Update reported errors on failed `executeAnonymous` to include original exception.
+
 ## 2.0.1
 
 - Fix `typeorm` - `DataSource` `synchronize` option doing database schema overwrite.

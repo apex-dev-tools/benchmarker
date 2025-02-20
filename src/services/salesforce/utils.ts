@@ -79,7 +79,7 @@ export const extractDataFromExecuteAnonymousResult = (
 /** @ignore */
 export const extractJSONFromExecuteAnonymousResult = function (
   anonymousExecutionResult: ExecuteAnonymousResult
-) {
+): GovernorMetricsResult | undefined {
   const jsonResponse = extractDataFromExecuteAnonymousResult(
     anonymousExecutionResult
   );
@@ -200,8 +200,10 @@ export const extractGovernorMetricsFromGenericApexFlow = (
         connection,
         apexCode
       );
-      const governorMetrics: GovernorMetricsResult =
-        extractJSONFromExecuteAnonymousResult(anonymousExecutionResult);
+
+      const governorMetrics = extractJSONFromExecuteAnonymousResult(
+        anonymousExecutionResult
+      );
 
       if (governorMetrics) {
         resolve(governorMetrics);
@@ -214,25 +216,25 @@ export const extractGovernorMetricsFromGenericApexFlow = (
             testStepDescription,
             message: `Compilation error: ${anonymousExecutionResult.compileProblem}`,
           });
-        } else if (
-          anonymousExecutionResult.exceptionMessage &&
-          !extractDataFromExecuteAnonymousResult(anonymousExecutionResult)
-        ) {
+        } else if (anonymousExecutionResult.exceptionMessage) {
           console.log(anonymousExecutionResult.exceptionMessage);
-          console.log(anonymousExecutionResult.exceptionStackTrace);
+          if (anonymousExecutionResult.exceptionStackTrace) {
+            console.log(anonymousExecutionResult.exceptionStackTrace);
+          }
+
           reject({
             testStepDescription,
             message: `Error in apex transaction: ${anonymousExecutionResult.exceptionMessage}`,
           });
         } else {
           reject({
-            message: `Failure during ${testStepDescription.flowName} - ${testStepDescription.action} process execution`,
+            message: `Failure during ${testStepDescription.flowName} - ${testStepDescription.action} process execution. Unexpected executeAnonymous response, expecting exceptionMessage with limits: ${JSON.stringify(anonymousExecutionResult)}`,
           });
         }
       }
     } catch (e) {
       reject({
-        message: `Failure during ${testStepDescription.flowName} - ${testStepDescription.action} process execution`,
+        message: `Failure during ${testStepDescription.flowName} - ${testStepDescription.action} process execution. ${e}`,
       });
     }
   });
@@ -284,17 +286,21 @@ export async function retry<T>(
   backoffMultiplier = 2
 ): Promise<T> {
   let waitTimeMs = initialWaitTimeMs;
+  let lastError;
   for (let i = 0; i < retryCount; i++) {
     try {
       const result = await fn();
       return result;
     } catch (error) {
       console.error(
-        `Error executing function. Retrying in ${waitTimeMs}ms. Error: ${error}`
+        `Error executing function. Retrying in ${waitTimeMs}ms. ${error}`
       );
+      lastError = error;
       await new Promise(resolve => setTimeout(resolve, waitTimeMs));
       waitTimeMs *= backoffMultiplier;
     }
   }
-  throw new Error(`Failed to execute function after ${retryCount} attempts.`);
+  throw new Error(
+    `Failed to execute function after ${retryCount} attempts. ${lastError}`
+  );
 }
