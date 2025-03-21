@@ -8,7 +8,7 @@ import {
   connectToSalesforceOrg,
   getSalesforceAuthInfoFromEnvVars,
 } from '../src/services/salesforce/connection';
-import { ApexBenchmarkService } from '../src/services/apex';
+import { ApexBenchmarkService } from '../src/service/apex';
 
 // Temporary system test for benchmark service
 // Bypasses public APIs

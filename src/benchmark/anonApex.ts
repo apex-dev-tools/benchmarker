@@ -2,20 +2,21 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
+import { DebugLogInfo } from '../soap/debug';
 import {
   Benchmark,
   BenchmarkParams,
   BenchmarkResult,
   ErrorResult,
 } from './base';
-import { getErrorFromResponse } from './anonApex/response';
-import { BenchmarkLimits, validate } from './anonApex/validate';
 import { Connection } from '@salesforce/core';
+import { GovernorLimits } from './schemas';
 import {
-  DebugLogInfo,
+  execResponseAsError,
   executeAnonymous,
   ExecuteAnonymousResponse,
-} from '../soap/apex';
+} from '../soap/executeAnonymous';
+import { validate } from '../text/json';
 
 export interface AnonApexBenchmarkParams extends BenchmarkParams {
   code: string;
@@ -35,7 +36,7 @@ export enum AnonApexTransactionType {
 }
 
 export interface AnonApexBenchmarkResult extends BenchmarkResult {
-  limits: BenchmarkLimits;
+  limits: GovernorLimits;
 }
 
 /**
@@ -118,7 +119,7 @@ export class AnonApexBenchmark extends Benchmark<
     execResponse: ExecuteAnonymousResponse,
     transaction: AnonApexTransaction
   ): ErrorResult | undefined {
-    const error = getErrorFromResponse(execResponse);
+    const error = execResponseAsError(execResponse);
 
     let abort = false;
     let benchResult: AnonApexBenchmarkResult | undefined;
