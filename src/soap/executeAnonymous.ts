@@ -18,10 +18,14 @@ export interface ExecuteAnonymousResponse {
   debugLog?: string;
 }
 
-export interface ExecuteAnonymousError {
-  message: string;
-  stack?: string;
+export class ExecuteAnonymousError extends Error {
+  constructor(message: string, stack?: string) {
+    super(message);
+    this.stack = stack;
+  }
 }
+
+export class ExecuteAnonymousCompileError extends ExecuteAnonymousError {}
 
 interface ExecuteAnonymousSoapResponse {
   'soapenv:Envelope': {
@@ -71,16 +75,16 @@ export function execResponseAsError(
   if (!execResponse.compiled) {
     const { line, column, compileProblem } = execResponse;
 
-    return {
-      message: `Compile Error (Line: ${line}, Col: ${column}): ${compileProblem}`,
-    };
+    return new ExecuteAnonymousCompileError(
+      `Compile Error (Line: ${line}, Col: ${column}): ${compileProblem}`
+    );
   } else if (!execResponse.success) {
     // This may be data capture, do not edit content
     // e.g. message: '... -_json_- '
-    return {
-      message: execResponse.exceptionMessage,
-      stack: execResponse.exceptionStackTrace,
-    };
+    return new ExecuteAnonymousError(
+      execResponse.exceptionMessage,
+      execResponse.exceptionStackTrace
+    );
   }
 
   return null;

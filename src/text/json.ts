@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import Ajv, { JTDSchemaType, ValidateFunction } from 'ajv/dist/jtd';
+import Ajv, { JTDSchemaType, JTDParser } from 'ajv/dist/jtd';
 import { limitsSchema, benchmarkSchema } from '../benchmark/schemas';
 
 const ajv = new Ajv();
@@ -12,32 +12,36 @@ const schemas = {
   benchmark: benchmarkSchema,
 };
 
-const validators = {};
+const parsers = {};
 
 type SchemaKey = keyof typeof schemas;
 
-type ValidType<S extends SchemaKey> =
+type ParsedType<S extends SchemaKey> =
   (typeof schemas)[S] extends JTDSchemaType<infer T> ? T : never;
 
-type ValidatorMap<S extends SchemaKey> = Record<
+type ParserMap<S extends SchemaKey> = Record<
   SchemaKey,
-  ValidateFunction<ValidType<S>>
+  JTDParser<ParsedType<S>>
 >;
 
-export function validate<S extends SchemaKey>(
+export function deserialize<S extends SchemaKey>(
   key: S,
-  data: unknown
-): ValidType<S> | undefined {
-  let validator = (validators as ValidatorMap<S>)[key];
+  text: string
+): ParsedType<S> {
+  let parse = (parsers as ParserMap<S>)[key];
 
-  if (!validator) {
-    validator = ajv.compile<ValidType<S>>(schemas[key]);
-    (validators as ValidatorMap<S>)[key] = validator;
+  if (!parse) {
+    parse = ajv.compileParser<ParsedType<S>>(schemas[key]);
+    (parsers as ParserMap<S>)[key] = parse;
   }
 
-  if (validator(data)) {
+  const data = parse(text);
+
+  if (data) {
     return data;
+  } else {
+    throw new Error(
+      `Failed to parse JSON type "${key}": ${parse.message} (pos: ${parse.position})`
+    );
   }
-
-  return undefined;
 }
