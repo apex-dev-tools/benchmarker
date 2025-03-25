@@ -41,7 +41,7 @@ export function deserialize<S extends SchemaKey>(
     return data;
   } else {
     throw new Error(
-      `Failed to parse JSON type "${key}": ${parse.message} (pos: ${parse.position})`
+      `Failed to parse JSON type "${key}", ${parse.message} (position: ${parse.position})`
     );
   }
 }
