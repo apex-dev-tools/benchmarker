@@ -28,8 +28,7 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark {
     this.transactions = [
       {
         action: (actions && actions[0]) || '1',
-        apexCode:
-          require('../../../scripts/apex/limits.apex') + this.params.code,
+        apexCode: require('../../scripts/apex/limits.apex') + this.params.code,
         type: AnonApexTransactionType.Benchmark,
       },
     ];

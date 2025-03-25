@@ -85,8 +85,8 @@ export class AnonApexBenchmark extends Benchmark<
       {
         action: (actions && actions[0]) || '1',
         apexCode:
-          require('../../../scripts/apex/limits.apex') +
-          require('../../../scripts/apex/benchmark.apex') +
+          require('../../scripts/apex/limits.apex') +
+          require('../../scripts/apex/benchmark.apex') +
           'benchmark.begin();' +
           content +
           'benchmark.end();',
