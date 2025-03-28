@@ -13,21 +13,6 @@ import { Connection } from '@salesforce/core';
 import { BenchmarkResponse } from '../../src/benchmark/schemas';
 import { ErrorResult } from '../../src/benchmark/base';
 
-function execResponse(
-  resp?: Partial<soap.ExecuteAnonymousResponse>
-): soap.ExecuteAnonymousResponse {
-  return {
-    column: '-1',
-    compiled: true,
-    compileProblem: '',
-    exceptionMessage: '',
-    exceptionStackTrace: '',
-    line: '-1',
-    success: true,
-    ...resp,
-  };
-}
-
 const mockResponse: BenchmarkResponse = {
   name: null,
   action: null,
@@ -44,29 +29,27 @@ const mockResponse: BenchmarkResponse = {
   },
 };
 
-function jsonResponse(obj?: object): soap.ExecuteAnonymousError {
-  return new soap.ExecuteAnonymousError(
-    `System.AssertException: Assertion Failed: -_${JSON.stringify({
-      ...mockResponse,
-      ...obj,
-    })}_-`
-  );
-}
-
 describe('benchmark/anonApex', () => {
   let execStub: SinonStub;
   let errorStub: SinonStub;
 
   beforeEach(() => {
-    execStub = sinon.stub(soap, 'executeAnonymous').resolves(
-      execResponse({
-        compiled: true,
-        success: false,
-      })
-    );
+    execStub = sinon.stub(soap, 'executeAnonymous').resolves({
+      column: '-1',
+      compiled: true,
+      compileProblem: '',
+      exceptionMessage: '',
+      exceptionStackTrace: '',
+      line: '-1',
+      success: false,
+    });
     errorStub = sinon
       .stub(soap, 'assertAnonymousError')
-      .returns(jsonResponse());
+      .returns(
+        new soap.ExecuteAnonymousError(
+          `System.AssertException: Assertion Failed: -_${JSON.stringify(mockResponse)}_-`
+        )
+      );
   });
 
   afterEach(() => {
@@ -150,10 +133,13 @@ describe('benchmark/anonApex', () => {
 
   it('should be able to override name and actions from script', async () => {
     errorStub.returns(
-      jsonResponse({
-        name: 'loop',
-        action: 'do a loop',
-      })
+      new soap.ExecuteAnonymousError(
+        `System.AssertException: Assertion Failed: -_${JSON.stringify({
+          ...mockResponse,
+          name: 'loop',
+          action: 'do a loop',
+        })}_-`
+      )
     );
 
     const bench = new AnonApexBenchmark('apexfile', {
