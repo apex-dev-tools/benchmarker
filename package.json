@@ -68,6 +68,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.4.1",
     "mocha": "10.4.0",
+    "mock-fs": "5.5.0",
     "nyc": "15.1.0",
     "prettier": "3.2.5",
     "public-ip": "7.0.1",
