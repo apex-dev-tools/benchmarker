@@ -12,19 +12,17 @@ export interface BenchmarkResult {
 export interface ErrorResult {
   name: string;
   action: string;
-  message: string;
-  stack?: string;
+  error: Error;
 }
 
 export abstract class Benchmark<
   P extends BenchmarkParams,
   R extends BenchmarkResult,
-  E extends ErrorResult = ErrorResult,
 > {
   public name: string;
   protected params: P;
   protected _results: R[];
-  protected _errors: E[];
+  protected _errors: ErrorResult[];
 
   constructor(name: string, params: P) {
     this.name = name;
@@ -41,11 +39,11 @@ export abstract class Benchmark<
     return this._results;
   }
 
-  errors(): E[] {
+  errors(): ErrorResult[] {
     return this._errors;
   }
 
-  reset(): void {
+  protected reset(): void {
     this._results = [];
     this._errors = [];
   }

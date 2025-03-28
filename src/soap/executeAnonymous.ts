@@ -27,8 +27,9 @@ export class ExecuteAnonymousError extends Error {
 
 export class ExecuteAnonymousCompileError extends ExecuteAnonymousError {}
 
-interface ExecuteAnonymousSoapResponse {
+export interface ExecuteAnonymousSoapResponse {
   'soapenv:Envelope': {
+    $: object;
     'soapenv:Header'?: { DebuggingInfo?: { debugLog: string } };
     'soapenv:Body': {
       executeAnonymousResponse: {
@@ -66,17 +67,17 @@ export async function executeAnonymous(
   return formatExecuteAnonymousResponse(soapResponse);
 }
 
-export function execResponseAsError(
+export function assertAnonymousError(
   execResponse: ExecuteAnonymousResponse
 ): ExecuteAnonymousError | null {
   // https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_executeanonymous_result.htm
   // if compiled = false : compileProblem / line / column
-  // if success = false : exceptionMessage / exceptionStackTrace
+  // if success = false : exceptionMessage / exceptionStackTrace (optionally line / column, also included in stacktrace)
   if (!execResponse.compiled) {
     const { line, column, compileProblem } = execResponse;
 
     return new ExecuteAnonymousCompileError(
-      `Compile Error (Line: ${line}, Col: ${column}): ${compileProblem}`
+      `Compile Error (line ${line}, col ${column}): ${compileProblem}`
     );
   } else if (!execResponse.success) {
     // This may be data capture, do not edit content

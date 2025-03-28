@@ -22,11 +22,11 @@ export async function postSoapRequest<R>(
       body(connection.accessToken!)
     );
   } catch (e) {
-    // request does not trigger any refresh fn (see refreshAuth doc)
-    // make 1 more attempt if session expired
+    // The `refreshFn` is used only on 401 by default, set by AuthInfo or jsforce login().
+    // The `accessToken` flow does not provide one. Safest to always force a refresh.
     if (
+      e instanceof Error &&
       e.name === 'ERROR_HTTP_500' &&
-      e.message &&
       e.message.includes('INVALID_SESSION_ID')
     ) {
       await connection.refreshAuth();

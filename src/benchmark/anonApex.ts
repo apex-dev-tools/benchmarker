@@ -12,9 +12,8 @@ import {
 import { Connection } from '@salesforce/core';
 import { BenchmarkResponse, GovernorLimits } from './schemas';
 import {
-  execResponseAsError,
+  assertAnonymousError,
   executeAnonymous,
-  ExecuteAnonymousCompileError,
   ExecuteAnonymousError,
   ExecuteAnonymousResponse,
 } from '../soap/executeAnonymous';
@@ -41,13 +40,9 @@ export interface AnonApexBenchmarkResult extends BenchmarkResult {
   limits: GovernorLimits;
 }
 
-export interface AnonApexErrorResult extends ErrorResult {
-  compileFailed: boolean;
-}
-
 /**
- * Standard test, with optional start/stop calls in apex. If not
- * present, the whole script is assumed to be a test and the code is
+ * Standard benchmark, with optional start/stop calls in apex. If not
+ * present, the whole script is assumed to be a benchmark and the code is
  * wrapped with these calls.
  *
  * @example Expected test format
@@ -59,12 +54,10 @@ export interface AnonApexErrorResult extends ErrorResult {
  */
 export class AnonApexBenchmark extends Benchmark<
   AnonApexBenchmarkParams,
-  AnonApexBenchmarkResult,
-  AnonApexErrorResult
+  AnonApexBenchmarkResult
 > {
   protected static resultPattern = /-_(.*)_-/;
-  protected transactions: AnonApexTransaction[];
-  protected errorCause: AnonApexErrorResult | undefined;
+  protected transactions: AnonApexTransaction[] = [];
 
   /**
    * Prepares an Anonymous Apex script for run. Injects required framework
@@ -99,9 +92,11 @@ export class AnonApexBenchmark extends Benchmark<
    * Execute Anonymous Apex transactions and accumulate results and errors.
    */
   async run(): Promise<void> {
+    this.reset();
+
     for (const transaction of this.transactions) {
-      if (this.errorCause) {
-        this._errors.push(this.abortTransaction(transaction, this.errorCause));
+      if (this._errors.length != 0) {
+        this._errors.push(this.abortTransaction(transaction, this._errors[0]));
         continue;
       }
 
@@ -114,9 +109,7 @@ export class AnonApexBenchmark extends Benchmark<
 
         this.handleResponse(response, transaction);
       } catch (e) {
-        const err = this.getErrorResult(e, transaction);
-        this._errors.push(err);
-        this.errorCause = err;
+        this._errors.push(this.getErrorResult(e, transaction));
       }
     }
   }
@@ -126,19 +119,17 @@ export class AnonApexBenchmark extends Benchmark<
    * For certain transactions, result can be skipped if there is nothing to
    * report.
    *
-   * If an error result is returned, this aborts all remaining transactions.
+   * If an error is thrown, this aborts all remaining transactions.
    */
   protected handleResponse(
     execResponse: ExecuteAnonymousResponse,
     transaction: AnonApexTransaction
   ): void {
-    const error = execResponseAsError(execResponse);
+    const error = assertAnonymousError(execResponse);
 
     if (transaction.type === AnonApexTransactionType.Benchmark) {
       if (!error) {
-        throw new Error(
-          'Apex did not assert false as expected with benchmark result.'
-        );
+        throw new Error('Apex did not assert false with benchmark result.');
       }
 
       if (execResponse.compiled) {
@@ -183,23 +174,12 @@ export class AnonApexBenchmark extends Benchmark<
   protected getErrorResult(
     e: unknown,
     transaction: AnonApexTransaction
-  ): AnonApexErrorResult {
-    const res: AnonApexErrorResult = {
+  ): ErrorResult {
+    return {
       name: this.name,
       action: transaction.action,
-      message: 'Unknown error',
-      compileFailed: false,
+      error: e instanceof Error ? e : new Error(`${e}`),
     };
-
-    if (e instanceof ExecuteAnonymousCompileError) {
-      res.compileFailed = true;
-    }
-    if (e instanceof Error) {
-      res.message = e.message;
-      res.stack = e.stack;
-    }
-
-    return res;
   }
 
   private parseBenchmark(error: ExecuteAnonymousError): BenchmarkResponse {
@@ -215,12 +195,14 @@ export class AnonApexBenchmark extends Benchmark<
 
   private abortTransaction(
     transaction: AnonApexTransaction,
-    prevError: AnonApexErrorResult
-  ): AnonApexErrorResult {
+    prevError: ErrorResult
+  ): ErrorResult {
     return {
       ...prevError,
       action: transaction.action,
-      message: `Transaction aborted due to previous error on '${prevError.action}': ${prevError.message}`,
+      error: new Error(
+        `Transaction aborted due to previous error on '${prevError.action}': ${prevError.error.message}`
+      ),
     };
   }
 }
