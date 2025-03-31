@@ -1,23 +1,22 @@
 {
   "check-coverage": true,
+  "per-file": true,
+  "functions": 80,
+  "lines": 80,
+  "statements": 80,
+  "reporter": [
+    "text",
+    "text-summary"
+  ],
   "extension": [
     ".ts"
   ],
   "exclude": [
     "**/*.test.ts",
     "**/*.d.ts",
+    "test/setup.ts",
     "scripts/apexLoader.ts",
     "src/shared/uiHelper.ts",
     "src/services/navigate/**/*.ts"
-  ],
-  "functions": 80,
-  "instrument": true,
-  "lines": 80,
-  "per-file": true,
-  "reporter": [
-    "text",
-    "text-summary"
-  ],
-  "sourceMap": true,
-  "statements": 80
+  ]
 }

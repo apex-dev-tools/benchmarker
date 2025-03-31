@@ -15,6 +15,7 @@ import {
   ExecuteAnonymousSoapResponse,
 } from '../../src/soap/executeAnonymous';
 import { HttpRequest } from '@jsforce/jsforce-node';
+import { DebugLogCategory, DebugLogCategoryLevel } from '../../src/soap/debug';
 
 type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
@@ -187,9 +188,17 @@ describe('soap/executeAnonymous', () => {
       );
       $$.fakeConnectionRequest = requestStub;
 
-      const response = await executeAnonymous(conn, '');
+      const response = await executeAnonymous(conn, '', [
+        {
+          category: DebugLogCategory.System,
+          level: DebugLogCategoryLevel.Debug,
+        },
+      ]);
 
       expect(requestStub).to.have.been.calledOnce;
+      expect(requestStub.args[0][0]?.body).to.include(
+        '<DebuggingHeader><categories><category>System</category><level>Debug</level></categories></DebuggingHeader>'
+      );
       expect(response).to.eql({
         column: '-1',
         compiled: true,
