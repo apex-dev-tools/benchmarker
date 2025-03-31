@@ -83,32 +83,6 @@
   "engines": {
     "node": ">20.0.0"
   },
-  "nyc": {
-    "check-coverage": true,
-    "extension": [
-      ".ts"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "src/shared/uiHelper.ts",
-      "src/services/navigate/**/*.ts"
-    ],
-    "functions": 80,
-    "include": [
-      "src/shared/**/*.ts",
-      "src/services/**/*.ts",
-      "src/database/**/*.ts"
-    ],
-    "instrument": true,
-    "lines": 80,
-    "per-file": true,
-    "reporter": [
-      "text",
-      "text-summary"
-    ],
-    "sourceMap": true,
-    "statements": 80
-  },
   "lint-staged": {
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
   }
