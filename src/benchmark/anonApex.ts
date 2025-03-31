@@ -1,0 +1,208 @@
+/*
+ * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ */
+
+import { DebugLogInfo } from '../soap/debug';
+import {
+  Benchmark,
+  BenchmarkParams,
+  BenchmarkResult,
+  ErrorResult,
+} from './base';
+import { Connection } from '@salesforce/core';
+import { BenchmarkResponse, GovernorLimits } from './schemas';
+import {
+  assertAnonymousError,
+  executeAnonymous,
+  ExecuteAnonymousError,
+  ExecuteAnonymousResponse,
+} from '../soap/executeAnonymous';
+import { deserialize } from '../text/json';
+
+export interface AnonApexBenchmarkParams extends BenchmarkParams {
+  code: string;
+  connection: Connection;
+  debug?: DebugLogInfo[];
+}
+
+export interface AnonApexTransaction {
+  action: string;
+  apexCode: string;
+  type: AnonApexTransactionType;
+}
+
+export enum AnonApexTransactionType {
+  Benchmark,
+  Execute,
+}
+
+export interface AnonApexBenchmarkResult extends BenchmarkResult {
+  limits: GovernorLimits;
+}
+
+/**
+ * Standard benchmark, with optional start/stop calls in apex. If not
+ * present, the whole script is assumed to be a benchmark and the code is
+ * wrapped with these calls.
+ *
+ * @example Expected test format
+ * // setup
+ * benchmark.start();
+ * // Apex code to test
+ * benchmark.stop();
+ * // teardown, extra assertions
+ */
+export class AnonApexBenchmark extends Benchmark<
+  AnonApexBenchmarkParams,
+  AnonApexBenchmarkResult
+> {
+  protected static resultPattern = /-_(.*)_-/;
+  protected transactions: AnonApexTransaction[] = [];
+
+  /**
+   * Prepares an Anonymous Apex script for run. Injects required framework
+   * code. Optionally splits into multiple transactions.
+   */
+  async prepare(actions?: string[]): Promise<void> {
+    const code = this.params.code;
+
+    let content;
+    if (!code.includes('benchmark.start(')) {
+      content = 'benchmark.start();';
+    }
+    if (!code.includes('benchmark.stop(')) {
+      content += code + 'benchmark.stop();';
+    }
+
+    this.transactions = [
+      {
+        action: (actions && actions[0]) || '1',
+        apexCode:
+          require('../../scripts/apex/limits.apex') +
+          require('../../scripts/apex/benchmark.apex') +
+          'benchmark.begin();' +
+          content +
+          'benchmark.end();',
+        type: AnonApexTransactionType.Benchmark,
+      },
+    ];
+  }
+
+  /**
+   * Execute Anonymous Apex transactions and accumulate results and errors.
+   */
+  async run(): Promise<void> {
+    this.reset();
+
+    for (const transaction of this.transactions) {
+      if (this._errors.length != 0) {
+        this._errors.push(this.abortTransaction(transaction, this._errors[0]));
+        continue;
+      }
+
+      try {
+        const response = await executeAnonymous(
+          this.params.connection,
+          transaction.apexCode,
+          this.params.debug
+        );
+
+        this.handleResponse(response, transaction);
+      } catch (e) {
+        this._errors.push(this.getErrorResult(e, transaction));
+      }
+    }
+  }
+
+  /**
+   * Process Anonymous Apex response into a result based on transaction type.
+   * For certain transactions, result can be skipped if there is nothing to
+   * report.
+   *
+   * If an error is thrown, this aborts all remaining transactions.
+   */
+  protected handleResponse(
+    execResponse: ExecuteAnonymousResponse,
+    transaction: AnonApexTransaction
+  ): void {
+    const error = assertAnonymousError(execResponse);
+
+    if (transaction.type === AnonApexTransactionType.Benchmark) {
+      if (!error) {
+        throw new Error('Apex did not assert false with benchmark result.');
+      }
+
+      if (execResponse.compiled) {
+        this._results.push(this.getBenchmarkResult(error, transaction));
+      } else {
+        // compile error - fatal
+        throw error;
+      }
+    } else if (error) {
+      // for other transaction types, treat errors normally
+      // and halt benchmarking
+      throw error;
+    }
+  }
+
+  protected getBenchmarkResult(
+    error: ExecuteAnonymousError,
+    transaction: AnonApexTransaction
+  ): AnonApexBenchmarkResult {
+    const benchmark = this.parseBenchmark(error);
+
+    if (!benchmark.limits) {
+      throw new Error('Apex did not collect limits usage.');
+    }
+
+    // replace default name (i.e. file name)
+    // and default action
+    if (benchmark.name) {
+      this.name = benchmark.name;
+    }
+    if (benchmark.action) {
+      transaction.action = benchmark.action;
+    }
+
+    return {
+      name: this.name,
+      action: transaction.action,
+      limits: benchmark.limits,
+    };
+  }
+
+  protected getErrorResult(
+    e: unknown,
+    transaction: AnonApexTransaction
+  ): ErrorResult {
+    return {
+      name: this.name,
+      action: transaction.action,
+      error: e instanceof Error ? e : new Error(`${e}`),
+    };
+  }
+
+  private parseBenchmark(error: ExecuteAnonymousError): BenchmarkResponse {
+    const resMatch = error.message.match(AnonApexBenchmark.resultPattern);
+    const text = resMatch && resMatch[1];
+
+    if (!text) {
+      throw error;
+    }
+
+    return deserialize('benchmark', text);
+  }
+
+  private abortTransaction(
+    transaction: AnonApexTransaction,
+    prevError: ErrorResult
+  ): ErrorResult {
+    return {
+      ...prevError,
+      action: transaction.action,
+      error: new Error(
+        `Transaction aborted due to previous error on '${prevError.action}': ${prevError.error.message}`
+      ),
+    };
+  }
+}

@@ -4,36 +4,8 @@
 
 import { Connection } from '@salesforce/core';
 import { postSoapRequest } from './request';
-
-export enum DebugLogCategory {
-  Db = 'Db',
-  Workflow = 'Workflow',
-  Validation = 'Validation',
-  Callout = 'Callout',
-  Apex_code = 'Apex_code',
-  Apex_profiling = 'Apex_profiling',
-  Visualforce = 'Visualforce',
-  System = 'System',
-  Wave = 'Wave',
-  Nba = 'Nba',
-  All = 'All',
-}
-
-export enum DebugLogCategoryLevel {
-  None = 'None',
-  Finest = 'Finest',
-  Finer = 'Finer',
-  Fine = 'Fine',
-  Debug = 'Debug',
-  Info = 'Info',
-  Warn = 'Warn',
-  Error = 'Error',
-}
-
-export interface DebugLogInfo {
-  category: DebugLogCategory;
-  level: DebugLogCategoryLevel;
-}
+import { escapeXml } from '../text/xml';
+import { apexDebugHeader, DebugLogInfo } from './debug';
 
 export interface ExecuteAnonymousResponse {
   column: string;
@@ -46,8 +18,18 @@ export interface ExecuteAnonymousResponse {
   debugLog?: string;
 }
 
-interface ExecuteAnonymousSoapResponse {
+export class ExecuteAnonymousError extends Error {
+  constructor(message: string, stack?: string) {
+    super(message);
+    this.stack = stack;
+  }
+}
+
+export class ExecuteAnonymousCompileError extends ExecuteAnonymousError {}
+
+export interface ExecuteAnonymousSoapResponse {
   'soapenv:Envelope': {
+    $: object;
     'soapenv:Header'?: { DebuggingInfo?: { debugLog: string } };
     'soapenv:Body': {
       executeAnonymousResponse: {
@@ -64,14 +46,6 @@ interface ExecuteAnonymousSoapResponse {
     };
   };
 }
-
-const xmlCharMap: { [index: string]: string } = {
-  '<': '&lt;',
-  '>': '&gt;',
-  '&': '&amp;',
-  '"': '&quot;',
-  "'": '&apos;',
-};
 
 /**
  * POST a request to `/executeAnonymous` Apex SOAP API.
@@ -91,6 +65,30 @@ export async function executeAnonymous(
   );
 
   return formatExecuteAnonymousResponse(soapResponse);
+}
+
+export function assertAnonymousError(
+  execResponse: ExecuteAnonymousResponse
+): ExecuteAnonymousError | null {
+  // https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_executeanonymous_result.htm
+  // if compiled = false : compileProblem / line / column
+  // if success = false : exceptionMessage / exceptionStackTrace (optionally line / column, also included in stacktrace)
+  if (!execResponse.compiled) {
+    const { line, column, compileProblem } = execResponse;
+
+    return new ExecuteAnonymousCompileError(
+      `Compile Error (line ${line}, col ${column}): ${compileProblem}`
+    );
+  } else if (!execResponse.success) {
+    // This may be data capture, do not edit content
+    // e.g. message: '... -_json_- '
+    return new ExecuteAnonymousError(
+      execResponse.exceptionMessage,
+      execResponse.exceptionStackTrace
+    );
+  }
+
+  return null;
 }
 
 function formatExecuteAnonymousResponse(
@@ -136,24 +134,6 @@ ${apexDebugHeader(debugTraces)}`,
   );
 }
 
-function apexDebugHeader(debugTraces?: DebugLogInfo[]): string {
-  if (debugTraces && debugTraces.length > 0) {
-    const categories = debugTraces.reduce(
-      (acc, curr) => acc + apexLogInfo(curr),
-      ''
-    );
-    return `<DebuggingHeader>${categories}</DebuggingHeader>`;
-  } else {
-    return '';
-  }
-}
-
-function apexLogInfo(info: DebugLogInfo): string {
-  const category = `<category>${info.category}</category>`;
-  const level = `<level>${info.level}</level>`;
-  return `<categories>${category}${level}</categories>`;
-}
-
 function apexSoapRequest(header: string, body: string): string {
   return `<soapenv:Envelope
   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
@@ -161,10 +141,4 @@ function apexSoapRequest(header: string, body: string): string {
   <soapenv:Header>${header}</soapenv:Header>
   <soapenv:Body>${body}</soapenv:Body>
 </soapenv:Envelope>`;
-}
-
-function escapeXml(data: string): string {
-  return data.replace(/[<>&'"]/g, char => {
-    return xmlCharMap[char];
-  });
 }

@@ -12,8 +12,7 @@ export interface BenchmarkResult {
 export interface ErrorResult {
   name: string;
   action: string;
-  message: string;
-  stack?: string;
+  error: Error;
 }
 
 export abstract class Benchmark<
@@ -44,7 +43,7 @@ export abstract class Benchmark<
     return this._errors;
   }
 
-  reset(): void {
+  protected reset(): void {
     this._results = [];
     this._errors = [];
   }

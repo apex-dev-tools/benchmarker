@@ -4,15 +4,18 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { SalesforceConnection } from './salesforce/connection';
-import { replaceTokensInString, TokenReplacement } from './tokenReplacement';
-import { ErrorResult } from './benchmark/base';
+import { SalesforceConnection } from '../services/salesforce/connection';
+import {
+  replaceTokensInString,
+  TokenReplacement,
+} from '../services/tokenReplacement';
+import { ErrorResult } from '../benchmark/base';
 import {
   AnonApexBenchmark,
   AnonApexBenchmarkParams,
   AnonApexBenchmarkResult,
-} from './benchmark/anonApex';
-import { LegacyAnonApexBenchmark } from './benchmark/legacy';
+} from '../benchmark/anonApex';
+import { LegacyAnonApexBenchmark } from '../benchmark/legacy';
 
 export interface ApexBenchmarkServiceOptions {}
 
@@ -85,7 +88,7 @@ export class ApexBenchmarkService {
 
       const benchmark = await this.runApexBenchmark(apex, {
         ...options,
-        benchmarkName: path.basename(path.relative(root, apexfile), '.apex'),
+        benchmarkName: path.relative(root, apexfile).replace('.apex', ''),
       });
 
       benchmarks.push(benchmark);
@@ -161,7 +164,7 @@ export class ApexBenchmarkService {
 
     const paths = entries
       .filter(ent => ent.isFile() && this.isApex(ent.name))
-      .map(e => e.parentPath + e.name);
+      .map(e => path.join(e.parentPath, e.name));
 
     if (paths.length == 0) {
       throw new Error('No ".apex" files found, check path is correct.');

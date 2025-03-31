@@ -34,6 +34,7 @@
   "dependencies": {
     "@jsforce/jsforce-node": "3.2.0",
     "@salesforce/core": "7.3.6",
+    "ajv": "8.17.1",
     "axios": "1.7.9",
     "cli-table": "0.3.11",
     "dotenv": "16.4.5",
@@ -52,6 +53,7 @@
     "@types/cli-table": "0.3.4",
     "@types/lodash": "4.17.1",
     "@types/mocha": "10.0.6",
+    "@types/mock-fs": "4.13.4",
     "@types/node": "20.12.12",
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "3.2.12",
@@ -67,6 +69,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.4.1",
     "mocha": "10.4.0",
+    "mock-fs": "5.5.0",
     "nyc": "15.1.0",
     "prettier": "3.2.5",
     "public-ip": "7.0.1",
@@ -79,32 +82,6 @@
   },
   "engines": {
     "node": ">20.0.0"
-  },
-  "nyc": {
-    "check-coverage": true,
-    "extension": [
-      ".ts"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "src/shared/uiHelper.ts",
-      "src/services/navigate/**/*.ts"
-    ],
-    "functions": 80,
-    "include": [
-      "src/shared/**/*.ts",
-      "src/services/**/*.ts",
-      "src/database/**/*.ts"
-    ],
-    "instrument": true,
-    "lines": 80,
-    "per-file": true,
-    "reporter": [
-      "text",
-      "text-summary"
-    ],
-    "sourceMap": true,
-    "statements": 80
   },
   "lint-staged": {
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
