@@ -88,7 +88,7 @@ export class ApexBenchmarkService {
 
       const benchmark = await this.runApexBenchmark(apex, {
         ...options,
-        benchmarkName: path.basename(path.relative(root, apexfile), '.apex'),
+        benchmarkName: path.relative(root, apexfile).replace('.apex', ''),
       });
 
       benchmarks.push(benchmark);
@@ -164,7 +164,7 @@ export class ApexBenchmarkService {
 
     const paths = entries
       .filter(ent => ent.isFile() && this.isApex(ent.name))
-      .map(e => e.parentPath + e.name);
+      .map(e => path.join(e.parentPath, e.name));
 
     if (paths.length == 0) {
       throw new Error('No ".apex" files found, check path is correct.');
