@@ -10,7 +10,7 @@ import {
   ErrorResult,
 } from './base';
 import { Connection } from '@salesforce/core';
-import { BenchmarkResponse, GovernorLimits } from './schemas';
+import { GovernorLimits } from './schemas';
 import {
   assertAnonymousError,
   executeAnonymous,
@@ -109,7 +109,7 @@ export class AnonApexBenchmark extends Benchmark<
 
         this.handleResponse(response, transaction);
       } catch (e) {
-        this._errors.push(this.getErrorResult(e, transaction));
+        this._errors.push(this.toErrorResult(e, transaction));
       }
     }
   }
@@ -133,7 +133,7 @@ export class AnonApexBenchmark extends Benchmark<
       }
 
       if (execResponse.compiled) {
-        this._results.push(this.getBenchmarkResult(error, transaction));
+        this._results.push(this.toBenchmarkResult(error, transaction));
       } else {
         // compile error - fatal
         throw error;
@@ -145,11 +145,11 @@ export class AnonApexBenchmark extends Benchmark<
     }
   }
 
-  protected getBenchmarkResult(
+  protected toBenchmarkResult(
     error: ExecuteAnonymousError,
     transaction: AnonApexTransaction
   ): AnonApexBenchmarkResult {
-    const benchmark = this.parseBenchmark(error);
+    const benchmark = deserialize('benchmark', this.extractRawData(error));
 
     if (!benchmark.limits) {
       throw new Error('Apex did not collect limits usage.');
@@ -171,7 +171,7 @@ export class AnonApexBenchmark extends Benchmark<
     };
   }
 
-  protected getErrorResult(
+  protected toErrorResult(
     e: unknown,
     transaction: AnonApexTransaction
   ): ErrorResult {
@@ -182,7 +182,7 @@ export class AnonApexBenchmark extends Benchmark<
     };
   }
 
-  private parseBenchmark(error: ExecuteAnonymousError): BenchmarkResponse {
+  protected extractRawData(error: ExecuteAnonymousError): string {
     const resMatch = error.message.match(AnonApexBenchmark.resultPattern);
     const text = resMatch && resMatch[1];
 
@@ -190,7 +190,7 @@ export class AnonApexBenchmark extends Benchmark<
       throw error;
     }
 
-    return deserialize('benchmark', text);
+    return text;
   }
 
   private abortTransaction(

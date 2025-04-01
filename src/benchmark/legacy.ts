@@ -34,21 +34,14 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark {
     ];
   }
 
-  protected getBenchmarkResult(
+  protected toBenchmarkResult(
     error: ExecuteAnonymousError,
     transaction: AnonApexTransaction
   ): AnonApexBenchmarkResult {
-    const resMatch = error.message.match(LegacyAnonApexBenchmark.resultPattern);
-    const text = resMatch && resMatch[1];
-
-    if (!text) {
-      throw error;
-    }
-
     return {
       name: this.name,
       action: transaction.action,
-      limits: deserialize('limits', text),
+      limits: deserialize('limits', this.extractRawData(error)),
     };
   }
 }
