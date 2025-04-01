@@ -2,7 +2,6 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { TRANSACTION_PROCESS } from '../shared/constants';
 import {
   connectToSalesforceOrg,
   getSalesforceAuthInfoFromEnvVars,
@@ -121,7 +120,7 @@ export namespace TransactionProcess {
    */
   export const build = async (
     product: string,
-    testType: string = TRANSACTION_PROCESS
+    testType: string = 'Transaction Process'
   ): Promise<TransactionTestTemplate> => {
     const processTestTemplate = new TransactionTestTemplate();
     processTestTemplate.product = product;

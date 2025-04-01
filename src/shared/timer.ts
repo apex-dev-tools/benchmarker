@@ -3,7 +3,6 @@
  */
 
 import moment from 'moment';
-import { TestPerformanceErrorI } from './uiHelper';
 import { DEFAULT_NUMERIC_VALUE } from './constants';
 
 /**
@@ -24,20 +23,6 @@ export class Timer {
       element => new Timer(element.label, element.targetValue)
     );
     return timers;
-  }
-
-  /**
-   * Creates a timer with an error associated to it
-   * @param description name to identify the timer
-   * @param e error message
-   */
-  public static createFromException(
-    description: string,
-    e: TestPerformanceErrorI
-  ): Timer {
-    const timer = new Timer(description);
-    timer.error = e.exception ? e.exception + '. ' + e.message : e.message;
-    return timer;
   }
 
   private description: string;

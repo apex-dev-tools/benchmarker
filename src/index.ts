@@ -5,68 +5,10 @@
  * @module @apexdevtools/benchmarker
  */
 
-import * as Env from './shared/env';
-import * as Data from './services/salesforce/data';
 import * as Connection from './services/salesforce/connection';
 import * as ConstantsModule from './shared/constants';
 import * as Utils from './services/salesforce/utils';
-import * as UiHelper from './shared/uiHelper';
 import * as FSUtils from './services/filesystem';
-
-/**
- * Test Template to creates multiple headers with multiple lines to call a bulkified service
- */
-export {
-  BulkDocumentProcessTestTemplate,
-  BulkDocumentProcessParams,
-  BulkDocumentProcess,
-} from './testTemplates/bulkDocumentProcessTestTemplate';
-
-/**
- * Test Template to creates a header with multiple lines to call a service
- * TestFlowStep - A function to gather information about a test step
- * TestFlowResult - Contains the results of a test step execution
- */
-export {
-  DocumentLineProcessExtendedMetricsTestTemplate,
-  DocumentLinesProcessExtendedMetricsParams,
-  DocumentLineProcessExtendedMetrics,
-  TestFlowStep,
-  TestFlowResult,
-} from './testTemplates/documentLineProcessExtendedMetricsTestTemplate';
-
-/**
- * Test Template to creates a header with multiple lines to call a service
- */
-export {
-  DocumentLineProcessTestTemplate,
-  DocumentLinesProcessParams,
-  DocumentLineProcess,
-} from './testTemplates/documentLineProcessTestTemplate';
-
-/**
- * Test Template to creates scenarios over batch processes
- */
-export {
-  BatchProcessTestTemplate,
-  BatchProcessCheckerParams,
-  BatchProcessStatusResult,
-  BatchProcess,
-  ProcessStartResult,
-} from './testTemplates/batchTestTemplate';
-
-/**
- * Test Template to performs UI testing using Chromium
- */
-export { FormLoadTestTemplate } from './testTemplates/formLoadTestTemplate';
-
-/**
- * Test Template to creates data and then performs UI actions using Chromium over the data created
- */
-export {
-  FormLoadWithDataLoadingTestTemplate,
-  FormLoadWithDataLoading,
-} from './testTemplates/formLoadWithDataLoadingTestTemplate';
 
 /**
  * Test Template to executes an Apex code from a file and retrieve the Governor Limits
@@ -116,124 +58,6 @@ export namespace Constants {
      */
     export const DEFAULT_STRING_VALUE = ConstantsModule.DEFAULT_STRING_VALUE;
   }
-
-  export namespace TestTypes {
-    /**
-     * Form Load test type
-     */
-    export const FORM_LOAD = ConstantsModule.FORM_LOAD;
-    /**
-     * Document Line Process test type
-     */
-    export const DOCUMENT_LINE_PROCESS = ConstantsModule.DOCUMENT_LINE_PROCESS;
-    /**
-     * Document Line Process LogGovernor Limits test type
-     */
-    export const DOCUMENT_LINE_PROCESS_EXTENDED_METRICS =
-      ConstantsModule.DOCUMENT_LINE_PROCESS_EXTENDED_METRICS;
-    /**
-     * Document Process test type
-     */
-    export const DOCUMENT_PROCESS = ConstantsModule.DOCUMENT_PROCESS;
-    /**
-     * Asyncronous Process test type
-     */
-    export const ASYNC_PROCESS = ConstantsModule.ASYNC_PROCESS;
-    /**
-     * Form Load with Data Loading test type
-     */
-    export const FORM_LOAD_WITH_DATA_LOADING =
-      ConstantsModule.FORM_LOAD_WITH_DATA_LOADING;
-    /**
-     * Form Load test type
-     */
-    export const COLD_START = ConstantsModule.COLD_START;
-    /**
-     * Transaction Process test type
-     */
-    export const PSA_SYNC_PROCESS = ConstantsModule.TRANSACTION_PROCESS;
-  }
-
-  export namespace Errors {
-    /**
-     * Duplicate value error
-     */
-    export const ERROR_DUPLICATE_VALUE = ConstantsModule.ERROR_DUPLICATE_VALUE;
-    /**
-     * Opening browser error
-     */
-    export const ERROR_OPENING_BROWSER = ConstantsModule.ERROR_OPENING_BROWSER;
-  }
-}
-
-export namespace Environment {
-  /**
-   * Gets LINES_INITIAL environment variable
-   */
-  export const getLinesInitial = Env.getLinesInitial;
-
-  /**
-   * Gets LINES_MAXIMUM environment variable
-   */
-  export const getLinesMaximum = Env.getLinesMaximum;
-
-  /**
-   * Gets LINES_ITERATION environment variable
-   */
-  export const getLinesIteration = Env.getLinesIteration;
-
-  /**
-   * Gets DOCUMENTS_INITIAL environment variable
-   */
-  export const getDocumentsInitial = Env.getDocumentsInitial;
-
-  /**
-   * Gets DOCUMENTS_MAXIMUM environment variable
-   */
-  export const getDocumentsMaximum = Env.getDocumentsMaximum;
-
-  /**
-   * Gets DOCUMENTS_ITERATION environment variable
-   */
-  export const getDocumentsIteration = Env.getDocumentsIteration;
-}
-
-export namespace SFData {
-  /**
-   * Creates SObject record in an org
-   */
-  export const createSobjectRecord = Data.createSobjectRecord;
-
-  /**
-   * Deletes SObject records filtered by a field with its value
-   */
-  export const deleteRecords = Data.deleteRecords;
-
-  /**
-   * Deletes SObject records in bulk given an External Id
-   */
-  export const deleteGenericRecordsByExternalIDs =
-    Data.deleteGenericRecordsByExternalIDs;
-
-  /**
-   * Creates SObject records in bulk from a csv file, using SF Bulk API
-   */
-  export const bulkInsert = Data.bulkInsert;
-
-  /**
-   * Generates unique External Ids values given a prefix and the number of items
-   */
-  export const generateExternalIds = Data.generateExternalIds;
-
-  /**
-   * Gets single SObject record filter by a field with its value
-   */
-  export const getSobjectRecord = Data.getSobjectRecord;
-
-  /**
-   * Gets multiple SObject records filter by a field with its value
-   */
-  export const getSobjectRecords = Data.getSobjectRecords;
 }
 
 /**
@@ -298,43 +122,6 @@ export namespace SFUtils {
    * Gets URL for a SObject record
    */
   export const getSObjectRecordPageURL = Utils.getSObjectRecordPageURL;
-}
-
-export namespace UIHelper {
-  /**
-   * @deprecated This API will be removed in a future version.
-   *
-   * Searches for element to be present in DOM
-   */
-  export const searchSelector = UiHelper.searchSelector;
-
-  /**
-   * @deprecated This API will be removed in a future version.
-   *
-   * Waits for a spinner to appear & dissapear
-   */
-  export const switchView = UiHelper.switchView;
-
-  /**
-   * @deprecated This API will be removed in a future version.
-   *
-   * Waits to Home page to appear
-   */
-  export const retryWaitToHomePage = UiHelper.retryWaitToHomePage;
-
-  /**
-   * @deprecated This API will be removed in a future version.
-   *
-   * Waits to page/tab/button to appear
-   */
-  export const retryWaitToPageTabButton = UiHelper.retryWaitToPageTabButton;
-
-  /**
-   * @deprecated This API will be removed in a future version.
-   *
-   * Adds a time delay given a number of milliseconds
-   */
-  export const delay = UiHelper.delay;
 }
 
 export namespace FileSystemUtils {

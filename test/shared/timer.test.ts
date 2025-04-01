@@ -82,27 +82,6 @@ describe('src/scenario/shared/timer', () => {
     expect(testTimer.targetValue).to.eql(1000);
   });
 
-  it('should create a timer from a exception', async () => {
-    const testTimer: Timer = Timer.createFromException(
-      'Test Page Description',
-      { message: 'Test message', exception: 'Test exception produced in test' }
-    );
-
-    expect(testTimer.error).to.eql(
-      'Test exception produced in test. Test message'
-    );
-    expect(testTimer.getTime()).to.eql(-1);
-  });
-
-  it('should create a timer from a message', async () => {
-    const testTimer: Timer = Timer.createFromException(
-      'Test Page Description',
-      { message: 'Test message', exception: undefined }
-    );
-
-    expect(testTimer.error).to.eql('Test message');
-  });
-
   it('should return time set from a given value using setTime', async () => {
     const testTimer: Timer = new Timer('Test');
     testTimer.setTime(10);
