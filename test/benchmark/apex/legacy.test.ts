@@ -4,12 +4,12 @@
 
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
-import * as soap from '../../src/soap/executeAnonymous';
-import { GovernorLimits } from '../../src/benchmark/schemas';
-import { LegacyAnonApexBenchmark } from '../../src/benchmark/legacy';
+import * as exec from '../../../src/org/execute';
+import { GovernorLimits } from '../../../src/benchmark/schemas';
+import { LegacyAnonApexBenchmark } from '../../../src/benchmark/apex/legacy';
 import { Connection } from '@salesforce/core';
-import { AnonApexBenchmarkResult } from '../../src/benchmark/anonApex';
-import { ErrorResult } from '../../src/benchmark/base';
+import { AnonApexBenchmarkResult } from '../../../src/benchmark/apex/anon';
+import { ErrorResult } from '../../../src/benchmark/base';
 
 const mockLimits: GovernorLimits = {
   cpuTime: 9,
@@ -23,12 +23,12 @@ const mockLimits: GovernorLimits = {
   timer: 8,
 };
 
-describe('benchmark/legacy', () => {
+describe('benchmark/apex/legacy', () => {
   let execStub: SinonStub;
-  let errorStub: SinonStub;
+  let extractStub: SinonStub;
 
   beforeEach(() => {
-    execStub = sinon.stub(soap, 'executeAnonymous').resolves({
+    execStub = sinon.stub(exec, 'executeAnonymous').resolves({
       column: '-1',
       compiled: true,
       compileProblem: '',
@@ -37,13 +37,7 @@ describe('benchmark/legacy', () => {
       line: '-1',
       success: false,
     });
-    errorStub = sinon
-      .stub(soap, 'assertAnonymousError')
-      .returns(
-        new soap.ExecuteAnonymousError(
-          `System.AssertException: Assertion Failed: -_${JSON.stringify(mockLimits)}_-`
-        )
-      );
+    extractStub = sinon.stub(exec, 'extractAssertionData').returns(mockLimits);
   });
 
   afterEach(() => {
@@ -75,8 +69,8 @@ describe('benchmark/legacy', () => {
   });
 
   it('should catch and save error results', async () => {
-    const error = new soap.ExecuteAnonymousError('Apex Exception');
-    errorStub.returns(error);
+    const error = new exec.ExecuteAnonymousError('Apex Exception');
+    extractStub.throws(error);
 
     const bench = new LegacyAnonApexBenchmark('apexfile', {
       code: '~limitsDiff + assert~',

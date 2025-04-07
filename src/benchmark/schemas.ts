@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { JTDSchemaType } from 'ajv/dist/jtd';
+import { NamedSchema } from '../text/json';
 
 export interface GovernorLimits {
   timer: number;
@@ -22,25 +22,31 @@ export interface BenchmarkResponse {
   limits: GovernorLimits | null;
 }
 
-export const limitsSchema: JTDSchemaType<GovernorLimits> = {
-  properties: {
-    timer: { type: 'int32' },
-    cpuTime: { type: 'int32' },
-    dmlRows: { type: 'int32' },
-    dmlStatements: { type: 'int32' },
-    heapSize: { type: 'int32' },
-    queryRows: { type: 'int32' },
-    soqlQueries: { type: 'int32' },
-    queueableJobs: { type: 'int32' },
-    futureCalls: { type: 'int32' },
+export const limitsSchema: NamedSchema<GovernorLimits> = {
+  name: 'limits',
+  schema: {
+    properties: {
+      timer: { type: 'int32' },
+      cpuTime: { type: 'int32' },
+      dmlRows: { type: 'int32' },
+      dmlStatements: { type: 'int32' },
+      heapSize: { type: 'int32' },
+      queryRows: { type: 'int32' },
+      soqlQueries: { type: 'int32' },
+      queueableJobs: { type: 'int32' },
+      futureCalls: { type: 'int32' },
+    },
   },
 };
 
-export const benchmarkSchema: JTDSchemaType<BenchmarkResponse> = {
-  properties: {
-    name: { type: 'string', nullable: true },
-    action: { type: 'string', nullable: true },
-    limits: { ...limitsSchema, nullable: true },
+export const benchmarkSchema: NamedSchema<BenchmarkResponse> = {
+  name: 'benchmark',
+  schema: {
+    properties: {
+      name: { type: 'string', nullable: true },
+      action: { type: 'string', nullable: true },
+      limits: { ...limitsSchema.schema, nullable: true },
+    },
+    additionalProperties: true,
   },
-  additionalProperties: true,
 };

@@ -3,18 +3,18 @@
  */
 
 import { expect } from 'chai';
-import { SalesforceConnection } from '../src/';
 import {
   connectToSalesforceOrg,
   getSalesforceAuthInfoFromEnvVars,
 } from '../src/services/salesforce/connection';
 import { ApexBenchmarkService } from '../src/service/apex';
+import { Connection } from '@salesforce/core';
 
 // Temporary system test for benchmark service
 // Bypasses public APIs
 
 describe('services/apex', () => {
-  let connection: SalesforceConnection;
+  let connection: Connection;
 
   before(async () => {
     connection = await connectToSalesforceOrg(
@@ -23,9 +23,10 @@ describe('services/apex', () => {
   });
 
   it('should execute legacy apex script', async () => {
-    const apex = new ApexBenchmarkService(connection);
+    const apex = new ApexBenchmarkService();
+    await apex.setup({ connection });
 
-    const result = await apex.benchmark(__dirname + '/scripts/basic.apex');
+    const result = await apex.benchmarkFile(__dirname + '/scripts/basic.apex');
 
     expect(result.errors.length).to.eql(0);
     expect(result.benchmarks.length).to.eql(1);
@@ -37,9 +38,10 @@ describe('services/apex', () => {
   });
 
   it('should execute simple apex script', async () => {
-    const apex = new ApexBenchmarkService(connection);
+    const apex = new ApexBenchmarkService();
+    await apex.setup({ connection });
 
-    const result = await apex.benchmark(__dirname + '/scripts/simple.apex');
+    const result = await apex.benchmarkFile(__dirname + '/scripts/simple.apex');
 
     expect(result.errors.length).to.eql(0);
     expect(result.benchmarks.length).to.eql(1);
