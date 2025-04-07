@@ -4,14 +4,14 @@
 
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
-import * as soap from '../../src/soap/executeAnonymous';
+import * as exec from '../../../src/org/execute';
 import {
   AnonApexBenchmark,
   AnonApexBenchmarkResult,
-} from '../../src/benchmark/anonApex';
+} from '../../../src/benchmark/apex/anon';
 import { Connection } from '@salesforce/core';
-import { BenchmarkResponse } from '../../src/benchmark/schemas';
-import { ErrorResult } from '../../src/benchmark/base';
+import { BenchmarkResponse } from '../../../src/benchmark/schemas';
+import { ErrorResult } from '../../../src/benchmark/base';
 
 const mockResponse: BenchmarkResponse = {
   name: null,
@@ -29,12 +29,12 @@ const mockResponse: BenchmarkResponse = {
   },
 };
 
-describe('benchmark/anonApex', () => {
+describe('benchmark/apex/anon', () => {
   let execStub: SinonStub;
-  let errorStub: SinonStub;
+  let extractStub: SinonStub;
 
   beforeEach(() => {
-    execStub = sinon.stub(soap, 'executeAnonymous').resolves({
+    execStub = sinon.stub(exec, 'executeAnonymous').resolves({
       column: '-1',
       compiled: true,
       compileProblem: '',
@@ -43,13 +43,9 @@ describe('benchmark/anonApex', () => {
       line: '-1',
       success: false,
     });
-    errorStub = sinon
-      .stub(soap, 'assertAnonymousError')
-      .returns(
-        new soap.ExecuteAnonymousError(
-          `System.AssertException: Assertion Failed: -_${JSON.stringify(mockResponse)}_-`
-        )
-      );
+    extractStub = sinon
+      .stub(exec, 'extractAssertionData')
+      .returns(mockResponse);
   });
 
   afterEach(() => {
@@ -132,15 +128,11 @@ describe('benchmark/anonApex', () => {
   });
 
   it('should be able to override name and actions from script', async () => {
-    errorStub.returns(
-      new soap.ExecuteAnonymousError(
-        `System.AssertException: Assertion Failed: -_${JSON.stringify({
-          ...mockResponse,
-          name: 'loop',
-          action: 'do a loop',
-        })}_-`
-      )
-    );
+    extractStub.returns({
+      ...mockResponse,
+      name: 'loop',
+      action: 'do a loop',
+    });
 
     const bench = new AnonApexBenchmark('apexfile', {
       code: "benchmark.setName('loop'); benchmark.start('do a loop'); for (Integer i=0; i<10000; i++) {}",
@@ -161,8 +153,8 @@ describe('benchmark/anonApex', () => {
   });
 
   it('should catch and save error results', async () => {
-    const error = new soap.ExecuteAnonymousError('Apex Exception');
-    errorStub.returns(error);
+    const error = new exec.ExecuteAnonymousError('Apex Exception');
+    extractStub.throws(error);
 
     const bench = new AnonApexBenchmark('apexfile', {
       code: 'for (Integer i=0; i<10000; i++) {}',

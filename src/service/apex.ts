@@ -1,58 +1,43 @@
 /*
- * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import fs from 'node:fs/promises';
 import path from 'node:path';
-import { SalesforceConnection } from '../services/salesforce/connection';
-import {
-  replaceTokensInString,
-  TokenReplacement,
-} from '../services/tokenReplacement';
 import { ErrorResult } from '../benchmark/base';
 import {
   AnonApexBenchmark,
-  AnonApexBenchmarkParams,
   AnonApexBenchmarkResult,
-} from '../benchmark/anonApex';
-import { LegacyAnonApexBenchmark } from '../benchmark/legacy';
+} from '../benchmark/apex/anon';
+import {
+  ApexBenchmarkOptions,
+  createAnonApexBenchmark,
+} from '../benchmark/apex';
+import { Connection } from '@salesforce/core';
+import {
+  connectToSalesforceOrg,
+  getSalesforceAuthInfoFromEnvVars,
+} from '../services/salesforce/connection';
+import {
+  findApexInDir,
+  readApex,
+  readApexFromFile,
+  resolveApexPath,
+} from './apex/source';
 
-export interface ApexBenchmarkServiceOptions {}
-
-export interface ApexBenchmarkOptions {
-  /**
-   * Map of string value replacement applied on Apex code.
-   *
-   * @example
-   * tokens: [{ token: '%var', value: '100' }]
-   * // Integer i = %var; -> Integer i = 100;
-   */
-  tokens?: TokenReplacement[];
-  /**
-   * List of namespaces to be removed from any Apex code.
-   *
-   * Removes the need to write separate benchmark scripts for managed and
-   * unmanaged executions.
-   */
-  unmanagedNamespaces?: string[];
+export interface ApexBenchmarkServiceOptions {
+  connection: Connection;
 }
 
-export interface ApexBenchmarkCodeOptions extends ApexBenchmarkOptions {
+export interface SingleApexBenchmarkOptions extends ApexBenchmarkOptions {
   /**
    * Name to identify the benchmark run in final results.
    */
-  benchmarkName: string;
+  name: string;
   /**
-   * For traceability - define an action name for each step that will be
-   * executed (e.g. test case definitions). This will be matched to each
-   * transaction executed.
-   *
-   * This value should preferably be set in the apex script with
-   * `benchmark.start('action taken')` or `benchmark.setAction()`.
-   *
+   * For traceability, describe each transaction in the benchmark.
    * If left undefined - actions will be named by their index starting from 1.
    */
-  benchmarkActions?: string[];
+  actions?: string[];
 }
 
 export interface ApexBenchmarkResult {
@@ -61,50 +46,111 @@ export interface ApexBenchmarkResult {
 }
 
 export class ApexBenchmarkService {
-  private connection: SalesforceConnection;
-  //private options: ApexBenchmarkServiceOptions;
+  private _options: ApexBenchmarkServiceOptions | undefined;
 
-  constructor(
-    connection: SalesforceConnection
-    //options?: ApexBenchmarkServiceOptions
-  ) {
-    this.connection = connection;
-    //this.options = options || {};
+  /**
+   * Customise global behaviour of the benchmarking service.
+   */
+  async setup(
+    options?: Partial<ApexBenchmarkServiceOptions>
+  ): Promise<ApexBenchmarkServiceOptions> {
+    const connection: Connection =
+      options?.connection ||
+      (await connectToSalesforceOrg(getSalesforceAuthInfoFromEnvVars()));
+
+    this._options = {
+      connection,
+    };
+
+    return this._options;
   }
 
   /**
-   * Run a benchmark for an apex file, or all apex files under the specified
-   * directory path.
+   * Run benchmarks for all apex files under the specified directory path.
+   *
+   * @param apexPath Path to directory containing ".apex" files.
+   * @param options Additional options to customise the benchmark.
+   * @returns A merged list of results from all identified benchmarks.
    */
-  async benchmark(
+  async benchmarkDirectory(
     apexPath: string,
     options?: ApexBenchmarkOptions
   ): Promise<ApexBenchmarkResult> {
-    const { root, paths } = await this.loadFromPath(apexPath);
+    const opts = await this.ensureSetup();
+    const { root, paths } = await findApexInDir(apexPath);
 
-    const benchmarks: AnonApexBenchmark[] = [];
+    const results: ApexBenchmarkResult[] = [];
     for (const apexfile of paths) {
-      const apex = await fs.readFile(apexfile, { encoding: 'utf8' });
-
-      const benchmark = await this.runApexBenchmark(apex, {
-        ...options,
-        benchmarkName: path.relative(root, apexfile).replace('.apex', ''),
+      const name = path.relative(root, apexfile).replace('.apex', '');
+      const benchmark = createAnonApexBenchmark(name, {
+        code: await readApexFromFile(apexfile, options),
+        connection: opts.connection,
       });
 
-      benchmarks.push(benchmark);
+      await benchmark.prepare();
+
+      const result = await this.runBenchmark(benchmark);
+
+      results.push(result);
     }
 
-    return this.mergeResults(benchmarks);
+    return this.mergeResults(results);
+  }
+
+  /**
+   * Run a benchmark for a single apex file.
+   *
+   * @param apexFilePath Path to ".apex" file containing benchmark script.
+   * @param options Additional options to customise the benchmark.
+   * @returns An object with reported results and errors.
+   */
+  async benchmarkFile(
+    apexFilePath: string,
+    options?: SingleApexBenchmarkOptions
+  ): Promise<ApexBenchmarkResult> {
+    const absPath = await resolveApexPath(apexFilePath);
+    const code = await readApexFromFile(absPath, options);
+
+    return this.benchmarkCode(code, {
+      ...options,
+      name: options?.name || path.basename(absPath, '.apex'),
+    });
   }
 
   /**
    * Run a benchmark on Anonymous Apex code.
+   *
+   * @param name An identifier used in results.
+   * @param apexCode Apex code to be benchmarked. Supports different formats.
+   * @param options Additional options to customise the benchmark.
+   * @returns An object with reported results and errors.
    */
   async benchmarkCode(
     apexCode: string,
-    options: ApexBenchmarkCodeOptions
+    options: SingleApexBenchmarkOptions
   ): Promise<ApexBenchmarkResult> {
-    const benchmark = await this.runApexBenchmark(apexCode, options);
+    const opts = await this.ensureSetup();
+    const benchmark = createAnonApexBenchmark(options.name, {
+      code: await readApex(apexCode, options),
+      connection: opts.connection,
+    });
+
+    await benchmark.prepare(options?.actions);
+
+    return this.runBenchmark(benchmark);
+  }
+
+  private async ensureSetup(): Promise<ApexBenchmarkServiceOptions> {
+    if (!this._options) {
+      return await this.setup();
+    }
+    return this._options;
+  }
+
+  private async runBenchmark(
+    benchmark: AnonApexBenchmark
+  ): Promise<ApexBenchmarkResult> {
+    await benchmark.run();
 
     return {
       benchmarks: benchmark.results(),
@@ -112,79 +158,11 @@ export class ApexBenchmarkService {
     };
   }
 
-  private async runApexBenchmark(
-    code: string,
-    options: ApexBenchmarkCodeOptions
-  ): Promise<AnonApexBenchmark> {
-    const benchmark = this.createAnonApexBenchmark(options.benchmarkName, {
-      code: replaceTokensInString(code, options?.tokens),
-      connection: this.connection,
-    });
-
-    await benchmark.prepare(options.benchmarkActions);
-    await benchmark.run();
-
-    return benchmark;
-  }
-
-  private createAnonApexBenchmark(
-    name: string,
-    params: AnonApexBenchmarkParams
-  ): AnonApexBenchmark {
-    if (
-      params.code.includes('new GovernorLimits()') &&
-      params.code.includes("System.assert(false, '-_'")
-    ) {
-      return new LegacyAnonApexBenchmark(name, params);
-    }
-
-    return new AnonApexBenchmark(name, params);
-  }
-
-  private async loadFromPath(
-    pathStr: string
-  ): Promise<{ root: string; paths: string[] }> {
-    const absPath = path.resolve(pathStr);
-    const stat = await fs.stat(absPath);
-
-    if (stat.isFile()) {
-      if (this.isApex(absPath)) {
-        return {
-          root: path.dirname(absPath),
-          paths: [absPath],
-        };
-      }
-      throw new Error(`${absPath} is not a directory or ".apex" file.`);
-    }
-
-    const entries = await fs.readdir(absPath, {
-      withFileTypes: true,
-      recursive: true,
-    });
-
-    const paths = entries
-      .filter(ent => ent.isFile() && this.isApex(ent.name))
-      .map(e => path.join(e.parentPath, e.name));
-
-    if (paths.length == 0) {
-      throw new Error('No ".apex" files found, check path is correct.');
-    }
-
-    return {
-      root: absPath,
-      paths,
-    };
-  }
-
-  private isApex(pathStr: string): boolean {
-    return path.extname(pathStr).toLowerCase() === '.apex';
-  }
-
-  private mergeResults(runs: AnonApexBenchmark[]): ApexBenchmarkResult {
+  private mergeResults(runs: ApexBenchmarkResult[]): ApexBenchmarkResult {
     return runs.reduce(
       (acc, curr) => ({
-        benchmarks: acc.benchmarks.concat(curr.results()),
-        errors: acc.errors.concat(curr.errors()),
+        benchmarks: acc.benchmarks.concat(curr.benchmarks),
+        errors: acc.errors.concat(curr.errors),
       }),
       { benchmarks: [], errors: [] } as ApexBenchmarkResult
     );

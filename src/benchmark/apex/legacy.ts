@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ExecuteAnonymousError } from '../soap/executeAnonymous';
-import { deserialize } from '../text/json';
+import { extractAssertionData } from '../../org/execute';
+import { ExecuteAnonymousResponse } from '../../org/soap/executeAnonymous';
+import { limitsSchema } from '../schemas';
 import {
   AnonApexBenchmark,
   AnonApexBenchmarkResult,
   AnonApexTransaction,
   AnonApexTransactionType,
-} from './anonApex';
+} from './anon';
 
 /**
  * Old (deprecated) test structure, with manual tracking and return of limits.
@@ -28,27 +29,21 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark {
     this.transactions = [
       {
         action: (actions && actions[0]) || '1',
-        apexCode: require('../../scripts/apex/limits.apex') + this.params.code,
-        type: AnonApexTransactionType.Benchmark,
+        apexCode:
+          require('../../../scripts/apex/limits.apex') + this.params.code,
+        type: AnonApexTransactionType.Data,
       },
     ];
   }
 
-  protected getBenchmarkResult(
-    error: ExecuteAnonymousError,
+  protected toBenchmarkResult(
+    response: ExecuteAnonymousResponse,
     transaction: AnonApexTransaction
   ): AnonApexBenchmarkResult {
-    const resMatch = error.message.match(LegacyAnonApexBenchmark.resultPattern);
-    const text = resMatch && resMatch[1];
-
-    if (!text) {
-      throw error;
-    }
-
     return {
       name: this.name,
       action: transaction.action,
-      limits: deserialize('limits', text),
+      limits: extractAssertionData(response, limitsSchema),
     };
   }
 }

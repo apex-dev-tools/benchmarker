@@ -21,7 +21,7 @@ export async function generateValidAlerts(
 
   try {
     // Extract flow-action pairs
-    const flowActionPairs = needToStoreAlert.map(result => ({
+    const flowActionPairs = needToStoreAlert.map(({ result }) => ({
       flowName: result.flowName,
       actionName: result.action,
     }));

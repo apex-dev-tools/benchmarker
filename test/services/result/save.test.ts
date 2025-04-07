@@ -3,9 +3,8 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import chai, { expect } from 'chai';
+import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as execInfo from '../../../src/database/executionInfo';
 import * as pkgInfo from '../../../src/database/packageInfo';
 import * as orgInfo from '../../../src/database/orgInfo';
@@ -15,8 +14,6 @@ import { save } from '../../../src/services/result/save';
 import { TestResult } from '../../../src/database/entity/result';
 import { OrgContext } from '../../../src/services/org/context';
 import { Alert } from '../../../src/database/entity/alert';
-
-chai.use(sinonChai);
 
 const defaultOrgContext: OrgContext = {
   orgInfo: {

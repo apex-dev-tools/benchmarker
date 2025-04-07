@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 Certinia Inc. All rights reserved.
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
 import { Connection } from '@salesforce/core';
 import { postSoapRequest } from './request';
-import { escapeXml } from '../text/xml';
+import { escapeXml } from '../../text/xml';
 import { apexDebugHeader, DebugLogInfo } from './debug';
 
 export interface ExecuteAnonymousResponse {
@@ -17,15 +17,6 @@ export interface ExecuteAnonymousResponse {
   success: boolean;
   debugLog?: string;
 }
-
-export class ExecuteAnonymousError extends Error {
-  constructor(message: string, stack?: string) {
-    super(message);
-    this.stack = stack;
-  }
-}
-
-export class ExecuteAnonymousCompileError extends ExecuteAnonymousError {}
 
 export interface ExecuteAnonymousSoapResponse {
   'soapenv:Envelope': {
@@ -52,7 +43,7 @@ export interface ExecuteAnonymousSoapResponse {
  *
  * Optionally enable debug logging, which is included in the reponse.
  */
-export async function executeAnonymous(
+export async function executeAnonymousSoap(
   connection: Connection,
   apexCode: string,
   debugTraces?: DebugLogInfo[]
@@ -65,30 +56,6 @@ export async function executeAnonymous(
   );
 
   return formatExecuteAnonymousResponse(soapResponse);
-}
-
-export function assertAnonymousError(
-  execResponse: ExecuteAnonymousResponse
-): ExecuteAnonymousError | null {
-  // https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_executeanonymous_result.htm
-  // if compiled = false : compileProblem / line / column
-  // if success = false : exceptionMessage / exceptionStackTrace (optionally line / column, also included in stacktrace)
-  if (!execResponse.compiled) {
-    const { line, column, compileProblem } = execResponse;
-
-    return new ExecuteAnonymousCompileError(
-      `Compile Error (line ${line}, col ${column}): ${compileProblem}`
-    );
-  } else if (!execResponse.success) {
-    // This may be data capture, do not edit content
-    // e.g. message: '... -_json_- '
-    return new ExecuteAnonymousError(
-      execResponse.exceptionMessage,
-      execResponse.exceptionStackTrace
-    );
-  }
-
-  return null;
 }
 
 function formatExecuteAnonymousResponse(

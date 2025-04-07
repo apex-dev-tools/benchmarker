@@ -3,36 +3,24 @@
  */
 
 import Ajv, { JTDSchemaType, JTDParser } from 'ajv/dist/jtd';
-import { limitsSchema, benchmarkSchema } from '../benchmark/schemas';
 
 const ajv = new Ajv();
 
-const schemas = {
-  limits: limitsSchema,
-  benchmark: benchmarkSchema,
-};
+const parsers: {
+  [key: string]: JTDParser;
+} = {};
 
-const parsers = {};
+export interface NamedSchema<T> {
+  name: string;
+  schema: JTDSchemaType<T>;
+}
 
-type SchemaKey = keyof typeof schemas;
-
-type ParsedType<S extends SchemaKey> =
-  (typeof schemas)[S] extends JTDSchemaType<infer T> ? T : never;
-
-type ParserMap<S extends SchemaKey> = Record<
-  SchemaKey,
-  JTDParser<ParsedType<S>>
->;
-
-export function deserialize<S extends SchemaKey>(
-  key: S,
-  text: string
-): ParsedType<S> {
-  let parse = (parsers as ParserMap<S>)[key];
+export function parseType<T>(text: string, schema: NamedSchema<T>): T {
+  let parse = parsers[schema.name] as JTDParser<T>;
 
   if (!parse) {
-    parse = ajv.compileParser<ParsedType<S>>(schemas[key]);
-    (parsers as ParserMap<S>)[key] = parse;
+    parse = ajv.compileParser<T>(schema.schema);
+    parsers[schema.name] = parse;
   }
 
   const data = parse(text);
@@ -41,7 +29,7 @@ export function deserialize<S extends SchemaKey>(
     return data;
   } else {
     throw new Error(
-      `Failed to parse JSON type "${key}", ${parse.message} (position: ${parse.position})`
+      `Failed to parse JSON type "${schema.name}", ${parse.message} (position: ${parse.position})`
     );
   }
 }

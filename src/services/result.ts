@@ -4,37 +4,34 @@
  */
 
 import { getDatabaseUrl } from '../shared/env';
-import { OrgContext } from './org/context';
-import {
-  TestResultOutput,
-  convertOutputToTestResult,
-  getReporters,
-} from './result/output';
+import { TestResultOutput } from './result/output';
 import { save } from './result/save';
 import { generateValidAlerts } from './result/alert';
+import { Connection } from '@salesforce/core';
+import { getOrgContext } from './org';
+import { TableReporter } from './result/table';
 
 export async function reportResults(
-  testResultOutput: TestResultOutput[],
-  orgContext: OrgContext
+  connection: Connection,
+  output: TestResultOutput[]
 ): Promise<void> {
-  const results = testResultOutput.map(convertOutputToTestResult);
+  const results = output.map(r => r.result);
+  const reporter = new TableReporter();
 
-  // run loggers
-  for (const reporter of getReporters()) {
-    try {
-      await reporter.report(results);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(
-          `Error running reporter '${reporter.name}': ${err.message}`
-        );
-      }
+  try {
+    await reporter.report(results);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(
+        `Error running reporter '${reporter.name}': ${err.message}`
+      );
     }
   }
 
   if (getDatabaseUrl()) {
     try {
-      const validAlerts = await generateValidAlerts(testResultOutput);
+      const orgContext = await getOrgContext(connection);
+      const validAlerts = await generateValidAlerts(output);
       await save(results, orgContext, validAlerts);
     } catch (err) {
       console.error(

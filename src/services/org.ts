@@ -3,31 +3,24 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
+import { Connection } from '@salesforce/core';
 import {
   Org,
   OrgContext,
-  getIsLex,
   getOrganizationData,
   getReleaseData,
   getUserInfoData,
 } from './org/context';
 import { Package, getPackagesOnOrg } from './org/packages';
-import { SalesforceConnection } from './salesforce/connection';
-import { retry } from './salesforce/utils';
 
 export async function getOrgContext(
-  connection: SalesforceConnection
+  connection: Connection
 ): Promise<OrgContext> {
-  const { isMulticurrency } = await retry(() => getUserInfoData(connection));
-  const { orgID, orgInstance, isSandbox, isTrial, orgType, orgCustomDomain } =
-    await retry(() => getOrganizationData(connection));
-  const isLex = await retry(() => getIsLex(connection));
-  const { releaseVersion, apiVersion } = await retry(() =>
-    getReleaseData(orgCustomDomain)
-  );
-  const packagesInfo: Package[] = await retry(() =>
-    getPackagesOnOrg(connection)
-  );
+  const { isMulticurrency } = await getUserInfoData(connection);
+  const { orgID, orgInstance, isSandbox, isTrial, orgType } =
+    await getOrganizationData(connection);
+  const { releaseVersion, apiVersion } = await getReleaseData(connection);
+  const packagesInfo: Package[] = await getPackagesOnOrg(connection);
 
   const orgInfo: Org = {
     orgID,
@@ -38,7 +31,7 @@ export async function getOrgContext(
     isTrial,
     orgInstance,
     isMulticurrency,
-    isLex,
+    isLex: true,
   };
 
   return { orgInfo, packagesInfo };

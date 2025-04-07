@@ -7,7 +7,6 @@ import {
   replaceTokensInString,
   TokenReplacement,
 } from '../../src/services/tokenReplacement';
-import moment from 'moment';
 
 describe('src/services/token-replacement', () => {
   describe('replaceTokensInString', () => {
@@ -106,7 +105,7 @@ describe('src/services/token-replacement', () => {
       const tokenReplacementMap: TokenReplacement[] = [
         {
           token: '%System__.*today()',
-          value: `date.parse('${moment().format('YYYY-MM-DD')}')`,
+          value: "date.parse('YYYY-MM-DD')",
         },
       ];
 

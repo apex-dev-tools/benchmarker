@@ -3,8 +3,7 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
-import { SalesforceConnection } from '../salesforce/connection';
+import { Connection } from '@salesforce/core';
 
 export interface Package {
   packageVersion: string;
@@ -16,7 +15,7 @@ export interface Package {
 }
 
 export async function getPackagesOnOrg(
-  connection: SalesforceConnection
+  connection: Connection
 ): Promise<Package[]> {
   const packages: Package[] = [];
   const packageData: any = await getPackageData(connection);
@@ -27,7 +26,7 @@ export async function getPackagesOnOrg(
     const packageName: string = SubscriberPackage.Name;
     let packageVersion: string = '';
     let isBeta: boolean = false;
-    let betaName: number = DEFAULT_NUMERIC_VALUE;
+    let betaName: number = -1;
 
     if (SubscriberPackageVersion.IsBeta) {
       packageVersion =
@@ -58,7 +57,7 @@ export async function getPackagesOnOrg(
   return packages;
 }
 
-async function getPackageData(connection: SalesforceConnection) {
+async function getPackageData(connection: Connection) {
   return connection.tooling.query(
     'SELECT SubscriberPackage.Name,' +
       ' SubscriberPackageVersion.MajorVersion,' +

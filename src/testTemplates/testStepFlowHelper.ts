@@ -6,10 +6,10 @@ import {
   FlowStep,
   TestStepDescription,
   TestFlowOptions,
+  TestFlowOutput,
 } from './transactionTestTemplate';
-import { extractGovernorMetricsFromGenericApexFlow } from '../services/salesforce/utils';
-import { readFile } from '../services/filesystem';
-import { replaceTokensInString } from '../services/tokenReplacement';
+import { apexService } from '..';
+import { ApexBenchmarkResult } from '../service/apex';
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
@@ -24,17 +24,18 @@ export const createApexExecutionTestStepFlow = async (
   testStepDescription: TestStepDescription,
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
-  const governorMetricsApexClass = require('./apex/GovernorLimits.apex');
-  const originalApexFileContent = await readFile(apexScriptPath);
-  const processedApexFileContent = replaceTokensInString(
-    originalApexFileContent,
-    testFlowOptions?.tokenMap
-  );
-  return createApexExecutionTestStepFlowFromApex(
-    connection,
-    governorMetricsApexClass + processedApexFileContent,
-    testStepDescription
-  );
+  return async () => {
+    const { flowName, action } = testStepDescription;
+    console.log(`Executing ${flowName} - ${action} performance test...`);
+
+    const result = await apexService.benchmarkFile(apexScriptPath, {
+      name: flowName,
+      actions: [action],
+      tokens: testFlowOptions?.tokenMap,
+    });
+
+    return toFlowOutput(testStepDescription, result);
+  };
 };
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
@@ -48,14 +49,37 @@ export const createApexExecutionTestStepFlowFromApex = async (
   testStepDescription: TestStepDescription
 ): Promise<FlowStep> => {
   return async () => {
-    const flowStep = {
-      testStepDescription,
-      result: await extractGovernorMetricsFromGenericApexFlow(
-        connection,
-        testStepDescription,
-        apexCode
-      ),
-    };
-    return flowStep;
+    const { flowName, action } = testStepDescription;
+    console.log(`Executing ${flowName} - ${action} performance test...`);
+
+    const result = await apexService.benchmarkCode(apexCode, {
+      name: flowName,
+      actions: [action],
+    });
+
+    return toFlowOutput(testStepDescription, result);
   };
 };
+
+function toFlowOutput(
+  testStepDescription: TestStepDescription,
+  result: ApexBenchmarkResult
+): TestFlowOutput {
+  const { flowName, action } = testStepDescription;
+  if (result.errors.length != 0) {
+    const { error } = result.errors[0];
+    console.log(
+      `Failure during ${flowName} - ${action} process execution: ${error.message}`
+    );
+    throw error;
+  }
+
+  if (result.benchmarks.length == 0) {
+    throw new Error(`No results available for ${flowName} - ${action}.`);
+  }
+
+  return {
+    testStepDescription,
+    result: result.benchmarks[0].limits,
+  };
+}

@@ -5,11 +5,12 @@
 import { expect } from 'chai';
 import sinon, { SinonStub, SinonStubbedInstance } from 'sinon';
 import mockfs from 'mock-fs';
-import * as anon from '../../src/benchmark/anonApex';
-import * as legacy from '../../src/benchmark/legacy';
+import * as anon from '../../src/benchmark/apex/anon';
+import * as legacy from '../../src/benchmark/apex/legacy';
 import { ApexBenchmarkService } from '../../src/service/apex';
-import { SalesforceConnection } from '../../src';
+
 import { GovernorLimits } from '../../src/benchmark/schemas';
+import { Connection } from '@salesforce/core';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -23,6 +24,7 @@ describe('service/apex', () => {
   let anonStub: SinonStub;
   let anonStubInstance: SinonStubbedInstance<anon.AnonApexBenchmark>;
   let legacyStub: SinonStub;
+  let service: ApexBenchmarkService;
 
   beforeEach(() => {
     anonStubInstance = sinon.createStubInstance(anon.AnonApexBenchmark);
@@ -50,6 +52,8 @@ describe('service/apex', () => {
       },
       'readme.md': 'markdown text',
     });
+
+    service = new ApexBenchmarkService();
   });
 
   afterEach(() => {
@@ -67,9 +71,9 @@ describe('service/apex', () => {
     ];
     anonStubInstance.results.onFirstCall().returns(results);
 
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
-    const res = await service.benchmark('test/scripts/script1.apex');
+    const res = await service.benchmarkFile('test/scripts/script1.apex');
 
     expect(anonStub).to.be.calledOnceWith('script1', {
       code: 'apexCode',
@@ -106,9 +110,9 @@ describe('service/apex', () => {
     anonStubInstance.results.onSecondCall().returns([results[1]]);
     anonStubInstance.results.onThirdCall().returns([results[2]]);
 
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
-    const res = await service.benchmark('test/scripts');
+    const res = await service.benchmarkDirectory('test/scripts');
 
     expect(anonStub).to.be.calledThrice;
     expect(anonStub).to.be.calledWith('script1', params);
@@ -129,10 +133,10 @@ describe('service/apex', () => {
     ];
     anonStubInstance.results.onFirstCall().returns(results);
 
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
     const res = await service.benchmarkCode('apex', {
-      benchmarkName: 'test name',
+      name: 'test name',
     });
 
     expect(anonStub).to.be.calledOnceWith('test name', {
@@ -154,9 +158,9 @@ describe('service/apex', () => {
     ];
     anonStubInstance.results.onFirstCall().returns(results);
 
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
-    const res = await service.benchmark('legacy/test/scripts');
+    const res = await service.benchmarkDirectory('legacy/test/scripts');
 
     expect(legacyStub).to.be.calledOnceWith('script4', {
       code: legacyContent,
@@ -168,17 +172,17 @@ describe('service/apex', () => {
   });
 
   it('should throw if specific file is not apex', async () => {
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
-    await expect(service.benchmark('readme.md')).to.be.rejectedWith(
-      'not a directory or ".apex" file'
+    await expect(service.benchmarkFile('readme.md')).to.be.rejectedWith(
+      'not an ".apex" file'
     );
   });
 
   it('should throw if dir contains no apex', async () => {
-    const service = new ApexBenchmarkService({} as SalesforceConnection);
+    await service.setup({ connection: {} as Connection });
 
-    await expect(service.benchmark('force-app')).to.be.rejectedWith(
+    await expect(service.benchmarkDirectory('force-app')).to.be.rejectedWith(
       'No ".apex" files found'
     );
   });

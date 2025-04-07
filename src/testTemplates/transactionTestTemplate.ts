@@ -2,7 +2,7 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { TRANSACTION_PROCESS } from '../shared/constants';
+import { apexService } from '..';
 import {
   connectToSalesforceOrg,
   getSalesforceAuthInfoFromEnvVars,
@@ -20,10 +20,6 @@ export interface GovernorMetricsResult {
   soqlQueries: number;
   queueableJobs: number;
   futureCalls: number;
-}
-
-export interface ProcessParams {
-  connection: SalesforceConnection;
 }
 
 /**
@@ -121,7 +117,7 @@ export namespace TransactionProcess {
    */
   export const build = async (
     product: string,
-    testType: string = TRANSACTION_PROCESS
+    testType: string = 'Transaction Process'
   ): Promise<TransactionTestTemplate> => {
     const processTestTemplate = new TransactionTestTemplate();
     processTestTemplate.product = product;
@@ -129,10 +125,14 @@ export namespace TransactionProcess {
     processTestTemplate.flowStepsResults = [];
     processTestTemplate.testType = testType;
 
-    const connectionData = await connectToSalesforceOrg(
+    const connection = await connectToSalesforceOrg(
       getSalesforceAuthInfoFromEnvVars()
     );
-    processTestTemplate.connection = connectionData;
+    processTestTemplate.connection = connection;
+
+    await apexService.setup({
+      connection,
+    });
 
     return processTestTemplate;
   };
@@ -147,30 +147,9 @@ export namespace TransactionProcess {
     testStep: FlowStep,
     alertInfo?: AlertInfo
   ) => {
-    try {
-      const result: TestFlowOutput = await testStep();
-      result.alertInfo = alertInfo;
-      processTestTemplate.flowStepsResults.push(result);
-    } catch (e) {
-      if (e.testStepDescription) {
-        processTestTemplate.flowStepsResults.push({
-          testStepDescription: e.testStepDescription,
-          error: e.message,
-          result: {
-            cpuTime: -1,
-            dmlRows: -1,
-            dmlStatements: -1,
-            heapSize: -1,
-            queryRows: -1,
-            soqlQueries: -1,
-            queueableJobs: -1,
-            futureCalls: -1,
-            timer: -1,
-          },
-        });
-      } else {
-        throw e;
-      }
-    }
+    // allow fatal errors like compile error to fail unit tests
+    const result: TestFlowOutput = await testStep();
+    result.alertInfo = alertInfo;
+    processTestTemplate.flowStepsResults.push(result);
   };
 }

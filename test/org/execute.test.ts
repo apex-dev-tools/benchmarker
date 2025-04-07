@@ -7,15 +7,22 @@ import sinon from 'sinon';
 import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
 import { AuthInfo, Connection } from '@salesforce/core';
 import {
+  ExecuteAnonymousResponse,
+  ExecuteAnonymousSoapResponse,
+} from '../../src/org/soap/executeAnonymous';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import {
+  DebugLogCategory,
+  DebugLogCategoryLevel,
+} from '../../src/org/soap/debug';
+import {
   assertAnonymousError,
   executeAnonymous,
   ExecuteAnonymousCompileError,
   ExecuteAnonymousError,
-  ExecuteAnonymousResponse,
-  ExecuteAnonymousSoapResponse,
-} from '../../src/soap/executeAnonymous';
-import { HttpRequest } from '@jsforce/jsforce-node';
-import { DebugLogCategory, DebugLogCategoryLevel } from '../../src/soap/debug';
+  extractAssertionData,
+} from '../../src/org/execute';
+import { NamedSchema } from '../../src/text/json';
 
 type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
@@ -65,7 +72,7 @@ function execAnonSoapResponse(
   };
 }
 
-describe('soap/executeAnonymous', () => {
+describe('org/execute', () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -238,6 +245,100 @@ describe('soap/executeAnonymous', () => {
         success: true,
         debugLog: undefined,
       } as ExecuteAnonymousResponse);
+    });
+  });
+
+  describe('extractAssertionData()', () => {
+    const testSchema: NamedSchema<{
+      test: number;
+    }> = {
+      name: 'test',
+      schema: {
+        properties: {
+          test: { type: 'int32' },
+        },
+      },
+    };
+
+    it('should return data with schema type', () => {
+      const resp: ExecuteAnonymousResponse = {
+        column: '-1',
+        compiled: true,
+        compileProblem: '',
+        exceptionMessage:
+          'System.AssertException: Assertion Failed: -_{"test": 1}_-',
+        exceptionStackTrace: 'stack',
+        line: '-1',
+        success: false,
+      };
+
+      const data = extractAssertionData(resp, testSchema);
+
+      expect(data.test).to.eql(1);
+    });
+
+    it('should throw on no data', () => {
+      const resp: ExecuteAnonymousResponse = {
+        column: '-1',
+        compiled: true,
+        compileProblem: '',
+        exceptionMessage: '',
+        exceptionStackTrace: '',
+        line: '-1',
+        success: true,
+      };
+
+      expect(() => extractAssertionData(resp, testSchema)).to.throw(
+        'did not assert false'
+      );
+    });
+
+    it('should throw on compile errors', () => {
+      const resp: ExecuteAnonymousResponse = {
+        column: '16',
+        compiled: false,
+        compileProblem: "Unexpected token 'i'.",
+        exceptionMessage: '',
+        exceptionStackTrace: '',
+        line: '35',
+        success: false,
+      };
+
+      expect(() => extractAssertionData(resp, testSchema)).to.throw(
+        'Unexpected token'
+      );
+    });
+
+    it('should throw original error if pattern did not match', () => {
+      const resp: ExecuteAnonymousResponse = {
+        column: '-1',
+        compiled: true,
+        compileProblem: '',
+        exceptionMessage: 'System.AssertException: Assertion Failed',
+        exceptionStackTrace: 'stack',
+        line: '-1',
+        success: false,
+      };
+
+      expect(() => extractAssertionData(resp, testSchema)).to.throw(
+        'Assertion Failed'
+      );
+    });
+
+    it('should throw json parse errors', () => {
+      const resp: ExecuteAnonymousResponse = {
+        column: '-1',
+        compiled: true,
+        compileProblem: '',
+        exceptionMessage: 'System.AssertException: Assertion Failed: -_{}_-',
+        exceptionStackTrace: 'stack',
+        line: '-1',
+        success: false,
+      };
+
+      expect(() => extractAssertionData(resp, testSchema)).to.throw(
+        'Failed to parse JSON type'
+      );
     });
   });
 

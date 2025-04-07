@@ -7,10 +7,9 @@ import {
   TestFlowOutput,
   GovernorMetricsResult,
 } from './transactionTestTemplate';
-import { Timer } from '../shared/timer';
-import { TestResultOutput } from '../services/result/output';
-import { getOrgContext } from '../services/org';
 import { reportResults } from '../services/result';
+import { TestResult } from '../database/entity/result';
+import { TestResultOutput } from '../services/result/output';
 
 /**
  * Retrieve peformance metrics from a tests execution and save them
@@ -21,37 +20,28 @@ export const saveResults = async (
   processTestTemplate: TransactionTestTemplate,
   results: TestFlowOutput[]
 ) => {
-  const testResults = results.map((flowOutput: TestFlowOutput) => {
-    const action: string = flowOutput.testStepDescription.action;
-    const flowName: string = flowOutput.testStepDescription.flowName;
-    const result: GovernorMetricsResult = flowOutput.result;
-    const testTimer = new Timer('');
-    testTimer.setTime(result.timer);
-    const testStep: TestResultOutput = {
-      timer: testTimer,
-      cpuTime: result.cpuTime,
-      dmlRows: result.dmlRows,
-      dmlStatements: result.dmlStatements,
-      heapSize: result.heapSize,
-      queryRows: result.queryRows,
-      soqlQueries: result.soqlQueries,
-      queueableJobs: result.queueableJobs,
-      futureCalls: result.futureCalls,
-      action,
-      flowName,
-      error: flowOutput.error ? flowOutput.error : '',
-      product: processTestTemplate.product,
-      incognitoBrowser: false,
-      lighthouseSpeedIndex: undefined,
-      lighthouseTimeToInteractive: undefined,
-      testType: processTestTemplate.testType,
-      alertInfo: flowOutput.alertInfo,
-    };
+  const tests: TestResultOutput[] = results.map(
+    (flowOutput: TestFlowOutput) => {
+      const r: TestResult = new TestResult();
+      r.flowName = flowOutput.testStepDescription.flowName;
+      r.action = flowOutput.testStepDescription.action;
+      r.product = processTestTemplate.product;
+      r.testType = processTestTemplate.testType;
 
-    return testStep;
-  });
+      const limits: GovernorMetricsResult = flowOutput.result;
+      r.duration = limits.timer;
+      r.cpuTime = limits.cpuTime;
+      r.dmlRows = limits.dmlRows;
+      r.dmlStatements = limits.dmlStatements;
+      r.heapSize = limits.heapSize;
+      r.queryRows = limits.queryRows;
+      r.soqlQueries = limits.soqlQueries;
+      r.queueableJobs = limits.queueableJobs;
+      r.futureCalls = limits.futureCalls;
 
-  const orgContext = await getOrgContext(processTestTemplate.connection);
+      return { result: r, alertInfo: flowOutput.alertInfo };
+    }
+  );
 
-  await reportResults(testResults, orgContext);
+  await reportResults(processTestTemplate.connection, tests);
 };
