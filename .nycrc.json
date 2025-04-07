@@ -16,7 +16,8 @@
     "**/*.d.ts",
     "test/setup.ts",
     "scripts/apexLoader.ts",
-    "src/shared/uiHelper.ts",
-    "src/services/navigate/**/*.ts"
+    "src/shared/**/*.ts",
+    "src/services/**/*.ts",
+    "src/testTemplates/**/*.ts"
   ]
 }

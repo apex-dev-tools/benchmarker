@@ -15,20 +15,12 @@ export function getDatabaseUrl() {
   return process.env.DATABASE_URL || '';
 }
 
-export function isDebug() {
-  return process.env.NODE_ENV === 'debug';
-}
-
 export function shouldStoreAlerts() {
   return process.env.STORE_ALERTS === 'true';
 }
 
 export function getUnmanagePackages() {
   return process.env.UNMANAGE_PACKAGE?.split(',') || [];
-}
-
-export function getAsyncMonitorTimeout() {
-  return process.env.ASYNC_MONITOR_TIMEOUT || '60';
 }
 
 export function getExternalBuildId() {
