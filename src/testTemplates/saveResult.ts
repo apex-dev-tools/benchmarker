@@ -39,6 +39,12 @@ export const saveResults = async (
       futureCalls: result.futureCalls,
       action,
       flowName,
+      functionalArea: flowOutput.testStepDescription.functionalArea
+        ? flowOutput.testStepDescription.functionalArea
+        : '',
+      description: flowOutput.testStepDescription.description
+        ? flowOutput.testStepDescription.description
+        : '',
       error: flowOutput.error ? flowOutput.error : '',
       product: processTestTemplate.product,
       incognitoBrowser: false,

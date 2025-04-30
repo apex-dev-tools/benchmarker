@@ -4,6 +4,7 @@
  */
 
 import { TestResult } from '../../database/entity/result';
+import { TestInfo } from '../../database/entity/testInfo';
 import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 import { Timer } from '../../shared/timer';
 import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
@@ -18,6 +19,8 @@ export interface TestResultOutput {
   product: string;
   testType: string;
   error?: string;
+  functionalArea?: string;
+  description?: string;
 
   // browser/metrics
   incognitoBrowser?: boolean;
@@ -155,6 +158,26 @@ export function getOffsetThresholdsByRange(
     heapThreshold,
     queryRowThreshold,
   };
+}
+
+export function convertOutputToTestInfo(
+  output: TestResultOutput,
+  recordsThatAlreadyExist: Map<string, number>
+): TestInfo {
+  // Construct the key for the current flowName and actionName
+  const key = `${output.flowName}_${output.action}`;
+
+  const testInfo: TestInfo = new TestInfo();
+  if (recordsThatAlreadyExist.has(key)) {
+    testInfo.id = recordsThatAlreadyExist.get(key) as number;
+  }
+  testInfo.action = output.action;
+  testInfo.flowName = output.flowName;
+  testInfo.product = output.product;
+  testInfo.functionalArea = output.functionalArea ? output.functionalArea : '';
+  testInfo.description = output.description ? output.description : '';
+
+  return testInfo;
 }
 
 export async function addAlertByComparingAvg(

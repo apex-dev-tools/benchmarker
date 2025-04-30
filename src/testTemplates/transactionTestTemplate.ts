@@ -67,6 +67,8 @@ export class TransactionTestTemplate {
 export interface TestStepDescription {
   action: string;
   flowName: string;
+  functionalArea?: string;
+  description?: string;
 }
 
 /**
