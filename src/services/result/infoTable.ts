@@ -9,28 +9,18 @@ import { convertOutputToTestInfo, TestResultOutput } from './output';
 export async function convertTestResultOutputToTestInfo(
   testResultOutput: TestResultOutput[]
 ): Promise<TestInfo[]> {
-  try {
-    // Extract flow-action pairs
-    const flowActionPairs = testResultOutput.map(result => ({
-      flowName: result.flowName,
-      actionName: result.action,
-    }));
+  // Extract flow-action pairs
+  const flowActionPairs = testResultOutput.map(result => ({
+    flowName: result.flowName,
+    actionName: result.action,
+  }));
 
-    const recordsThatAlreadyExist =
-      await getTestInfoRecordThatAlreadyExist(flowActionPairs);
+  const recordsThatAlreadyExist =
+    await getTestInfoRecordThatAlreadyExist(flowActionPairs);
 
-    const testInfoResults = await Promise.all(
-      testResultOutput.map(async item =>
-        convertOutputToTestInfo(
-          item,
-          recordsThatAlreadyExist as Map<string, number>
-        )
-      )
-    );
+  const testInfoResults = testResultOutput.map(item =>
+    convertOutputToTestInfo(item, recordsThatAlreadyExist)
+  );
 
-    return testInfoResults;
-  } catch (err) {
-    console.error('Error :', err);
-    return [];
-  }
+  return testInfoResults;
 }

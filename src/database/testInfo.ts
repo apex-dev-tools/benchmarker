@@ -33,11 +33,11 @@ export async function getTestInfoRecordThatAlreadyExist(
   try {
     const result = await connection.query(query);
 
-    const resultsMap = new Map<string, number>();
+    const resultsMap: { [key: string]: number } = {};
     // Populate the results map
     result.forEach((row: { id: number; flow_name: string; action: string }) => {
       const key = `${row.flow_name}_${row.action}`;
-      resultsMap.set(key, row.id);
+      resultsMap[key] = row.id;
     });
 
     return resultsMap;

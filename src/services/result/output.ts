@@ -162,15 +162,14 @@ export function getOffsetThresholdsByRange(
 
 export function convertOutputToTestInfo(
   output: TestResultOutput,
-  recordsThatAlreadyExist: Map<string, number>
+  recordsThatAlreadyExist: { [key: string]: number }
 ): TestInfo {
   // Construct the key for the current flowName and actionName
   const key = `${output.flowName}_${output.action}`;
+  const id = recordsThatAlreadyExist[key];
 
   const testInfo: TestInfo = new TestInfo();
-  if (recordsThatAlreadyExist.has(key)) {
-    testInfo.id = recordsThatAlreadyExist.get(key) as number;
-  }
+  if (id != null) testInfo.id = id;
   testInfo.action = output.action;
   testInfo.flowName = output.flowName;
   testInfo.product = output.product;
