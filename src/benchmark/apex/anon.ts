@@ -2,30 +2,38 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { DebugLogInfo } from '../../org/soap/debug';
 import {
   Benchmark,
-  BenchmarkParams,
+  BenchmarkAction,
   BenchmarkResult,
   ErrorResult,
 } from '../base';
-import { Connection } from '@salesforce/core';
-import { benchmarkSchema, GovernorLimits } from '../schemas';
 import {
   executeAnonymous,
   assertAnonymousError,
   extractAssertionData,
-} from '../../org/execute';
-import { ExecuteAnonymousResponse } from '../../org/soap/executeAnonymous';
+  ExecuteAnonymousOptions,
+} from '../../salesforce/execute';
+import { ExecuteAnonymousResponse } from '../../salesforce/soap/executeAnonymous';
+import { RunContext } from '../../state/context';
+import { NamedSchema } from '../../parser/json';
 
-export interface AnonApexBenchmarkParams extends BenchmarkParams {
+export interface AnonApexBenchmarkOptions {
+  /**
+   * Name to identify the benchmark run in final results.
+   */
+  name: string;
+
+  /**
+   * Full apex script to be used in benchmark.
+   */
   code: string;
-  connection: Connection;
-  debug?: DebugLogInfo[];
+
+  executeAnonymous?: ExecuteAnonymousOptions;
 }
 
-export interface AnonApexTransaction {
-  action: string;
+export interface AnonApexTransaction<C> {
+  action: AnonApexAction<C>;
   apexCode: string;
   type: AnonApexTransactionType;
 }
@@ -35,55 +43,49 @@ export enum AnonApexTransactionType {
   Execute,
 }
 
-export interface AnonApexBenchmarkResult extends BenchmarkResult {
-  limits: GovernorLimits;
+export interface AnonApexAction<C> extends BenchmarkAction {
+  context?: C;
+  executeAnonymous?: ExecuteAnonymousOptions;
+}
+
+export interface AnonApexBenchmarkResult<T, C>
+  extends BenchmarkResult<AnonApexAction<C>> {
+  data: T;
 }
 
 /**
- * Standard benchmark, with optional start/stop calls in apex. If not
- * present, the whole script is assumed to be a benchmark and the code is
- * wrapped with these calls.
+ * Extend to create Anonymous Apex benchmarks that return data `T`.
+ * Requires a `NamedSchema<T>` to validate the JSON returned by `System.Assert`.
  *
- * @example Expected test format
- * // setup
- * benchmark.start();
- * // Apex code to test
- * benchmark.stop();
- * // teardown, extra assertions
+ * Provide context information/config object `C` to be set on prepared actions.
+ * This is also saved to the corresponding results for later use.
  */
-export class AnonApexBenchmark extends Benchmark<
-  AnonApexBenchmarkParams,
-  AnonApexBenchmarkResult
+export abstract class AnonApexBenchmark<T, C> extends Benchmark<
+  AnonApexAction<C>,
+  AnonApexBenchmarkResult<T, C>
 > {
-  protected transactions: AnonApexTransaction[] = [];
+  protected transactions: AnonApexTransaction<C>[] = [];
+  protected options: AnonApexBenchmarkOptions;
+  protected schema: NamedSchema<T>;
+
+  constructor(options: AnonApexBenchmarkOptions, schema: NamedSchema<T>) {
+    super(options.name);
+    this.options = options;
+    this.schema = schema;
+  }
+
+  protected abstract prepareTransactions(
+    actions?: AnonApexAction<C>[]
+  ): Promise<AnonApexTransaction<C>[]>;
 
   /**
    * Prepares an Anonymous Apex script for run. Injects required framework
    * code. Optionally splits into multiple transactions.
+   *
+   * @param actions Override actions configuration in the benchmark.
    */
-  async prepare(actions?: string[]): Promise<void> {
-    const code = this.params.code;
-
-    let content;
-    if (!code.includes('benchmark.start(')) {
-      content = 'benchmark.start();';
-    }
-    if (!code.includes('benchmark.stop(')) {
-      content += code + 'benchmark.stop();';
-    }
-
-    this.transactions = [
-      {
-        action: (actions && actions[0]) || '1',
-        apexCode:
-          require('../../../scripts/apex/limits.apex') +
-          require('../../../scripts/apex/benchmark.apex') +
-          'benchmark.begin();' +
-          content +
-          'benchmark.end();',
-        type: AnonApexTransactionType.Data,
-      },
-    ];
+  async prepare(actions?: AnonApexAction<C>[]): Promise<void> {
+    this.transactions = await this.prepareTransactions(actions);
   }
 
   /**
@@ -93,15 +95,15 @@ export class AnonApexBenchmark extends Benchmark<
     this.reset();
 
     for (const transaction of this.transactions) {
-      if (this._errors.length != 0) {
+      if (this._error) {
         break;
       }
 
       try {
         const response = await executeAnonymous(
-          this.params.connection,
+          RunContext.current.org.connection,
           transaction.apexCode,
-          this.params.debug
+          transaction.action.executeAnonymous || this.options.executeAnonymous
         );
 
         if (transaction.type === AnonApexTransactionType.Data) {
@@ -110,49 +112,32 @@ export class AnonApexBenchmark extends Benchmark<
           // for other transaction types, treat errors normally
           // and halt benchmarking
           const err = assertAnonymousError(response);
-          if (err) {
-            throw err;
-          }
+          if (err) throw err;
         }
       } catch (e) {
-        this._errors.push(this.toErrorResult(e, transaction));
+        this._error = this.toErrorResult(e, transaction);
       }
     }
   }
 
   protected toBenchmarkResult(
     response: ExecuteAnonymousResponse,
-    transaction: AnonApexTransaction
-  ): AnonApexBenchmarkResult {
-    const benchmark = extractAssertionData(response, benchmarkSchema);
-
-    if (!benchmark.limits) {
-      throw new Error('Apex did not collect limits usage.');
-    }
-
-    // replace default name (i.e. file name)
-    // and default action
-    if (benchmark.name) {
-      this.name = benchmark.name;
-    }
-    if (benchmark.action) {
-      transaction.action = benchmark.action;
-    }
-
+    transaction: AnonApexTransaction<C>
+  ): AnonApexBenchmarkResult<T, C> {
     return {
       name: this.name,
       action: transaction.action,
-      limits: benchmark.limits,
+      data: extractAssertionData(response, this.schema),
     };
   }
 
   protected toErrorResult(
     e: unknown,
-    transaction: AnonApexTransaction
+    transaction: AnonApexTransaction<C>
   ): ErrorResult {
     return {
       name: this.name,
-      action: transaction.action,
+      actionName: transaction.action.name,
       error: e instanceof Error ? e : new Error(`${e}`),
     };
   }

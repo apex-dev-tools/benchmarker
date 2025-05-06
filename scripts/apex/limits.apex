@@ -1,8 +1,8 @@
 public class GovernorLimits {
-	private Integer timer, cpuTime, dmlRows, dmlStatements, heapSize, queryRows, soqlQueries, queueableJobs, futureCalls;
+	private Integer duration, cpuTime, dmlRows, dmlStatements, heapSize, queryRows, soqlQueries, queueableJobs, futureCalls;
 
 	public GovernorLimits getCurrentGovernorLimits() {
-		this.timer = (Integer)Datetime.now().getTime();
+		this.duration = (Integer)Datetime.now().getTime();
 		this.cpuTime = Limits.getCpuTime();
 		this.dmlRows = Limits.getDMLRows();
 		this.dmlStatements = Limits.getDMLStatements();
@@ -15,7 +15,7 @@ public class GovernorLimits {
 	}
 
 	public GovernorLimits getLimitsDiff(GovernorLimits govLim1, GovernorLimits govLim2) {
-		this.timer = govLim2.timer - govLim1.timer;
+		this.duration = govLim2.duration - govLim1.duration;
 		this.cpuTime = govLim2.cpuTime - govLim1.cpuTime;
 		this.dmlRows = govLim2.dmlRows - govLim1.dmlRows;
 		this.dmlStatements = govLim2.dmlStatements - govLim1.dmlStatements;

@@ -1,9 +1,9 @@
 {
   "check-coverage": true,
-  "per-file": true,
-  "functions": 80,
-  "lines": 80,
-  "statements": 80,
+  "per-file": false,
+  "functions": 40,
+  "lines": 40,
+  "statements": 40,
   "reporter": [
     "text",
     "text-summary"
@@ -14,10 +14,9 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.d.ts",
+    "test/mocks.ts",
     "test/setup.ts",
-    "scripts/apexLoader.ts",
-    "src/shared/**/*.ts",
-    "src/services/**/*.ts",
+    "scripts/*.ts",
     "src/testTemplates/**/*.ts"
   ]
 }

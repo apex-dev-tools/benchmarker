@@ -5,64 +5,86 @@
 import path from 'node:path';
 import { ErrorResult } from '../benchmark/base';
 import {
-  AnonApexBenchmark,
-  AnonApexBenchmarkResult,
-} from '../benchmark/apex/anon';
-import {
-  ApexBenchmarkOptions,
+  ApexAction,
+  ApexBenchmarkResult,
   createAnonApexBenchmark,
 } from '../benchmark/apex';
-import { Connection } from '@salesforce/core';
-import {
-  connectToSalesforceOrg,
-  getSalesforceAuthInfoFromEnvVars,
-} from '../services/salesforce/connection';
 import {
   findApexInDir,
-  readApex,
   readApexFromFile,
   resolveApexPath,
 } from './apex/source';
+import { RunContext, RunContextOptions } from '../state/context';
+import {
+  LimitsMetricProvider,
+  LimitsMetricProviderOptions,
+} from '../metrics/limits';
+import { RunStore } from '../state/store';
+import { ExecuteAnonymousOptions } from '../salesforce/execute';
+import { ApexScriptParser, ApexScriptParserOptions } from '../parser/apex';
 
-export interface ApexBenchmarkServiceOptions {
-  connection: Connection;
+export interface ApexBenchmarkServiceOptions extends RunContextOptions {
+  limitsMetrics?: LimitsMetricProviderOptions;
+  useLegacySchema?: boolean;
 }
 
-export interface SingleApexBenchmarkOptions extends ApexBenchmarkOptions {
-  /**
-   * Name to identify the benchmark run in final results.
-   */
+export interface BenchmarkDirectoryOptions {
+  parser?: ApexScriptParserOptions;
+  executeAnonymous?: ExecuteAnonymousOptions;
+}
+
+export interface BenchmarkSingleOptions {
   name: string;
-  /**
-   * For traceability, describe each transaction in the benchmark.
-   * If left undefined - actions will be named by their index starting from 1.
-   */
-  actions?: string[];
+  actions?: ApexAction[];
+  parser?: ApexScriptParserOptions;
+  executeAnonymous?: ExecuteAnonymousOptions;
 }
 
-export interface ApexBenchmarkResult {
-  benchmarks: AnonApexBenchmarkResult[];
+export interface BenchmarkDirectoryResult {
+  benchmarks: ApexBenchmarkResult[];
   errors: ErrorResult[];
 }
 
+export interface BenchmarkSingleResult {
+  benchmarks: ApexBenchmarkResult[];
+  error?: ErrorResult;
+}
+
 export class ApexBenchmarkService {
-  private _options: ApexBenchmarkServiceOptions | undefined;
+  protected setupCalled: boolean = false;
+  protected store: RunStore<ApexBenchmarkResult>;
+  protected scriptParser: ApexScriptParser;
+  protected limitsMetrics: LimitsMetricProvider;
+
+  constructor() {
+    this.store = new RunStore();
+    this.scriptParser = new ApexScriptParser();
+    this.limitsMetrics = new LimitsMetricProvider();
+  }
 
   /**
-   * Customise global behaviour of the benchmarking service.
+   * Customise behaviour of the benchmarking service.
    */
-  async setup(
-    options?: Partial<ApexBenchmarkServiceOptions>
-  ): Promise<ApexBenchmarkServiceOptions> {
-    const connection: Connection =
-      options?.connection ||
-      (await connectToSalesforceOrg(getSalesforceAuthInfoFromEnvVars()));
+  async setup(options: ApexBenchmarkServiceOptions = {}): Promise<void> {
+    this.setupCalled = true;
+    const run = RunContext.current;
 
-    this._options = {
-      connection,
-    };
+    await run.setup(options);
 
-    return this._options;
+    if (options.useLegacySchema ?? Boolean(process.env.BENCH_POSTGRES_LEGACY)) {
+      await run.setupPgLegacy(options.pg);
+    }
+
+    this.limitsMetrics.setup(
+      run.pgLegacy?.commonMapper || run.pg.commonMapper,
+      options.limitsMetrics
+    );
+  }
+
+  restore() {
+    RunContext.reset();
+    this.store = new RunStore();
+    this.setupCalled = false;
   }
 
   /**
@@ -74,27 +96,19 @@ export class ApexBenchmarkService {
    */
   async benchmarkDirectory(
     apexPath: string,
-    options?: ApexBenchmarkOptions
-  ): Promise<ApexBenchmarkResult> {
-    const opts = await this.ensureSetup();
-    const { root, paths } = await findApexInDir(apexPath);
+    options?: BenchmarkDirectoryOptions
+  ): Promise<BenchmarkDirectoryResult> {
+    await this.ensureSetup();
+    const { parser, ...opts } = options || {};
 
-    const results: ApexBenchmarkResult[] = [];
-    for (const apexfile of paths) {
-      const name = path.relative(root, apexfile).replace('.apex', '');
-      const benchmark = createAnonApexBenchmark(name, {
-        code: await readApexFromFile(apexfile, options),
-        connection: opts.connection,
-      });
+    this.setupParser(parser);
 
-      await benchmark.prepare();
+    const { benchmarks, errors } = await this.runBenchmarksInDir(
+      apexPath,
+      opts
+    );
 
-      const result = await this.runBenchmark(benchmark);
-
-      results.push(result);
-    }
-
-    return this.mergeResults(results);
+    return { benchmarks: await this.postProcessResults(benchmarks), errors };
   }
 
   /**
@@ -106,10 +120,10 @@ export class ApexBenchmarkService {
    */
   async benchmarkFile(
     apexFilePath: string,
-    options?: SingleApexBenchmarkOptions
-  ): Promise<ApexBenchmarkResult> {
+    options?: BenchmarkSingleOptions
+  ): Promise<BenchmarkSingleResult> {
     const absPath = await resolveApexPath(apexFilePath);
-    const code = await readApexFromFile(absPath, options);
+    const code = await readApexFromFile(absPath);
 
     return this.benchmarkCode(code, {
       ...options,
@@ -120,51 +134,114 @@ export class ApexBenchmarkService {
   /**
    * Run a benchmark on Anonymous Apex code.
    *
-   * @param name An identifier used in results.
    * @param apexCode Apex code to be benchmarked. Supports different formats.
    * @param options Additional options to customise the benchmark.
    * @returns An object with reported results and errors.
    */
   async benchmarkCode(
     apexCode: string,
-    options: SingleApexBenchmarkOptions
-  ): Promise<ApexBenchmarkResult> {
-    const opts = await this.ensureSetup();
-    const benchmark = createAnonApexBenchmark(options.name, {
-      code: await readApex(apexCode, options),
-      connection: opts.connection,
-    });
+    options: BenchmarkSingleOptions
+  ): Promise<BenchmarkSingleResult> {
+    await this.ensureSetup();
+    const { parser, ...opts } = options;
 
-    await benchmark.prepare(options?.actions);
+    this.setupParser(parser);
 
-    return this.runBenchmark(benchmark);
+    const { benchmarks, error } = await this.runBenchmark(apexCode, opts);
+
+    return { benchmarks: await this.postProcessResults(benchmarks), error };
   }
 
-  private async ensureSetup(): Promise<ApexBenchmarkServiceOptions> {
-    if (!this._options) {
-      return await this.setup();
+  /**
+   * Sync current stored results to configured data sources.
+   */
+  async save(): Promise<void> {
+    const run = RunContext.current;
+    const results = this.store.getItemsFromCursor();
+
+    if (results.length === 0 || !run.isPostgresAvailable()) return;
+
+    const orgContext = await run.org.getContext();
+
+    await run.forPostgres(mapper =>
+      mapper.saveApexResults(run, orgContext, results)
+    );
+
+    this.store.moveCursor();
+  }
+
+  private async ensureSetup(): Promise<RunContext> {
+    if (!this.setupCalled) await this.setup();
+    return RunContext.current;
+  }
+
+  private setupParser(options?: ApexScriptParserOptions): void {
+    this.scriptParser.setup(
+      RunContext.current.org.getNamespaceRegExp().map(ns => [ns, '']),
+      options
+    );
+  }
+
+  private async runBenchmarksInDir(
+    apexPath: string,
+    options: BenchmarkDirectoryOptions
+  ): Promise<BenchmarkDirectoryResult> {
+    const { root, paths } = await findApexInDir(apexPath);
+
+    const results: BenchmarkSingleResult[] = [];
+    for (const apexfile of paths) {
+      const code = await readApexFromFile(apexfile);
+      results.push(
+        await this.runBenchmark(code, {
+          ...options,
+          name: path.relative(root, apexfile).replace('.apex', ''),
+        })
+      );
     }
-    return this._options;
+
+    return this.mergeDirResults(results);
   }
 
   private async runBenchmark(
-    benchmark: AnonApexBenchmark
-  ): Promise<ApexBenchmarkResult> {
+    code: string,
+    options: BenchmarkSingleOptions
+  ): Promise<BenchmarkSingleResult> {
+    const { actions, ...opts } = options;
+    const benchmark = createAnonApexBenchmark({
+      ...opts,
+      code: this.scriptParser.parse(code),
+    });
+
+    await benchmark.prepare(actions);
+
     await benchmark.run();
 
     return {
       benchmarks: benchmark.results(),
-      errors: benchmark.errors(),
+      error: benchmark.error(),
     };
   }
 
-  private mergeResults(runs: ApexBenchmarkResult[]): ApexBenchmarkResult {
+  private mergeDirResults(
+    runs: BenchmarkSingleResult[]
+  ): BenchmarkDirectoryResult {
     return runs.reduce(
-      (acc, curr) => ({
-        benchmarks: acc.benchmarks.concat(curr.benchmarks),
-        errors: acc.errors.concat(curr.errors),
-      }),
-      { benchmarks: [], errors: [] } as ApexBenchmarkResult
+      (acc, curr) => {
+        acc.benchmarks.push(...curr.benchmarks);
+        if (curr.error) acc.errors.push(curr.error);
+        return acc;
+      },
+      { benchmarks: [], errors: [] } as BenchmarkDirectoryResult
     );
+  }
+
+  private async postProcessResults(
+    input: ApexBenchmarkResult[]
+  ): Promise<ApexBenchmarkResult[]> {
+    const benchmarks = await this.limitsMetrics.calculate(input);
+
+    this.store.addItems(benchmarks);
+
+    return benchmarks;
   }
 }

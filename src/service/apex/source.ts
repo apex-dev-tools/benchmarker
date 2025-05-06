@@ -4,8 +4,6 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { replaceTokensInString } from '../../services/tokenReplacement';
-import { ApexBenchmarkOptions } from '../../benchmark/apex';
 import { Stats } from 'node:fs';
 
 export interface ApexDirectory {
@@ -18,25 +16,12 @@ interface PathDescription {
   stats: Stats;
 }
 
-export async function readApex(
-  content: string,
-  options?: ApexBenchmarkOptions
-): Promise<string> {
-  const preCode = replaceTokensInString(content, options?.tokens);
-
-  return preCode;
-}
-
-export async function readApexFromFile(
-  filePath: string,
-  options?: ApexBenchmarkOptions
-): Promise<string> {
-  const apex = await fs.readFile(filePath, { encoding: 'utf8' });
-  return readApex(apex, options);
+export async function readApexFromFile(filePath: string): Promise<string> {
+  return fs.readFile(filePath, { encoding: 'utf8' });
 }
 
 export async function findApexInDir(dir: string): Promise<ApexDirectory> {
-  const { absolutePath, stats } = await describePath(dir); // describe
+  const { absolutePath, stats } = await describePath(dir);
 
   if (!stats.isDirectory()) {
     throw new Error(`${absolutePath} is not a directory.`);
