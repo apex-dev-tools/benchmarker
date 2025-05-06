@@ -1,9 +1,81 @@
-/**
+/*
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { TestResult } from '../src/database/entity/result';
-import { saveTestResult } from '../src/database/testResult';
+import * as dotenv from 'dotenv';
+import { Alert } from '../src/database/legacy/entity/alert';
+import { TestResult } from '../src/database/legacy/entity/result';
+import { LegacyDataMapper } from '../src/database/legacy/mapper';
+import { RunContext } from '../src/state/context';
+import { MockEnv, MockRunContext } from '../test/mocks';
+
+export function loadEnv(env?: MockEnv): void {
+  // replace with either .env file or set specifics
+  if (!env) {
+    dotenv.config({ override: true });
+  } else {
+    MockRunContext.replaceEnv(env);
+  }
+}
+
+export function restore(): void {
+  MockRunContext.clearEnv();
+  RunContext.reset();
+}
+
+export async function cleanDatabase(): Promise<void> {
+  const connection = (await getMapper()).dataSource;
+  const entities = connection.entityMetadatas;
+  const tableNames = entities
+    .map(entity => `${entity.schema}.${entity.tableName}`)
+    .join(', ');
+
+  await connection.query(`TRUNCATE ${tableNames} CASCADE;`);
+}
+
+export async function createSampleAlertTestData(
+  action: string,
+  flowName: string,
+  product: string,
+  testType: string,
+  count: number = 5
+): Promise<void> {
+  const results: TestResult[] = [];
+  for (let i = 0; i < count; i++) {
+    results.push(createTestResult(action, flowName, product, testType));
+  }
+
+  await saveTestResults(results);
+}
+
+export async function saveTestResults(results: TestResult[]): Promise<void> {
+  const pg = await getMapper();
+  await pg.testResults.save(results);
+}
+
+export async function loadTestResults(): Promise<TestResult[]> {
+  const pg = await getMapper();
+  return pg.testResults.find();
+}
+
+export async function loadAlerts(
+  flowName: string,
+  action: string
+): Promise<Alert[]> {
+  const pg = await getMapper();
+  return pg.alerts.findBy({
+    flowName,
+    action,
+  });
+}
+
+async function getMapper(): Promise<LegacyDataMapper> {
+  const pg = RunContext.current.pgLegacy?.mapper;
+  if (!pg) {
+    throw new Error('Database not connected.');
+  }
+  return pg;
+}
 
 function createTestResult(
   action: string,
@@ -27,19 +99,4 @@ function createTestResult(
   r.futureCalls = 0;
 
   return r;
-}
-
-export async function createSampleAlertTestData(
-  action: string,
-  flowName: string,
-  product: string,
-  testType: string,
-  count: number = 5
-): Promise<void> {
-  const results: TestResult[] = [];
-  for (let i = 0; i < count; i++) {
-    results.push(createTestResult(action, flowName, product, testType));
-  }
-
-  await saveTestResult(results);
 }

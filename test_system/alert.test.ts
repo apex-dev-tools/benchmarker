@@ -10,22 +10,29 @@ import {
   Thresholds,
   TransactionProcess,
   TransactionTestTemplate,
-} from '../../src';
-import { Alert } from '../../src/database/entity/alert';
-import { cleanDatabase, getAlerts } from '../database';
-import { createSampleAlertTestData } from '../helper';
-import { config } from 'dotenv';
+} from '../src';
+import { Alert } from '../src/database/legacy/entity/alert';
+import {
+  cleanDatabase,
+  createSampleAlertTestData,
+  loadAlerts,
+  loadEnv,
+  restore,
+} from './helper';
 
-describe('Sample Test For Alert Handling', () => {
+describe('alert', () => {
   let test: TransactionTestTemplate;
-  config();
 
   before(async () => {
-    await cleanDatabase();
+    restore();
+    loadEnv({
+      BENCH_METRICS: 'true',
+      BENCH_POSTGRES_LEGACY: 'true',
+    });
 
-    if (process.env.STORE_ALERTS === undefined) {
-      process.env.STORE_ALERTS = 'true';
-    }
+    test = await TransactionProcess.build('testProduct');
+
+    await cleanDatabase();
 
     await createSampleAlertTestData(
       'testActionOne',
@@ -47,24 +54,20 @@ describe('Sample Test For Alert Handling', () => {
     );
   });
 
-  beforeEach(async () => {
-    test = await TransactionProcess.build('testProduct');
-  });
-
   it('should create alert when we used default threshold and store alerts.', async () => {
     // Act
     await TransactionProcess.executeTestStep(
       test,
       await createApexExecutionTestStepFlow(
         test.connection,
-        __dirname + '/alert.apex',
+        __dirname + '/scripts/alert.apex',
         { flowName: 'sampleTestFlow', action: 'testActionOne' }
       )
     );
     await saveResults(test, test.flowStepsResults);
 
     // Assert
-    const alert: Alert[] = await getAlerts('sampleTestFlow', 'testActionOne');
+    const alert: Alert[] = await loadAlerts('sampleTestFlow', 'testActionOne');
     expect(alert).to.be.ok;
     expect(
       alert,
@@ -74,7 +77,7 @@ describe('Sample Test For Alert Handling', () => {
       alert,
       `Alert is expected to have 1 item but it contains ${alert.length}.`
     ).to.have.lengthOf(1);
-    expect(alert.at(0)?.flow_name).to.be.equal('sampleTestFlow');
+    expect(alert.at(0)?.flowName).to.be.equal('sampleTestFlow');
     expect(alert.at(0)?.action).to.be.equal('testActionOne');
   });
 
@@ -97,7 +100,7 @@ describe('Sample Test For Alert Handling', () => {
       test,
       await createApexExecutionTestStepFlow(
         test.connection,
-        __dirname + '/alert.apex',
+        __dirname + '/scripts/alert.apex',
         { flowName: 'sampleTestFlow', action: 'testActionTwo' }
       ),
       alertInfo
@@ -105,7 +108,7 @@ describe('Sample Test For Alert Handling', () => {
     await saveResults(test, test.flowStepsResults);
 
     // Assert
-    const alert: Alert[] = await getAlerts('sampleTestFlow', 'testActionTwo');
+    const alert: Alert[] = await loadAlerts('sampleTestFlow', 'testActionTwo');
     expect(alert).to.be.ok;
     expect(
       alert,
@@ -115,7 +118,7 @@ describe('Sample Test For Alert Handling', () => {
       alert,
       `Alert is expected to have 1 item but it contains ${alert.length}.`
     ).to.have.lengthOf(1);
-    expect(alert.at(0)?.flow_name).to.be.equal('sampleTestFlow');
+    expect(alert.at(0)?.flowName).to.be.equal('sampleTestFlow');
     expect(alert.at(0)?.action).to.be.equal('testActionTwo');
   });
 
@@ -129,7 +132,7 @@ describe('Sample Test For Alert Handling', () => {
       test,
       await createApexExecutionTestStepFlow(
         test.connection,
-        __dirname + '/alert.apex',
+        __dirname + '/scripts/alert.apex',
         { flowName: 'sampleTestFlow', action: 'testActionThree' }
       ),
       alertInfo
@@ -137,7 +140,10 @@ describe('Sample Test For Alert Handling', () => {
     await saveResults(test, test.flowStepsResults);
 
     // Assert
-    const alert: Alert[] = await getAlerts('sampleTestFlow', 'testActionThree');
+    const alert: Alert[] = await loadAlerts(
+      'sampleTestFlow',
+      'testActionThree'
+    );
     expect(alert).to.be.ok;
     expect(
       alert,

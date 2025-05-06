@@ -3,52 +3,46 @@
  */
 
 import { expect } from 'chai';
-import {
-  connectToSalesforceOrg,
-  getSalesforceAuthInfoFromEnvVars,
-} from '../src/services/salesforce/connection';
 import { ApexBenchmarkService } from '../src/service/apex';
-import { Connection } from '@salesforce/core';
+import { restore } from './helper';
 
 // Temporary system test for benchmark service
 // Bypasses public APIs
 
-describe('services/apex', () => {
-  let connection: Connection;
+describe('service/apex', () => {
+  let apex: ApexBenchmarkService;
 
   before(async () => {
-    connection = await connectToSalesforceOrg(
-      getSalesforceAuthInfoFromEnvVars()
-    );
+    restore();
+    apex = new ApexBenchmarkService();
+    await apex.setup({
+      global: {
+        projectId: 'MockProduct',
+      },
+    });
   });
 
   it('should execute legacy apex script', async () => {
-    const apex = new ApexBenchmarkService();
-    await apex.setup({ connection });
-
     const result = await apex.benchmarkFile(__dirname + '/scripts/basic.apex');
 
-    expect(result.errors.length).to.eql(0);
+    expect(result.error).to.be.undefined;
     expect(result.benchmarks.length).to.eql(1);
     const benchmark = result.benchmarks[0];
     expect(benchmark.name).to.eql('basic');
-    expect(benchmark.action).to.eql('1');
-    expect(benchmark.limits.cpuTime).to.be.above(0);
-    expect(benchmark.limits.heapSize).to.be.above(0);
+    expect(benchmark.action.name).to.eql('1');
+    expect(benchmark.data.cpuTime).to.be.above(0);
+    expect(benchmark.data.heapSize).to.be.above(0);
   });
 
   it('should execute simple apex script', async () => {
-    const apex = new ApexBenchmarkService();
-    await apex.setup({ connection });
-
     const result = await apex.benchmarkFile(__dirname + '/scripts/simple.apex');
 
-    expect(result.errors.length).to.eql(0);
+    expect(result.error).to.be.undefined;
     expect(result.benchmarks.length).to.eql(1);
     const benchmark = result.benchmarks[0];
     expect(benchmark.name).to.eql('simple');
-    expect(benchmark.action).to.eql('1');
-    expect(benchmark.limits.cpuTime).to.be.above(0);
-    expect(benchmark.limits.heapSize).to.be.above(0);
+    expect(benchmark.action.name).to.eql('1');
+    expect(benchmark.data.cpuTime).to.be.above(0);
+    expect(benchmark.data.heapSize).to.be.above(0);
   });
 });

@@ -3,15 +3,21 @@
  */
 
 import { expect } from 'chai';
-import { connectToSalesforceOrg } from '../src/services/salesforce/connection';
+import { connectToSalesforceOrg } from '../src/salesforce/org/connection';
+import { loadEnv, restore } from './helper';
 
-describe('Connection', function () {
-  before(async function () {});
+describe('connection', () => {
+  let username: string;
+
+  before(() => {
+    restore();
+    loadEnv();
+    username = process.env.BENCH_ORG_USERNAME || 'bench_testing';
+  });
 
   it('should connect with alias', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
     });
     expect(connection.query('Select Id From Account')).to.not.be.undefined;
   });
@@ -19,7 +25,6 @@ describe('Connection', function () {
   it('should not connect with bad alias', async () => {
     try {
       await connectToSalesforceOrg({
-        isSFDX: true,
         username: 'bad',
       });
       expect.fail();
@@ -33,12 +38,10 @@ describe('Connection', function () {
 
   it('should connect with username', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
     });
 
     const connection2 = await connectToSalesforceOrg({
-      isSFDX: true,
       username: connection.getUsername()!,
     });
 
@@ -47,8 +50,7 @@ describe('Connection', function () {
 
   it('should connect at requested version', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
       version: '60.0',
     });
 
@@ -57,8 +59,7 @@ describe('Connection', function () {
 
   it('should connect with username/password', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
     });
     const userIdResults = await connection.query(
       `Select Id from User where Username='${connection.getUsername()}'`
@@ -87,8 +88,7 @@ describe('Connection', function () {
 
   it('should not connect with username/password with bad password', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
     });
     const userIdResults = await connection.query(
       `Select Id from User where Username='${connection.getUsername()}'`
@@ -122,8 +122,7 @@ describe('Connection', function () {
 
   it('should connect with username/password at requested version', async () => {
     const connection = await connectToSalesforceOrg({
-      isSFDX: true,
-      username: 'bench_testing',
+      username,
     });
     const userIdResults = await connection.query(
       `Select Id from User where Username='${connection.getUsername()}'`
