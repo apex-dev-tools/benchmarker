@@ -2,14 +2,12 @@
  * Copyright (c) 2019 Certinia Inc. All rights reserved.
  */
 
+import { apexService } from '..';
 import {
   TransactionTestTemplate,
   TestFlowOutput,
-  GovernorMetricsResult,
 } from './transactionTestTemplate';
-import { reportResults } from '../services/result';
-import { TestResult } from '../database/entity/result';
-import { TestResultOutput } from '../services/result/output';
+import Table from 'cli-table';
 
 /**
  * Retrieve peformance metrics from a tests execution and save them
@@ -20,28 +18,40 @@ export const saveResults = async (
   processTestTemplate: TransactionTestTemplate,
   results: TestFlowOutput[]
 ) => {
-  const tests: TestResultOutput[] = results.map(
-    (flowOutput: TestFlowOutput) => {
-      const r: TestResult = new TestResult();
-      r.flowName = flowOutput.testStepDescription.flowName;
-      r.action = flowOutput.testStepDescription.action;
-      r.product = processTestTemplate.product;
-      r.testType = processTestTemplate.testType;
+  if (results.length > 0) {
+    console.log(createTable(results));
+  }
 
-      const limits: GovernorMetricsResult = flowOutput.result;
-      r.duration = limits.timer;
-      r.cpuTime = limits.cpuTime;
-      r.dmlRows = limits.dmlRows;
-      r.dmlStatements = limits.dmlStatements;
-      r.heapSize = limits.heapSize;
-      r.queryRows = limits.queryRows;
-      r.soqlQueries = limits.soqlQueries;
-      r.queueableJobs = limits.queueableJobs;
-      r.futureCalls = limits.futureCalls;
-
-      return { result: r, alertInfo: flowOutput.alertInfo };
-    }
-  );
-
-  await reportResults(processTestTemplate.connection, tests);
+  await apexService.save();
 };
+
+function createTable(data: TestFlowOutput[]): string {
+  return new Table({
+    head: [
+      'Flow Name',
+      'Action',
+      'Duration (ms)',
+      'CPU time (ms)',
+      'DML rows',
+      'DML statements',
+      'Heap size (bytes)',
+      'Query rows',
+      'SOQL queries',
+      'Queueables',
+      'Futures',
+    ],
+    rows: data.map(({ testStepDescription, result }) => [
+      testStepDescription.flowName,
+      testStepDescription.action,
+      String(result.timer),
+      String(result.cpuTime),
+      String(result.dmlRows),
+      String(result.dmlStatements),
+      String(result.heapSize),
+      String(result.queryRows),
+      String(result.soqlQueries),
+      String(result.queueableJobs),
+      String(result.futureCalls),
+    ]),
+  }).toString();
+}

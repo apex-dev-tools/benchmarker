@@ -1,15 +1,19 @@
 /*
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
-import { SalesforceConnection } from '../services/salesforce/connection';
+
 import {
   FlowStep,
   TestStepDescription,
   TestFlowOptions,
   TestFlowOutput,
+  AlertInfo,
+  TokenReplacement,
 } from './transactionTestTemplate';
 import { apexService } from '..';
-import { ApexBenchmarkResult } from '../service/apex';
+import { Connection } from '@salesforce/core';
+import { BenchmarkSingleResult } from '../service/apex';
+import { LimitsContext } from '../benchmark/apex/schemas';
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
@@ -19,24 +23,30 @@ import { ApexBenchmarkResult } from '../service/apex';
  * @param [testFlowOptions] optional, replaces values in the Apex scripts, for examples datetimes values
  */
 export const createApexExecutionTestStepFlow = async (
-  connection: SalesforceConnection,
+  connection: Connection,
   apexScriptPath: string,
   testStepDescription: TestStepDescription,
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
-  return async () => {
+  return async alertInfo => {
     const { flowName, action } = testStepDescription;
-    console.log(`Executing ${flowName} - ${action} performance test...`);
+    console.log(`Executing '${flowName} - ${action}' performance test...`);
 
     const result = await apexService.benchmarkFile(apexScriptPath, {
       name: flowName,
-      actions: [action],
-      tokens: testFlowOptions?.tokenMap,
+      actions: [
+        {
+          name: action,
+          context: toLimitsContext(alertInfo),
+        },
+      ],
+      parser: { replace: toReplaceDict(testFlowOptions?.tokenMap) },
     });
 
-    return toFlowOutput(testStepDescription, result);
+    return toTestFlowOutput(testStepDescription, result);
   };
 };
+
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
  * @param connection object to handle the connection to a Salesforce Org
@@ -44,42 +54,76 @@ export const createApexExecutionTestStepFlow = async (
  * @param testStepDescription adds information about the name of the flow to be executed and the action perfromed
  */
 export const createApexExecutionTestStepFlowFromApex = async (
-  connection: SalesforceConnection,
+  connection: Connection,
   apexCode: string,
   testStepDescription: TestStepDescription
 ): Promise<FlowStep> => {
-  return async () => {
+  return async alertInfo => {
     const { flowName, action } = testStepDescription;
-    console.log(`Executing ${flowName} - ${action} performance test...`);
+    console.log(`Executing '${flowName} - ${action}' performance test...`);
 
     const result = await apexService.benchmarkCode(apexCode, {
       name: flowName,
-      actions: [action],
+      actions: [
+        {
+          name: action,
+          context: toLimitsContext(alertInfo),
+        },
+      ],
     });
 
-    return toFlowOutput(testStepDescription, result);
+    return toTestFlowOutput(testStepDescription, result);
   };
 };
 
-function toFlowOutput(
+// Compatibility functions to new API
+
+function toLimitsContext(alertInfo?: AlertInfo): LimitsContext {
+  const { storeAlerts, thresholds } = alertInfo || {};
+
+  return {
+    enableMetrics: storeAlerts,
+    thresholds: {
+      cpuTime: thresholds?.cpuTimeThreshold,
+      dmlRows: thresholds?.dmlRowThreshold,
+      dmlStatements: thresholds?.dmlStatementThreshold,
+      heapSize: thresholds?.heapSizeThreshold,
+      queryRows: thresholds?.queryRowsThreshold,
+      soqlQueries: thresholds?.soqlQueriesThreshold,
+    },
+  };
+}
+
+function toReplaceDict(
+  tokens?: TokenReplacement[]
+): Record<string, string> | undefined {
+  return tokens?.reduce<Record<string, string>>((dict, { token, value }) => {
+    dict[token] = value;
+    return dict;
+  }, {});
+}
+
+function toTestFlowOutput(
   testStepDescription: TestStepDescription,
-  result: ApexBenchmarkResult
+  result: BenchmarkSingleResult
 ): TestFlowOutput {
   const { flowName, action } = testStepDescription;
-  if (result.errors.length != 0) {
-    const { error } = result.errors[0];
+  if (result.error) {
+    const { error } = result.error;
     console.log(
-      `Failure during ${flowName} - ${action} process execution: ${error.message}`
+      `Failure during '${flowName} - ${action}' process execution: ${error.message}`
     );
     throw error;
   }
 
   if (result.benchmarks.length == 0) {
-    throw new Error(`No results available for ${flowName} - ${action}.`);
+    throw new Error(`No results available for '${flowName} - ${action}'.`);
   }
+
+  const { duration, ...data } = result.benchmarks[0].data;
 
   return {
     testStepDescription,
-    result: result.benchmarks[0].limits,
+    result: { ...data, timer: duration },
   };
 }

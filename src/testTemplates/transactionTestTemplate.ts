@@ -3,12 +3,8 @@
  */
 
 import { apexService } from '..';
-import {
-  connectToSalesforceOrg,
-  getSalesforceAuthInfoFromEnvVars,
-  SalesforceConnection,
-} from '../services/salesforce/connection';
-import { TokenReplacement } from '../services/tokenReplacement';
+import { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection';
+import { RunContext } from '../state/context';
 
 export interface GovernorMetricsResult {
   timer: number;
@@ -96,16 +92,27 @@ export class AlertInfo {
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
   result: GovernorMetricsResult;
-  alertInfo?: AlertInfo;
   error?: string;
 }
 
 /**
  * A function to gather information about a test step
  */
-export type FlowStep = () => Promise<TestFlowOutput>;
+export type FlowStep = (alertInfo?: AlertInfo) => Promise<TestFlowOutput>;
+
+export interface TokenReplacement {
+  token: string;
+  value: string;
+}
 
 export interface TestFlowOptions {
+  /**
+   * String value replacement applied on Apex code.
+   *
+   * @example
+   * tokenMap: [{ token: '%var', value: '100' }]
+   * // Integer i = %var; -> Integer i = 100;
+   */
   tokenMap?: TokenReplacement[];
 }
 
@@ -125,14 +132,13 @@ export namespace TransactionProcess {
     processTestTemplate.flowStepsResults = [];
     processTestTemplate.testType = testType;
 
-    const connection = await connectToSalesforceOrg(
-      getSalesforceAuthInfoFromEnvVars()
-    );
-    processTestTemplate.connection = connection;
-
     await apexService.setup({
-      connection,
+      global: {
+        projectId: product,
+      },
     });
+
+    processTestTemplate.connection = RunContext.current.org.connection;
 
     return processTestTemplate;
   };
@@ -148,8 +154,7 @@ export namespace TransactionProcess {
     alertInfo?: AlertInfo
   ) => {
     // allow fatal errors like compile error to fail unit tests
-    const result: TestFlowOutput = await testStep();
-    result.alertInfo = alertInfo;
+    const result: TestFlowOutput = await testStep(alertInfo);
     processTestTemplate.flowStepsResults.push(result);
   };
 }
