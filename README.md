@@ -23,7 +23,7 @@ Available scripts:
 
 ### Testing
 
-Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI, and have a Dev Hub set up. To use another type of org, multiple environment variables need setting with credentials, see `.env.example` and `test_system/.env`.
+Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI, and have a Dev Hub set up. To use an org with username and password, more environment variables need setting, see `.env.example` and `test_system/.env`.
 
 1. Create a scratch org:
 
@@ -33,7 +33,7 @@ Running system tests requires a Salesforce Org and Docker. The instructions belo
 
 1. Start the docker database with `docker compose up -d`. It is accessible by the host on port 5433, and via adminer control panel at `localhost:8081` to review results.
 
-1. (Run once) Init system test env file with `npm run test:system:init`. Uncomment `SFDX_USERNAME=` and update to `SFDX_USERNAME=bench_testing`. Optionally set any other variables for all tests to use, like `STORE_ALERTS`.
+1. (Run once) Init system test env file with `npm run test:system:init`. Uncomment `BENCH_ORG_USERNAME=` and update to `BENCH_ORG_USERNAME=bench_testing`.
 
 1. Finally, run tests:
 
