@@ -4,7 +4,7 @@
 
 import { Connection } from '@salesforce/core';
 import { postSoapRequest } from './request';
-import { escapeXml } from '../../text/xml';
+import { escapeXml } from '../../parser/xml';
 import { apexDebugHeader, DebugLogInfo } from './debug';
 
 export interface ExecuteAnonymousResponse {

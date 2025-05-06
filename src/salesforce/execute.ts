@@ -8,7 +8,14 @@ import {
   executeAnonymousSoap,
 } from './soap/executeAnonymous';
 import { DebugLogInfo } from './soap/debug';
-import { NamedSchema, parseType } from '../text/json';
+import { NamedSchema, parseType } from '../parser/json';
+
+export interface ExecuteAnonymousOptions {
+  /**
+   * Set debug logging behaviour.
+   */
+  debug?: DebugLogInfo[];
+}
 
 export const defaultDataPattern = /-_(.*)_-/;
 
@@ -24,9 +31,9 @@ export class ExecuteAnonymousCompileError extends ExecuteAnonymousError {}
 export async function executeAnonymous(
   connection: Connection,
   apexCode: string,
-  debugTraces?: DebugLogInfo[]
+  options?: ExecuteAnonymousOptions
 ): Promise<ExecuteAnonymousResponse> {
-  return executeAnonymousSoap(connection, apexCode, debugTraces);
+  return executeAnonymousSoap(connection, apexCode, options?.debug);
 }
 
 export function extractAssertionData<T>(

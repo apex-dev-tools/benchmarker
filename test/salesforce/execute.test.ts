@@ -4,25 +4,28 @@
 
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
+import {
+  MockTestOrgData,
+  TestContext as SfTestContext,
+} from '@salesforce/core/testSetup';
 import { AuthInfo, Connection } from '@salesforce/core';
 import {
   ExecuteAnonymousResponse,
   ExecuteAnonymousSoapResponse,
-} from '../../src/org/soap/executeAnonymous';
+} from '../../src/salesforce/soap/executeAnonymous';
 import { HttpRequest } from '@jsforce/jsforce-node';
 import {
   DebugLogCategory,
   DebugLogCategoryLevel,
-} from '../../src/org/soap/debug';
+} from '../../src/salesforce/soap/debug';
 import {
   assertAnonymousError,
   executeAnonymous,
   ExecuteAnonymousCompileError,
   ExecuteAnonymousError,
   extractAssertionData,
-} from '../../src/org/execute';
-import { NamedSchema } from '../../src/text/json';
+} from '../../src/salesforce/execute';
+import { NamedSchema } from '../../src/parser/json';
 
 type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
@@ -72,13 +75,13 @@ function execAnonSoapResponse(
   };
 }
 
-describe('org/execute', () => {
+describe('salesforce/execute', () => {
   afterEach(() => {
     sinon.restore();
   });
 
   describe('executeAnonymous()', () => {
-    const $$ = new TestContext({ sinon });
+    const $$ = new SfTestContext({ sinon });
     let testData: MockTestOrgData;
     let conn: Connection;
 
@@ -195,12 +198,14 @@ describe('org/execute', () => {
       );
       $$.fakeConnectionRequest = requestStub;
 
-      const response = await executeAnonymous(conn, '', [
-        {
-          category: DebugLogCategory.System,
-          level: DebugLogCategoryLevel.Debug,
-        },
-      ]);
+      const response = await executeAnonymous(conn, '', {
+        debug: [
+          {
+            category: DebugLogCategory.System,
+            level: DebugLogCategoryLevel.Debug,
+          },
+        ],
+      });
 
       expect(requestStub).to.have.been.calledOnce;
       expect(requestStub.args[0][0]?.body).to.include(
