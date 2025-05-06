@@ -1,46 +1,35 @@
-/** @ignore */
 /*
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
-import {
-  DEFAULT_NUMERIC_VALUE,
-  DEFAULT_STRING_VALUE,
-} from '../../shared/constants';
 
 @Entity({ name: 'alert' })
 export class Alert extends PerformanceBaseEntity {
-  [key: string]: number | string | Date | boolean | undefined;
-
   @Column('integer', { nullable: true, name: 'test_result_id' })
-  public testResultId = DEFAULT_NUMERIC_VALUE;
+  public testResultId: number;
 
   @Column('text', { nullable: true, name: 'action' })
-  public action = DEFAULT_STRING_VALUE;
+  public action: string;
 
   @Column('text', { nullable: true, name: 'flow_name' })
-  public flowName = DEFAULT_STRING_VALUE;
+  public flowName: string;
 
   @Column('integer', { nullable: true, name: 'cpu_time_degraded' })
-  public cpuTimeDegraded = DEFAULT_NUMERIC_VALUE;
+  public cpuTimeDegraded: number;
 
   @Column('integer', { nullable: true, name: 'dml_rows_degraded' })
-  public dmlRowsDegraded = DEFAULT_NUMERIC_VALUE;
+  public dmlRowsDegraded: number;
 
   @Column('integer', { nullable: true, name: 'dml_statements_degraded' })
-  public dmlStatementsDegraded = DEFAULT_NUMERIC_VALUE;
+  public dmlStatementsDegraded: number;
 
   @Column('integer', { nullable: true, name: 'heap_size_degraded' })
-  public heapSizeDegraded = DEFAULT_NUMERIC_VALUE;
+  public heapSizeDegraded: number;
 
   @Column('integer', { nullable: true, name: 'query_rows_degraded' })
-  public queryRowsDegraded = DEFAULT_NUMERIC_VALUE;
+  public queryRowsDegraded: number;
 
   @Column('integer', { nullable: true, name: 'soql_queries_degraded' })
-  public soqlQueriesDegraded = DEFAULT_NUMERIC_VALUE;
-
-  public constructor() {
-    super();
-  }
+  public soqlQueriesDegraded: number;
 }

@@ -1,35 +1,27 @@
-/** @ignore */
 /**
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
-import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 
 @Entity({ name: 'package_info' })
 export class PackageInfo extends PerformanceBaseEntity {
-  [key: string]: number | string | Date | boolean | undefined | (() => string);
-
   @Column('text', { nullable: true, name: 'package_name' })
-  public packageName = '';
+  public packageName: string;
 
   @Column('text', { nullable: true, name: 'package_version' })
-  public packageVersion = '';
+  public packageVersion: string;
 
   @Column('text', { nullable: true, name: 'package_version_id' })
-  public packageVersionId = '';
+  public packageVersionId: string;
 
   @Column('text', { nullable: true, name: 'package_id' })
-  public packageId = '';
+  public packageId: string;
 
   @Column('boolean', { nullable: true, name: 'is_beta' })
-  public isBeta = false;
+  public isBeta: boolean;
 
   @Column('integer', { nullable: true, name: 'beta_name' })
-  public betaName = DEFAULT_NUMERIC_VALUE;
-
-  public constructor() {
-    super();
-  }
+  public betaName: number;
 }

@@ -1,76 +1,68 @@
-/** @ignore */
 /**
  * Copyright (c) 2020 FinancialForce.com, inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
-import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
 
 @Entity({ name: 'test_result' })
 export class TestResult extends PerformanceBaseEntity {
-  [key: string]: number | string | Date | boolean | undefined;
-
   @Column('integer', { nullable: true })
-  public duration = DEFAULT_NUMERIC_VALUE;
+  public duration: number;
 
   @Column('integer', { nullable: true, name: 'target_value' })
-  public targetValue = DEFAULT_NUMERIC_VALUE;
+  public targetValue: number;
 
   @Column('text', { nullable: true })
-  public action = '';
+  public action: string;
 
   @Column('text', { nullable: true, name: 'flow_name' })
-  public flowName = '';
+  public flowName: string;
 
   @Column('text', { nullable: true, name: 'error' })
-  public error = '';
+  public error: string;
 
   @Column('text', { nullable: true })
-  public product = '';
+  public product: string;
 
   @Column('boolean', { nullable: true, name: 'incognito_browser' })
-  public incognitoBrowser = false;
+  public incognitoBrowser: boolean;
 
   @Column('integer', { nullable: true, name: 'speed_index' })
-  public lighthouseSpeedIndex = DEFAULT_NUMERIC_VALUE;
+  public lighthouseSpeedIndex: number;
 
   @Column('integer', { nullable: true, name: 'time_to_interactive' })
-  public lighthouseTimeToInteractive = DEFAULT_NUMERIC_VALUE;
+  public lighthouseTimeToInteractive: number;
 
   @Column('integer', { nullable: true, name: 'dlp_lines' })
-  public dlpLines = DEFAULT_NUMERIC_VALUE;
+  public dlpLines: number;
 
   @Column('integer', { nullable: true, name: 'dp_documents' })
-  public dpDocuments = DEFAULT_NUMERIC_VALUE;
+  public dpDocuments: number;
 
   @Column('text', { nullable: true, name: 'test_type' })
-  public testType = '';
+  public testType: string;
 
   @Column('integer', { nullable: true, name: 'cpu_time' })
-  public cpuTime = DEFAULT_NUMERIC_VALUE;
+  public cpuTime: number;
 
   @Column('integer', { nullable: true, name: 'dml_rows' })
-  public dmlRows = DEFAULT_NUMERIC_VALUE;
+  public dmlRows: number;
 
   @Column('integer', { nullable: true, name: 'dml_statements' })
-  public dmlStatements = DEFAULT_NUMERIC_VALUE;
+  public dmlStatements: number;
 
   @Column('integer', { nullable: true, name: 'heap_size' })
-  public heapSize = DEFAULT_NUMERIC_VALUE;
+  public heapSize: number;
 
   @Column('integer', { nullable: true, name: 'query_rows' })
-  public queryRows = DEFAULT_NUMERIC_VALUE;
+  public queryRows: number;
 
   @Column('integer', { nullable: true, name: 'soql_queries' })
-  public soqlQueries = DEFAULT_NUMERIC_VALUE;
+  public soqlQueries: number;
 
   @Column('integer', { nullable: true, name: 'queueable_jobs' })
-  public queueableJobs = DEFAULT_NUMERIC_VALUE;
+  public queueableJobs: number;
 
   @Column('integer', { nullable: true, name: 'future_calls' })
-  public futureCalls = DEFAULT_NUMERIC_VALUE;
-
-  public constructor() {
-    super();
-  }
+  public futureCalls: number;
 }
