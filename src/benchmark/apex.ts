@@ -2,38 +2,38 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { AnonApexBenchmark, AnonApexBenchmarkParams } from './apex/anon';
+import { DegLimitsMetric } from '../metrics/limits/deg';
+import {
+  AnonApexAction,
+  AnonApexBenchmark,
+  AnonApexBenchmarkOptions,
+  AnonApexBenchmarkResult,
+} from './apex/anon';
 import { LegacyAnonApexBenchmark } from './apex/legacy';
-import { TokenReplacement } from '../services/tokenReplacement';
+import { LimitsAnonApexBenchmark } from './apex/limits';
+import { GovernorLimits, LimitsContext } from './apex/schemas';
 
-export interface ApexBenchmarkOptions {
-  /**
-   * Map of string value replacement applied on Apex code.
-   *
-   * @example
-   * tokens: [{ token: '%var', value: '100' }]
-   * // Integer i = %var; -> Integer i = 100;
-   */
-  tokens?: TokenReplacement[];
-  /**
-   * List of namespaces to be removed from any Apex code.
-   *
-   * Removes the need to write separate benchmark scripts for managed and
-   * unmanaged executions.
-   */
-  unmanagedNamespaces?: string[];
-}
+export type ApexBenchmark = AnonApexBenchmark<GovernorLimits, LimitsContext>;
+export type ApexAction = AnonApexAction<LimitsContext>;
+export type ApexMetrics = {
+  deg?: DegLimitsMetric;
+};
+export type ApexBenchmarkResult = AnonApexBenchmarkResult<
+  GovernorLimits,
+  LimitsContext
+> &
+  ApexMetrics;
 
 export function createAnonApexBenchmark(
-  name: string,
-  params: AnonApexBenchmarkParams
-): AnonApexBenchmark {
+  options: AnonApexBenchmarkOptions
+): ApexBenchmark {
+  const { code } = options;
   if (
-    params.code.includes('new GovernorLimits()') &&
-    params.code.includes("System.assert(false, '-_'")
+    code.includes('new GovernorLimits()') &&
+    code.includes("System.assert(false, '-_'")
   ) {
-    return new LegacyAnonApexBenchmark(name, params);
+    return new LegacyAnonApexBenchmark(options);
   }
 
-  return new AnonApexBenchmark(name, params);
+  return new LimitsAnonApexBenchmark(options);
 }

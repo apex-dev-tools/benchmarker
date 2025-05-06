@@ -12,18 +12,18 @@ import {
 import { GovernorLimits, LimitsContext, limitsSchema } from './schemas';
 
 /**
- * Old (deprecated) script structure, with manual tracking and return of limits.
+ * Standard limits benchmark, with optional start/stop calls in apex. If not
+ * present, the whole script is assumed to be a benchmark and the code is
+ * wrapped with these calls.
  *
  * @example Expected test format
  * // setup
- * GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
+ * benchmark.start();
  * // Apex code to test
- * GovernorLimits finalLimits = (new GovernorLimits()).getCurrentGovernorLimits();
- * GovernorLimits limitsDiff = (new GovernorLimits()).getLimitsDiff(initialLimits, finalLimits);
+ * benchmark.stop();
  * // teardown, extra assertions
- * System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-');
  */
-export class LegacyAnonApexBenchmark extends AnonApexBenchmark<
+export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
   GovernorLimits,
   LimitsContext
 > {
@@ -34,11 +34,25 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark<
   protected async prepareTransactions(
     actions?: AnonApexAction<LimitsContext>[]
   ): Promise<AnonApexTransaction<LimitsContext>[]> {
+    const { code } = this.options;
+
+    let content;
+    if (!code.includes('benchmark.start(')) {
+      content = 'benchmark.start();';
+    }
+    if (!code.includes('benchmark.stop(')) {
+      content += code + 'benchmark.stop();';
+    }
+
     return [
       {
         action: (actions && actions[0]) || { name: '1' },
         apexCode:
-          require('../../../scripts/apex/limits.apex') + this.options.code,
+          require('../../../scripts/apex/limits.apex') +
+          require('../../../scripts/apex/benchmark.apex') +
+          'benchmark.begin();' +
+          content +
+          'benchmark.end();',
         type: AnonApexTransactionType.Data,
       },
     ];

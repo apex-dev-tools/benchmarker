@@ -1,16 +1,6 @@
 public class Benchmark {
-	private String name;
-	private String action;
 	private GovernorLimits initialLimits;
 	private GovernorLimits limits;
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setAction(String action) {
-		this.action = action;
-	}
 
 	public void begin() {}
 
@@ -19,7 +9,6 @@ public class Benchmark {
 	}
 
 	public void start(String action) {
-		this.action = action;
 		this.start();
 	}
 
@@ -29,7 +18,7 @@ public class Benchmark {
 	}
 
 	public void end() {
-		System.assert(false, '-_' + JSON.serialize(this) + '_-');
+		System.assert(false, '-_' + JSON.serialize(limits) + '_-');
 	}
 }
 

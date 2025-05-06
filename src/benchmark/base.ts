@@ -2,36 +2,35 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-export interface BenchmarkParams {}
-
-export interface BenchmarkResult {
+export interface BenchmarkAction {
   name: string;
-  action: string;
+}
+
+export interface BenchmarkResult<A extends BenchmarkAction> {
+  name: string;
+  action: A;
 }
 
 export interface ErrorResult {
   name: string;
-  action: string;
+  actionName: string;
   error: Error;
 }
 
 export abstract class Benchmark<
-  P extends BenchmarkParams,
-  R extends BenchmarkResult,
+  A extends BenchmarkAction,
+  R extends BenchmarkResult<A>,
 > {
-  public name: string;
-  protected params: P;
+  name: string;
   protected _results: R[];
-  protected _errors: ErrorResult[];
+  protected _error?: ErrorResult;
 
-  constructor(name: string, params: P) {
+  constructor(name: string) {
     this.name = name;
-    this.params = params;
     this._results = [];
-    this._errors = [];
   }
 
-  abstract prepare(actions?: string[]): Promise<void>;
+  abstract prepare(actions?: A[]): Promise<void>;
 
   abstract run(): Promise<void>;
 
@@ -39,12 +38,12 @@ export abstract class Benchmark<
     return this._results;
   }
 
-  errors(): ErrorResult[] {
-    return this._errors;
+  error(): ErrorResult | undefined {
+    return this._error;
   }
 
   protected reset(): void {
     this._results = [];
-    this._errors = [];
+    this._error = undefined;
   }
 }

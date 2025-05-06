@@ -3,7 +3,7 @@
  */
 
 import { expect } from 'chai';
-import { escapeXml } from '../../src/text/xml';
+import { escapeXml } from '../../src/parser/xml';
 
 describe('text/xml', () => {
   it('should replace special xml characters with escape codes', () => {
