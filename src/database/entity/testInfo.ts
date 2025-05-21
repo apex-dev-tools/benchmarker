@@ -19,8 +19,8 @@ export class TestInfo extends PerformanceBaseEntity {
   @Column('text', { nullable: true, name: 'product' })
   public product = DEFAULT_STRING_VALUE;
 
-  @Column('text', { nullable: true, name: 'additional_info' })
-  public additionalInfo = DEFAULT_STRING_VALUE;
+  @Column('text', { nullable: true, name: 'additional_data' })
+  public additionalData = DEFAULT_STRING_VALUE;
 
   public constructor() {
     super();

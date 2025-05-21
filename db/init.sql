@@ -87,5 +87,5 @@ CREATE TABLE IF NOT EXISTS performance.test_info (
     flow_name text,
     action text,
     product text,
-    additional_info text
+    additional_data text
 );
