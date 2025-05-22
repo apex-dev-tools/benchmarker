@@ -125,7 +125,7 @@ describe('convertTestResultOutputToTestInfo', () => {
     ];
     mockGetTestInfoRecordThatAlreadyExist.rejects(new Error('Database error'));
 
-    // When
+    // When // Then
     try {
       await convertTestResultOutputToTestInfo(testResultOutput);
       expect.fail('Expected function to throw an error');
@@ -134,7 +134,6 @@ describe('convertTestResultOutputToTestInfo', () => {
       expect(error.message).to.equal('Database error');
     }
 
-    // Then
     expect(mockGetTestInfoRecordThatAlreadyExist.calledOnce).to.be.true;
     expect(mockConvertOutputToTestInfo.notCalled).to.be.true;
   });
