@@ -13,6 +13,7 @@ import * as orgInfo from '../../src/database/orgInfo';
 import * as testResult from '../../src/database/testResult';
 import * as outputModule from '../../src/services/result/output';
 import * as testInfo from '../../src/database/testInfo';
+import * as testResultOutput from '../../src/services/result/infoTable';
 import { Timer } from '../../src/shared/timer';
 import { reportResults } from '../../src/services/result';
 import { OrgContext } from '../../src/services/org/context';
@@ -157,6 +158,7 @@ describe('src/services/result', () => {
     let execSaveStub: SinonStub;
     let alertInfoStub: SinonStub;
     let testInfoSaveStub: SinonStub;
+    let testResultOutputStub: SinonStub;
 
     const defaultTestResults: outputModule.TestResultOutput[] = [
       {
@@ -179,6 +181,10 @@ describe('src/services/result', () => {
       execSaveStub = sinon.stub(execInfo, 'saveExecutionInfo');
       alertInfoStub = sinon.stub(alertInfo, 'saveAlerts');
       testInfoSaveStub = sinon.stub(testInfo, 'saveTestInfoRecords');
+      testResultOutputStub = sinon.stub(
+        testResultOutput,
+        'convertTestResultOutputToTestInfo'
+      );
 
       testSaveStub.resolvesArg(0);
       orgIdStub.resolves(null);
@@ -188,6 +194,7 @@ describe('src/services/result', () => {
       execSaveStub.resolvesArg(0);
       alertInfoStub.resolvesArg(0);
       testInfoSaveStub.resolvesArg(0);
+      testResultOutputStub.resolves([]);
     });
 
     it('should save all records from a test run, without packages', async () => {
