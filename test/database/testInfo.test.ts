@@ -2,21 +2,27 @@
  * Copyright (c) 2025 Certinia, Inc. All rights reserved.
  */
 
-import { getTestInfoRecordThatAlreadyExist } from '../../src/database/testInfo';
+import {
+  getTestInfoRecordThatAlreadyExist,
+  saveTestInfoRecords,
+} from '../../src/database/testInfo';
 import * as db from '../../src/database/connection';
 import sinon from 'sinon';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
+import { TestInfo } from '../../src/database/entity/testInfo';
 
 chai.use(sinonChai);
 
 describe('src/database/testInfo', () => {
   let mockQuery: sinon.SinonStub;
   let mockDataSource: any;
+  let mockManager: any;
 
   beforeEach(() => {
     mockQuery = sinon.stub();
-    mockDataSource = { query: mockQuery };
+    mockManager = { save: sinon.stub() };
+    mockDataSource = { query: mockQuery, manager: mockManager };
     sinon.stub(db, 'getConnection').resolves(mockDataSource);
   });
 
@@ -99,6 +105,74 @@ describe('src/database/testInfo', () => {
         sinon.match.instanceOf(Error)
       );
       consoleErrorStub.restore();
+    });
+  });
+
+  describe('saveTestInfoRecords', () => {
+    it('should save test info records and return the saved results', async () => {
+      // Given
+      const testStepResults = [
+        Object.assign(new TestInfo(), {
+          flowName: 'flow1',
+          actionName: 'action1',
+        }),
+        Object.assign(new TestInfo(), {
+          flowName: 'flow2',
+          actionName: 'action2',
+        }),
+      ];
+
+      const savedResults = [
+        { id: 1, flow_name: 'flow1', action: 'action1' },
+        { id: 2, flow_name: 'flow2', action: 'action2' },
+      ];
+
+      mockManager.save.resolves(savedResults);
+
+      // When
+      const results = await saveTestInfoRecords(testStepResults);
+
+      // Then
+      expect(mockManager.save.calledOnce).to.be.true;
+      expect(mockManager.save).to.have.been.calledWith(testStepResults);
+      expect(results).to.deep.equal(savedResults);
+    });
+
+    it('should handle an empty testStepResults array and return an empty array', async () => {
+      // Given
+      const testStepResults: TestInfo[] = [];
+
+      mockManager.save.resolves([]);
+
+      // When
+      const results = await saveTestInfoRecords(testStepResults);
+
+      // Then
+      expect(mockManager.save.calledOnce).to.be.true;
+      expect(mockManager.save).to.have.been.calledWith([]);
+      expect(results).to.deep.equal([]);
+    });
+
+    it('should handle errors and throw an error', async () => {
+      const testStepResults = [
+        Object.assign(new TestInfo(), {
+          flowName: 'flow1',
+          actionName: 'action1',
+        }),
+      ];
+
+      const error = new Error('Database save error');
+      mockManager.save.rejects(error);
+
+      // When // Then
+      try {
+        await saveTestInfoRecords(testStepResults);
+        expect.fail('Expected saveTestInfoRecords to throw an error');
+      } catch (err) {
+        expect(err).to.equal(error);
+        expect(mockManager.save.calledOnce).to.be.true;
+        expect(mockManager.save).to.have.been.calledWith(testStepResults);
+      }
     });
   });
 });

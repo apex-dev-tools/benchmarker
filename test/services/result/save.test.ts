@@ -11,8 +11,10 @@ import * as pkgInfo from '../../../src/database/packageInfo';
 import * as orgInfo from '../../../src/database/orgInfo';
 import * as testResult from '../../../src/database/testResult';
 import * as alertInfo from '../../../src/database/alertInfo';
+import * as testInfo from '../../../src/database/testInfo';
 import { save } from '../../../src/services/result/save';
 import { TestResult } from '../../../src/database/entity/result';
+import { TestInfo } from '../../../src/database/entity/testInfo';
 import { OrgContext } from '../../../src/services/org/context';
 import { Alert } from '../../../src/database/entity/alert';
 
@@ -50,6 +52,7 @@ describe('src/services/result/save', () => {
   let pkgSaveStub: SinonStub;
   let execSaveStub: SinonStub;
   let alertInfoStub: SinonStub;
+  let testInfoSaveStub: SinonStub;
 
   beforeEach(() => {
     process.env.DATABASE_URL = 'test';
@@ -61,6 +64,7 @@ describe('src/services/result/save', () => {
     pkgSaveStub = sinon.stub(pkgInfo, 'savePackageInfo');
     execSaveStub = sinon.stub(execInfo, 'saveExecutionInfo');
     alertInfoStub = sinon.stub(alertInfo, 'saveAlerts');
+    testInfoSaveStub = sinon.stub(testInfo, 'saveTestInfoRecords');
 
     testSaveStub.resolvesArg(0);
     orgIdStub.resolves(null);
@@ -69,6 +73,7 @@ describe('src/services/result/save', () => {
     pkgSaveStub.resolvesArg(0);
     execSaveStub.resolvesArg(0);
     alertInfoStub.resolvesArg(0);
+    testInfoSaveStub.resolvesArg(0);
   });
 
   afterEach(() => {
@@ -87,6 +92,11 @@ describe('src/services/result/save', () => {
     alert.flowName = 'test flow';
     alert.action = 'test action';
 
+    const testInfoResult = new TestInfo();
+    testInfoResult.flowName = 'test flow';
+    testInfoResult.action = 'test action';
+    testInfoResult.id = 102;
+
     // When
     await save(
       [result],
@@ -94,7 +104,8 @@ describe('src/services/result/save', () => {
         orgInfo: defaultOrgContext.orgInfo,
         packagesInfo: defaultOrgContext.packagesInfo,
       },
-      [alert]
+      [alert],
+      [testInfoResult]
     );
 
     // Then
@@ -102,6 +113,8 @@ describe('src/services/result/save', () => {
     expect(orgSaveStub).to.be.calledOnce;
     expect(pkgSaveStub).to.be.calledOnce;
     expect(alertInfoStub).to.be.calledOnce;
+    expect(testInfoSaveStub).to.be.calledOnce;
+    expect(testInfoSaveStub).to.have.been.calledWith([testInfoResult]);
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
     expect(alertInfoStub.args[0][0][0].testResultId).to.equal(100);
@@ -119,6 +132,11 @@ describe('src/services/result/save', () => {
     alert.flowName = 'test flow 2';
     alert.action = 'test action 2';
 
+    const testInfoResult = new TestInfo();
+    testInfoResult.flowName = 'test flow 1';
+    testInfoResult.action = 'test action 2';
+    testInfoResult.id = 102;
+
     // When
     await save(
       [result],
@@ -126,7 +144,8 @@ describe('src/services/result/save', () => {
         orgInfo: defaultOrgContext.orgInfo,
         packagesInfo: defaultOrgContext.packagesInfo,
       },
-      [alert]
+      [alert],
+      [testInfoResult]
     );
 
     // Then
@@ -134,6 +153,8 @@ describe('src/services/result/save', () => {
     expect(orgSaveStub).to.be.calledOnce;
     expect(pkgSaveStub).to.be.calledOnce;
     expect(alertInfoStub).to.be.calledOnce;
+    expect(testInfoSaveStub).to.be.calledOnce;
+    expect(testInfoSaveStub).to.have.been.calledWith([testInfoResult]);
     expect(execSaveStub).to.be.calledOnce;
     expect(execSaveStub.args[0][0]).to.have.length(1);
     expect(alertInfoStub.args[0][0][0].testResultId).to.equal(-1);
