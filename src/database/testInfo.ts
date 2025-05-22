@@ -2,7 +2,13 @@
 /*
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
+import { TestInfo } from './entity/testInfo';
 import { getConnection } from './connection';
+
+export async function saveTestInfoRecords(testStepResults: TestInfo[]) {
+  const connection = await getConnection();
+  return connection.manager.save(testStepResults);
+}
 
 export async function getTestInfoRecordThatAlreadyExist(
   flowActionPairs: { flowName: string; actionName: string }[]

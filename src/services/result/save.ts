@@ -4,6 +4,7 @@
  */
 
 import { Alert } from '../../database/entity/alert';
+import { TestInfo } from '../../database/entity/testInfo';
 import { ExecutionInfo } from '../../database/entity/execution';
 import { OrgInfo } from '../../database/entity/org';
 import { PackageInfo } from '../../database/entity/package';
@@ -16,6 +17,7 @@ import {
   savePackageInfo,
 } from '../../database/packageInfo';
 import { saveTestResult } from '../../database/testResult';
+import { saveTestInfoRecords } from '../../database/testInfo';
 import { getExternalBuildId } from '../../shared/env';
 import { Org, OrgContext } from '../org/context';
 import { Package } from '../org/packages';
@@ -23,12 +25,14 @@ import { Package } from '../org/packages';
 export async function save(
   testResults: TestResult[],
   orgContext: OrgContext,
-  alerts: Alert[]
+  alerts: Alert[],
+  testInfoResults: TestInfo[]
 ): Promise<void> {
   const testResultsDB: TestResult[] = await saveTestResults(testResults);
   const orgInfoDB: OrgInfo = await saveOrg(orgContext.orgInfo);
   const packagesDB: PackageInfo[] = await savePackages(orgContext.packagesInfo);
   await saveAlert(alerts, testResultsDB);
+  await saveTestInfoRecords(testInfoResults);
   const executionInfoRows = generateExecutionInfoRows(
     testResultsDB.map(tr => tr.id),
     orgInfoDB.id,
