@@ -101,7 +101,7 @@ describe('src/database/testInfo', () => {
       expect(mockQuery.calledOnce).to.be.true;
       expect(results).to.deep.equal({});
       expect(consoleErrorStub).to.have.been.calledWith(
-        'Error in existing records: ',
+        'Error in fetching existing records: ',
         sinon.match.instanceOf(Error)
       );
       consoleErrorStub.restore();

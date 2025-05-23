@@ -40,7 +40,7 @@ export async function getTestInfoRecordThatAlreadyExist(
 
     return resultsMap;
   } catch (error) {
-    console.error('Error in existing records: ', error);
+    console.error('Error in fetching existing records: ', error);
     return {};
   }
 }
