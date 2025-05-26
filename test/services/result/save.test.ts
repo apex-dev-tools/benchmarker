@@ -80,7 +80,7 @@ describe('src/services/result/save', () => {
     sinon.restore();
   });
 
-  it('should save all records with alerts', async () => {
+  it('should save all records with alerts and test info', async () => {
     // Given
     const result = new TestResult();
     result.flowName = 'test flow';
