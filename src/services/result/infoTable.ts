@@ -1,3 +1,7 @@
+/** @ignore */
+/*
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
+ */
 import { getTestInfoRecordThatAlreadyExist } from '../../database/testInfo';
 import { TestInfo } from '../../database/entity/testInfo';
 import { convertOutputToTestInfo, TestResultOutput } from './output';
