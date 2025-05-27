@@ -11,6 +11,7 @@ import {
   clearReporters,
   getReporters,
   TestResultOutput,
+  convertOutputToTestInfo,
 } from '../../src/services/result/output';
 import { Timer } from '../../src/shared/timer';
 import { TableReporter } from '../../src/services/result/table';
@@ -269,6 +270,78 @@ describe('Test Utilities', () => {
       expect(alert).to.have.property('heapSizeDegraded').that.equals(50);
       expect(alert).to.have.property('queryRowsDegraded').that.equals(50);
       expect(alert).to.have.property('soqlQueriesDegraded').that.equals(10);
+    });
+  });
+
+  describe('convertOutputToTestInfo', () => {
+    it('should correctly map TestResultOutput to TestInfo with and without existing ID', () => {
+      // Given
+      const input: TestResultOutput = {
+        timer: new Timer('1000'),
+        action: 'testAction',
+        flowName: 'testFlow',
+        product: 'productA',
+        testType: 'unitTest',
+        additionalData: 'extra details',
+      };
+
+      const recordsThatAlreadyExist = {
+        testFlow_testAction: 123,
+      };
+
+      // When
+      const resultWithId = convertOutputToTestInfo(
+        input,
+        recordsThatAlreadyExist
+      );
+      const resultWithoutId = convertOutputToTestInfo(input, {});
+
+      // Then
+      // Test with existing ID
+      expect(resultWithId).to.have.property('id').that.equals(123);
+      expect(resultWithId).to.have.property('action').that.equals('testAction');
+      expect(resultWithId).to.have.property('flowName').that.equals('testFlow');
+      expect(resultWithId).to.have.property('product').that.equals('productA');
+      expect(resultWithId)
+        .to.have.property('additionalData')
+        .that.equals('extra details');
+
+      // Test without existing ID
+      expect(resultWithoutId).to.have.property('id').that.equals(0);
+      expect(resultWithoutId)
+        .to.have.property('action')
+        .that.equals('testAction');
+      expect(resultWithoutId)
+        .to.have.property('flowName')
+        .that.equals('testFlow');
+      expect(resultWithoutId)
+        .to.have.property('product')
+        .that.equals('productA');
+      expect(resultWithoutId)
+        .to.have.property('additionalData')
+        .that.equals('extra details');
+    });
+
+    it('should handle missing additionalData in TestResultOutput', () => {
+      // Given
+      const input: TestResultOutput = {
+        timer: new Timer('1000'),
+        action: 'testAction',
+        flowName: 'testFlow',
+        product: 'productA',
+        testType: 'unitTest',
+      };
+
+      const recordsThatAlreadyExist = {};
+
+      // When
+      const result = convertOutputToTestInfo(input, recordsThatAlreadyExist);
+
+      // Then
+      expect(result).to.have.property('action').that.equals('testAction');
+      expect(result).to.have.property('flowName').that.equals('testFlow');
+      expect(result).to.have.property('product').that.equals('productA');
+      expect(result).to.have.property('additionalData').that.equals('');
     });
   });
 

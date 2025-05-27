@@ -12,6 +12,7 @@ import {
 } from './result/output';
 import { save } from './result/save';
 import { generateValidAlerts } from './result/alert';
+import { convertTestResultOutputToTestInfo } from './result/infoTable';
 
 export async function reportResults(
   testResultOutput: TestResultOutput[],
@@ -35,7 +36,9 @@ export async function reportResults(
   if (getDatabaseUrl()) {
     try {
       const validAlerts = await generateValidAlerts(testResultOutput);
-      await save(results, orgContext, validAlerts);
+      const testInfoResults =
+        await convertTestResultOutputToTestInfo(testResultOutput);
+      await save(results, orgContext, validAlerts, testInfoResults);
     } catch (err) {
       console.error(
         'Failed to save results to database. Check DATABASE_URL environment variable, unset to skip saving.'
