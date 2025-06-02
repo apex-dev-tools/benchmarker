@@ -1,5 +1,24 @@
 # Benchmarker - Changelog
 
+## 3.0.0
+
+### Breaking Changes
+
+- Database schema updated: Use `db/migrations/V3__test_info.sql` script to upgrade existing PostgreSQL database before using this package version.
+
+### Added
+
+- New property on `TestStepDescription`, `additionalData`. Provide custom string information to link to results.
+  - Stored against `flowName`, `action` and `product` of the test.
+  - To set it use `createApexExecutionTestStepFlow(connection, path, { flowName, action, additionalData })`.
+
+- Database update:
+  - New table, `test_info`. Columns:
+    - `additional_data` - Custom string data recorded by test.
+    - `flow_name`
+    - `action`
+    - `product`
+
 ## 2.0.2
 
 - Add retry to `executeAnonymous` call.
