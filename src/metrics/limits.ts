@@ -4,6 +4,7 @@
 
 import { ApexBenchmarkResult } from '../benchmark/apex';
 import { GovernorLimits } from '../benchmark/apex/schemas';
+import { BenchmarkResultId } from '../benchmark/base';
 import { PostgresCommonDataMapper } from '../database/interop';
 import { RunContext } from '../state/context';
 import { calculateDeg } from './limits/deg';
@@ -18,10 +19,7 @@ export type LimitsMetric<T = number> = Record<keyof GovernorLimits, T>;
 
 export type LimitsThresholds = Partial<LimitsMetric>;
 
-export type LimitsAvg = Partial<LimitsMetric> & {
-  name: string;
-  action: string;
-};
+export type LimitsAvg = Partial<LimitsMetric> & BenchmarkResultId;
 
 export class LimitsMetricProvider {
   protected globalEnabled: boolean = false;
@@ -41,23 +39,24 @@ export class LimitsMetricProvider {
   async calculate(
     results: ApexBenchmarkResult[]
   ): Promise<ApexBenchmarkResult[]> {
-    const metricsToDo = this.identifyEnabled(results);
-    if (metricsToDo.size == 0) {
+    const enabled = this.identifyEnabled(results);
+    if (enabled.length == 0) {
       return results;
     }
 
     const ranges = await this.getRanges();
-    const avgMap = await this.getRecentAverages(metricsToDo);
+    const avgDict = await this.getRecentAverages(results, enabled);
 
     const resultsAndMetrics = [...results];
-    metricsToDo.forEach((bench, idx) => {
+    enabled.forEach(idx => {
+      const current = resultsAndMetrics[idx];
       resultsAndMetrics[idx] = {
-        ...bench,
+        ...current,
         deg: calculateDeg(
-          bench.data,
+          current.data,
           ranges,
-          bench.action.context?.thresholds,
-          avgMap.get(idx)
+          current.action.context?.thresholds,
+          avgDict[current.name + current.action.name]
         ),
       };
     });
@@ -65,16 +64,14 @@ export class LimitsMetricProvider {
     return resultsAndMetrics;
   }
 
-  private identifyEnabled(
-    results: ApexBenchmarkResult[]
-  ): Map<number, ApexBenchmarkResult> {
-    return results.reduce((acc, curr, idx) => {
+  private identifyEnabled(results: ApexBenchmarkResult[]): number[] {
+    return results.reduce<number[]>((acc, curr, idx) => {
       const localEnabled = curr.action.context?.enableMetrics;
       if (localEnabled || (localEnabled == null && this.globalEnabled)) {
-        acc.set(idx, curr);
+        acc.push(idx);
       }
       return acc;
-    }, new Map<number, ApexBenchmarkResult>());
+    }, []);
   }
 
   private async getRanges(): Promise<RangeCollection> {
@@ -87,32 +84,25 @@ export class LimitsMetricProvider {
   }
 
   private async getRecentAverages(
-    results: Map<number, ApexBenchmarkResult>
-  ): Promise<Map<number, LimitsAvg>> {
+    results: ApexBenchmarkResult[],
+    indexes: number[]
+  ): Promise<Partial<Record<string, LimitsAvg>>> {
     if (!this.dataMapper) {
-      return new Map();
+      return {};
     }
-
-    const names = new Set<string>();
-    const actions = new Set<string>();
-    const nameIndexes: Record<string, number> = {};
-    results.forEach(({ name, action }, key) => {
-      names.add(name);
-      actions.add(action.name);
-      nameIndexes[name + action.name] = key;
-    });
+    const toAvg =
+      indexes.length === results.length
+        ? results
+        : indexes.map(i => results[i]);
 
     const records = await this.dataMapper.findLimitsTenDayAverage(
       RunContext.current.projectId,
-      Array.from(names.values()),
-      Array.from(actions.values())
+      toAvg
     );
 
-    const avg = new Map<number, LimitsAvg>();
-    records.forEach(rec => {
-      avg.set(nameIndexes[rec.name + rec.action], rec);
-    });
-
-    return avg;
+    return records.reduce<Partial<Record<string, LimitsAvg>>>((dict, rec) => {
+      dict[rec.name + rec.actionName] = rec;
+      return dict;
+    }, {});
   }
 }
