@@ -6,9 +6,14 @@ export interface BenchmarkAction {
   name: string;
 }
 
-export interface BenchmarkResult<A extends BenchmarkAction> {
+export interface BenchmarkResult<A extends BenchmarkAction = BenchmarkAction> {
   name: string;
   action: A;
+}
+
+export interface BenchmarkResultId {
+  name: string;
+  actionName: string;
 }
 
 export interface ErrorResult {
