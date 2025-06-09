@@ -5,7 +5,7 @@
 import { Brackets, DataSource, In, Repository } from 'typeorm';
 import { TestResult } from './entity/result';
 import { LimitsAvg } from '../../metrics/limits';
-import { PostgresCommonDataMapper } from '../interop';
+import { CommonDataUtil, PostgresCommonDataMapper } from '../interop';
 import { Alert } from './entity/alert';
 import { ExecutionInfo } from './entity/execution';
 import { OrgInfo } from './entity/org';
@@ -14,6 +14,7 @@ import { ApexBenchmarkResult } from '../../benchmark/apex';
 import { OrgContext, OrgPackage } from '../../salesforce/org/context';
 import { RunContext } from '../../state/context';
 import { Degradation } from '../../metrics/limits/deg';
+import { TestInfo } from './entity/info';
 
 export class LegacyDataMapper implements PostgresCommonDataMapper {
   dataSource: DataSource;
@@ -22,6 +23,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
   orgs: Repository<OrgInfo>;
   packages: Repository<PackageInfo>;
   testResults: Repository<TestResult>;
+  testInfos: Repository<TestInfo>;
 
   protected orgRecordIds: Partial<Record<string, number>>;
   protected packageRecordIds: Partial<Record<string, number[]>>;
@@ -33,6 +35,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     this.orgs = dataSource.getRepository(OrgInfo);
     this.packages = dataSource.getRepository(PackageInfo);
     this.testResults = dataSource.getRepository(TestResult);
+    this.testInfos = dataSource.getRepository(TestInfo);
     this.orgRecordIds = {};
     this.packageRecordIds = {};
   }
@@ -53,14 +56,16 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
       run.buildId
     );
 
+    await this.saveTestInfo(run.projectId, results);
     await this.saveDegradationAlerts(results, tests);
   }
 
   async findLimitsTenDayAverage(
     projectId: string,
-    names: string[],
-    actionNames: string[]
+    results: ApexBenchmarkResult[]
   ): Promise<LimitsAvg[]> {
+    const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
+
     return this.testResults
       .createQueryBuilder('res')
       .select('res.flow_name', 'name')
@@ -242,19 +247,52 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     await this.executions.save(executions);
   }
 
+  private async saveTestInfo(
+    product: string,
+    results: ApexBenchmarkResult[]
+  ): Promise<void> {
+    const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
+    const infoRecords = await this.testInfos.findBy({
+      product,
+      flowName: In(names),
+      action: In(actionNames),
+    });
+    const infoDict = infoRecords.reduce<Partial<Record<string, TestInfo>>>(
+      (dict, info) => {
+        dict[info.flowName + info.action] = info;
+        return dict;
+      },
+      {}
+    );
+
+    // As in previous version, info is created regardless if data is set
+    await this.testInfos.save(
+      results.map(
+        ({ name, action }) =>
+          infoDict[name + action.name] ||
+          this.testInfos.create({
+            product,
+            flowName: name,
+            action: action.name,
+            additionalData: action.context?.jsonData,
+          })
+      )
+    );
+  }
+
   private async saveDegradationAlerts(
     results: ApexBenchmarkResult[],
-    records: TestResult[]
+    testRecords: TestResult[]
   ): Promise<void> {
     const deg = results.filter(r => r.deg);
     if (deg.length === 0) return;
 
-    const testIds = records.reduce<Record<string, number>>((dict, rec) => {
+    const testIds = testRecords.reduce<Record<string, number>>((dict, rec) => {
       dict[rec.flowName + rec.action] = rec.id;
       return dict;
     }, {});
 
-    const alerts = deg.reduce<Alert[]>((alerts, { name, action, deg }) => {
+    const records = deg.reduce<Alert[]>((alerts, { name, action, deg }) => {
       if (deg) {
         alerts.push(
           this.alerts.create({
@@ -273,7 +311,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
       return alerts;
     }, []);
 
-    await this.alerts.save(alerts);
+    await this.alerts.save(records);
   }
 
   private getDegradation({ overThreshold, overAvg }: Degradation): number {
