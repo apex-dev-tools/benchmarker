@@ -29,7 +29,7 @@ export const createApexExecutionTestStepFlow = async (
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
   return async alertInfo => {
-    const { flowName, action } = testStepDescription;
+    const { flowName, action, additionalData } = testStepDescription;
     console.log(`Executing '${flowName} - ${action}' performance test...`);
 
     const result = await apexService.benchmarkFile(apexScriptPath, {
@@ -37,7 +37,7 @@ export const createApexExecutionTestStepFlow = async (
       actions: [
         {
           name: action,
-          context: toLimitsContext(alertInfo),
+          context: toLimitsContext(alertInfo, additionalData),
         },
       ],
       parser: { replace: toReplaceDict(testFlowOptions?.tokenMap) },
@@ -59,7 +59,7 @@ export const createApexExecutionTestStepFlowFromApex = async (
   testStepDescription: TestStepDescription
 ): Promise<FlowStep> => {
   return async alertInfo => {
-    const { flowName, action } = testStepDescription;
+    const { flowName, action, additionalData } = testStepDescription;
     console.log(`Executing '${flowName} - ${action}' performance test...`);
 
     const result = await apexService.benchmarkCode(apexCode, {
@@ -67,7 +67,7 @@ export const createApexExecutionTestStepFlowFromApex = async (
       actions: [
         {
           name: action,
-          context: toLimitsContext(alertInfo),
+          context: toLimitsContext(alertInfo, additionalData),
         },
       ],
     });
@@ -78,7 +78,10 @@ export const createApexExecutionTestStepFlowFromApex = async (
 
 // Compatibility functions to new API
 
-function toLimitsContext(alertInfo?: AlertInfo): LimitsContext {
+function toLimitsContext(
+  alertInfo?: AlertInfo,
+  jsonData?: string
+): LimitsContext {
   const { storeAlerts, thresholds } = alertInfo || {};
 
   return {
@@ -91,6 +94,7 @@ function toLimitsContext(alertInfo?: AlertInfo): LimitsContext {
       queryRows: thresholds?.queryRowsThreshold,
       soqlQueries: thresholds?.soqlQueriesThreshold,
     },
+    jsonData,
   };
 }
 
