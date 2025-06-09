@@ -59,6 +59,7 @@ export class TransactionTestTemplate {
 export interface TestStepDescription {
   action: string;
   flowName: string;
+  additionalData?: string;
 }
 
 /**

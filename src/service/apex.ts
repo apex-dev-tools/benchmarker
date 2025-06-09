@@ -226,10 +226,10 @@ export class ApexBenchmarkService {
     runs: BenchmarkSingleResult[]
   ): BenchmarkDirectoryResult {
     return runs.reduce(
-      (acc, curr) => {
-        acc.benchmarks.push(...curr.benchmarks);
-        if (curr.error) acc.errors.push(curr.error);
-        return acc;
+      (dir, res) => {
+        dir.benchmarks.push(...res.benchmarks);
+        if (res.error) dir.errors.push(res.error);
+        return dir;
       },
       { benchmarks: [], errors: [] } as BenchmarkDirectoryResult
     );

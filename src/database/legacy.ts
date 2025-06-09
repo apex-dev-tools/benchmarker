@@ -9,6 +9,7 @@ import { OrgInfo } from './legacy/entity/org';
 import { PackageInfo } from './legacy/entity/package';
 import { ExecutionInfo } from './legacy/entity/execution';
 import { Alert } from './legacy/entity/alert';
+import { TestInfo } from './legacy/entity/info';
 import { PostgresDataSource, PostgresOptions } from './postgres';
 import { PostgresCommonDataMapper } from './interop';
 
@@ -33,7 +34,14 @@ export class LegacyDataSource extends PostgresDataSource {
 
     const ds = await new DataSource({
       type: 'postgres',
-      entities: [TestResult, OrgInfo, PackageInfo, ExecutionInfo, Alert],
+      entities: [
+        TestResult,
+        OrgInfo,
+        PackageInfo,
+        ExecutionInfo,
+        Alert,
+        TestInfo,
+      ],
       schema: 'performance',
       synchronize: false,
       logging: false,

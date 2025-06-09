@@ -21,6 +21,7 @@ export interface GovernorLimits {
 export interface LimitsContext {
   enableMetrics?: boolean;
   thresholds?: LimitsThresholds;
+  jsonData?: string;
 }
 
 export const limitsSchema: NamedSchema<GovernorLimits> = {
