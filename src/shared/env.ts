@@ -160,6 +160,5 @@ export function getRangeCollection(): RangeCollection {
  * returns the source reference to populate the source_ref column of test_result.
  */
 export function getSourceRef() {
-  console.log(process.env.SOURCE_REF);
   return process.env.SOURCE_REF || '';
 }
