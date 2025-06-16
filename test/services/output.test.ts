@@ -21,6 +21,7 @@ describe('Test Utilities', () => {
   describe('convertOutputToTestResult', () => {
     it('should correctly map TestResultOutput to TestResult', () => {
       //Given
+      process.env.SOURCE_REF = 'test_ref';
       const input: TestResultOutput = {
         timer: new Timer('1000'),
         action: 'testAction',
@@ -44,6 +45,7 @@ describe('Test Utilities', () => {
       expect(result).to.have.property('product').that.equals('productA');
       expect(result).to.have.property('cpuTime').that.equals(100);
       expect(result).to.have.property('dmlRows').that.equals(200);
+      expect(result).to.have.property('sourceRef').that.equals('test_ref');
     });
   });
 
