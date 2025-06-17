@@ -1,0 +1,1 @@
+ALTER TABLE performance.test_result add column IF NOT EXISTS source_ref text;

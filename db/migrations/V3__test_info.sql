@@ -7,5 +7,3 @@ CREATE TABLE IF NOT EXISTS performance.test_info (
     product text,
     additional_data text
 );
-
-ALTER TABLE performance.test_result add column IF NOT EXISTS source_ref text;
