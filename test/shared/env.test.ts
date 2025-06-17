@@ -460,6 +460,30 @@ describe('shared/env/index', () => {
     });
   });
 
+  describe('getSourceRef', () => {
+    it('returns supplied value when value is supplied', () => {
+      // Given
+      process.env.SOURCE_REF = 'test';
+
+      // When
+      const sourceRef = env.getSourceRef();
+
+      // Then
+      expect(sourceRef).to.eql('test');
+    });
+
+    it('returns default value when value is not supplied', () => {
+      // Given
+      delete process.env.SOURCE_REF;
+
+      // When
+      const sourceRef = env.getSourceRef();
+
+      // Then
+      expect(sourceRef).to.eql('');
+    });
+  });
+
   describe('getAppLauncherSelector', () => {
     it('returns APP_LAUNCHER_SELECTOR given value', () => {
       // Given

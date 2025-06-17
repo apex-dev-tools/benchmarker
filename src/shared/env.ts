@@ -155,3 +155,10 @@ export function getRangeCollection(): RangeCollection {
   cachedRanges = DEFAULT_RANGES;
   return cachedRanges;
 }
+
+/**
+ * returns the source reference to populate the source_ref column of test_result.
+ */
+export function getSourceRef() {
+  return process.env.SOURCE_REF || '';
+}

@@ -11,6 +11,7 @@ import { AlertInfo } from '../../testTemplates/transactionTestTemplate';
 import { TableReporter } from './table';
 import { Alert } from '../../database/entity/alert';
 import { RangeCollection, OffsetThresholdRange } from '../ranges';
+import { getSourceRef } from '../../shared/env';
 
 export interface TestResultOutput {
   timer: Timer;
@@ -89,6 +90,7 @@ export function convertOutputToTestResult(
     output.futureCalls !== undefined
       ? output.futureCalls
       : DEFAULT_NUMERIC_VALUE;
+  testResult.sourceRef = getSourceRef();
 
   return testResult;
 }

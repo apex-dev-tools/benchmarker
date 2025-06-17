@@ -4,7 +4,10 @@
  */
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
-import { DEFAULT_NUMERIC_VALUE } from '../../shared/constants';
+import {
+  DEFAULT_NUMERIC_VALUE,
+  DEFAULT_STRING_VALUE,
+} from '../../shared/constants';
 
 @Entity({ name: 'test_result' })
 export class TestResult extends PerformanceBaseEntity {
@@ -69,6 +72,9 @@ export class TestResult extends PerformanceBaseEntity {
 
   @Column('integer', { nullable: true, name: 'future_calls' })
   public futureCalls = DEFAULT_NUMERIC_VALUE;
+
+  @Column('text', { nullable: true, name: 'source_ref' })
+  public sourceRef = DEFAULT_STRING_VALUE;
 
   public constructor() {
     super();
