@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { GovernorLimits } from '../../benchmark/apex/schemas';
+import { GovernorLimits } from '../../benchmark/limits/schemas';
 import { LimitsAvg, LimitsMetric, LimitsThresholds } from '../limits';
 import { createLimitMetric } from './factory';
 import { RangeCollection, ThresholdOffsetRange } from './ranges';

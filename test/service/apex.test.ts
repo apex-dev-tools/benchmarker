@@ -5,19 +5,19 @@
 import { expect } from 'chai';
 import sinon, { SinonStub, SinonStubbedInstance } from 'sinon';
 import mockfs from 'mock-fs';
-import * as limits from '../../src/benchmark/apex/limits';
-import * as legacy from '../../src/benchmark/apex/legacy';
+import * as limits from '../../src/benchmark/limits/limits';
+import * as legacy from '../../src/benchmark/limits/legacy';
 import { ApexBenchmarkService } from '../../src/service/apex';
 
 import {
   GovernorLimits,
   LimitsContext,
-} from '../../src/benchmark/apex/schemas';
+} from '../../src/benchmark/limits/schemas';
 import { MockRunContext } from '../mocks';
-import { ApexBenchmarkResult } from '../../src/benchmark/apex';
+import { LimitsBenchmarkResult } from '../../src/benchmark/anon';
 import { BenchmarkOrg } from '../../src/salesforce/org';
 import { PostgresDataSource } from '../../src/database/postgres';
-import { AnonApexBenchmark } from '../../src/benchmark/apex/anon';
+import { AnonApexBenchmark } from '../../src/benchmark/anon';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -81,7 +81,7 @@ describe('service/apex', () => {
   });
 
   it('should run a benchmark for a specific apex file', async () => {
-    const results: ApexBenchmarkResult[] = [
+    const results: LimitsBenchmarkResult[] = [
       {
         name: 'script1',
         action: { name: '1' },
@@ -104,7 +104,7 @@ describe('service/apex', () => {
   });
 
   it('should run benchmarks on a script directory', async () => {
-    const results: ApexBenchmarkResult[] = [
+    const results: LimitsBenchmarkResult[] = [
       {
         name: 'script1',
         action: { name: '1' },
@@ -148,7 +148,7 @@ describe('service/apex', () => {
   });
 
   it('should run a benchmark for an apex string', async () => {
-    const results: ApexBenchmarkResult[] = [
+    const results: LimitsBenchmarkResult[] = [
       {
         name: 'script1',
         action: { name: '1' },
@@ -173,7 +173,7 @@ describe('service/apex', () => {
   });
 
   it('should support legacy apex content', async () => {
-    const results: ApexBenchmarkResult[] = [
+    const results: LimitsBenchmarkResult[] = [
       {
         name: 'script4',
         action: { name: '1' },

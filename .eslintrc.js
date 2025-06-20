@@ -29,19 +29,5 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-
-    // temp disabled - currently errors on this codebase
-    '@typescript-eslint/no-namespace': 'off',
-    '@typescript-eslint/no-unsafe-argument': 'off',
-    '@typescript-eslint/no-unsafe-member-access': 'off',
-    '@typescript-eslint/no-unsafe-return': 'off',
-    '@typescript-eslint/no-unsafe-call': 'off',
-    '@typescript-eslint/require-await': 'off',
-    '@typescript-eslint/no-misused-promises': 'off',
-    '@typescript-eslint/restrict-template-expressions': 'off',
-    '@typescript-eslint/unbound-method': 'off',
-    'no-async-promise-executor': 'off',
-    'no-useless-escape': 'off',
-    'no-case-declarations': 'off',
   },
 };

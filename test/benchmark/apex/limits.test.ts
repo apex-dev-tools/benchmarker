@@ -5,14 +5,14 @@
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
 import * as exec from '../../../src/salesforce/execute';
-import { AnonApexBenchmarkResult } from '../../../src/benchmark/apex/anon';
+import { AnonApexBenchmarkResult } from '../../../src/benchmark/anon';
 import {
   GovernorLimits,
   LimitsContext,
-} from '../../../src/benchmark/apex/schemas';
+} from '../../../src/benchmark/limits/schemas';
 import { ErrorResult } from '../../../src/benchmark/base';
 import { MockRunContext } from '../../mocks';
-import { LimitsAnonApexBenchmark } from '../../../src/benchmark/apex/limits';
+import { LimitsAnonApexBenchmark } from '../../../src/benchmark/limits/limits';
 
 const mockResponse: GovernorLimits = {
   duration: 8,

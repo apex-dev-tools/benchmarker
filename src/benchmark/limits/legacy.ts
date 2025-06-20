@@ -2,13 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import {
-  AnonApexAction,
-  AnonApexBenchmark,
-  AnonApexBenchmarkOptions,
-  AnonApexTransaction,
-  AnonApexTransactionType,
-} from './anon';
+import { AnonApexBenchmark, AnonApexTransaction } from '../anon';
 import { GovernorLimits, LimitsContext, limitsSchema } from './schemas';
 
 /**
@@ -27,20 +21,22 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark<
   GovernorLimits,
   LimitsContext
 > {
-  constructor(options: AnonApexBenchmarkOptions) {
-    super(options, limitsSchema);
+  private transaction: AnonApexTransaction<LimitsContext>;
+
+  constructor(
+    name: string,
+    code: string,
+    transactionConfig: Omit<AnonApexTransaction<LimitsContext>, 'code'>
+  ) {
+    super(name, limitsSchema);
+
+    this.transaction = {
+      ...transactionConfig,
+      code: require('../../../scripts/apex/limits.apex') + code,
+    };
   }
 
-  protected async prepareTransactions(
-    actions?: AnonApexAction<LimitsContext>[]
-  ): Promise<AnonApexTransaction<LimitsContext>[]> {
-    return [
-      {
-        action: (actions && actions[0]) || { name: '1' },
-        apexCode:
-          require('../../../scripts/apex/limits.apex') + this.options.code,
-        type: AnonApexTransactionType.Data,
-      },
-    ];
+  protected *nextTransaction(): Generator<AnonApexTransaction<LimitsContext>> {
+    return this.transaction;
   }
 }

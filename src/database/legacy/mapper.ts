@@ -10,7 +10,7 @@ import { Alert } from './entity/alert';
 import { ExecutionInfo } from './entity/execution';
 import { OrgInfo } from './entity/org';
 import { PackageInfo } from './entity/package';
-import { ApexBenchmarkResult } from '../../benchmark/apex';
+import { LimitsBenchmarkResult } from '../../service/apex';
 import { OrgContext, OrgPackage } from '../../salesforce/org/context';
 import { RunContext } from '../../state/context';
 import { Degradation } from '../../metrics/limits/deg';
@@ -40,10 +40,10 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     this.packageRecordIds = {};
   }
 
-  async saveApexResults(
+  async saveLimitsResults(
     run: RunContext,
     org: OrgContext,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<void> {
     const orgId = await this.saveAndCacheOrg(org);
     const packageIds = await this.saveAndCachePackages(org);
@@ -62,9 +62,9 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   async findLimitsTenDayAverage(
     projectId: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<LimitsAvg[]> {
-    const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
+    const { names, actions } = CommonDataUtil.idSetsFromResults(results);
 
     return this.testResults
       .createQueryBuilder('res')
@@ -93,8 +93,8 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
       )
       .where('res.product = :projectId', { projectId })
       .andWhere('res.flow_name IN (:...names)', { names })
-      .andWhere('res.action IN (:...actionNames)', {
-        actionNames,
+      .andWhere('res.action IN (:...actions)', {
+        actions,
       })
       .andWhere(
         new Brackets(qb => qb.where('error IS NULL').orWhere("error = ''"))
@@ -193,14 +193,14 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   private async saveTestResults(
     product: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<TestResult[]> {
     return this.testResults.save(
       results.map(({ name, action, data }) =>
         this.testResults.create({
           product,
           flowName: name,
-          action: action.name,
+          action,
           testType: 'Transaction Process',
           duration: data.duration,
           cpuTime: data.cpuTime,
@@ -249,13 +249,13 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   private async saveTestInfo(
     product: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<void> {
-    const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
+    const { names, actions } = CommonDataUtil.idSetsFromResults(results);
     const infoRecords = await this.testInfos.findBy({
       product,
       flowName: In(names),
-      action: In(actionNames),
+      action: In(actions),
     });
     const infoDict = infoRecords.reduce<Partial<Record<string, TestInfo>>>(
       (dict, info) => {
@@ -268,20 +268,20 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     // As in previous version, info is created regardless if data is set
     await this.testInfos.save(
       results.map(
-        ({ name, action }) =>
-          infoDict[name + action.name] ||
+        ({ name, action, context }) =>
+          infoDict[name + action] ||
           this.testInfos.create({
             product,
             flowName: name,
-            action: action.name,
-            additionalData: action.context?.jsonData,
+            action: action,
+            additionalData: context?.data,
           })
       )
     );
   }
 
   private async saveDegradationAlerts(
-    results: ApexBenchmarkResult[],
+    results: LimitsBenchmarkResult[],
     testRecords: TestResult[]
   ): Promise<void> {
     const deg = results.filter(r => r.deg);
@@ -297,8 +297,8 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
         alerts.push(
           this.alerts.create({
             flowName: name,
-            action: action.name,
-            testResultId: testIds[name + action.name],
+            action,
+            testResultId: testIds[name + action],
             cpuTimeDegraded: this.getDegradation(deg.cpuTime),
             dmlRowsDegraded: this.getDegradation(deg.dmlRows),
             dmlStatementsDegraded: this.getDegradation(deg.dmlStatements),

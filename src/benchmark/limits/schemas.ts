@@ -21,7 +21,7 @@ export interface GovernorLimits {
 export interface LimitsContext {
   enableMetrics?: boolean;
   thresholds?: LimitsThresholds;
-  jsonData?: string;
+  data?: any;
 }
 
 export const limitsSchema: NamedSchema<GovernorLimits> = {
@@ -37,6 +37,19 @@ export const limitsSchema: NamedSchema<GovernorLimits> = {
       soqlQueries: { type: 'int32' },
       queueableJobs: { type: 'int32' },
       futureCalls: { type: 'int32' },
+    },
+  },
+};
+
+export const contextSchema: NamedSchema<LimitsContext> = {
+  name: 'limitsContext',
+  schema: {
+    optionalProperties: {
+      enableMetrics: { type: 'boolean' },
+      thresholds: {
+        optionalProperties: limitsSchema.schema.properties,
+      },
+      data: {},
     },
   },
 };

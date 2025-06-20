@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexBenchmarkResult } from '../benchmark/apex';
+import { LimitsBenchmarkResult } from '../service/apex';
 import { BenchmarkResult } from '../benchmark/base';
 import { LimitsAvg } from '../metrics/limits';
 import { OrgContext } from '../salesforce/org/context';
@@ -12,15 +12,15 @@ import { RunContext } from '../state/context';
  * Interface for common operations between different postgres mappers.
  */
 export interface PostgresCommonDataMapper {
-  saveApexResults(
+  saveLimitsResults(
     run: RunContext,
     org: OrgContext,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<void>;
 
   findLimitsTenDayAverage(
     projectId: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<LimitsAvg[]>;
 }
 
@@ -32,16 +32,16 @@ export class CommonDataUtil {
 
   static idSetsFromResults(results: BenchmarkResult[]): {
     names: string[];
-    actionNames: string[];
+    actions: string[];
   } {
     const nameSet = new Set<string>();
     const actionSet = new Set<string>();
 
     results.forEach(({ name, action }) => {
       nameSet.add(name);
-      actionSet.add(action.name);
+      actionSet.add(action);
     });
 
-    return { names: Array.from(nameSet), actionNames: Array.from(actionSet) };
+    return { names: Array.from(nameSet), actions: Array.from(actionSet) };
   }
 }
