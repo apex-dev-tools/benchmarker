@@ -11,14 +11,13 @@ export interface BenchmarkResult<A extends BenchmarkAction = BenchmarkAction> {
   action: A;
 }
 
-export interface BenchmarkResultId {
+export interface BenchmarkId {
   name: string;
   actionName: string;
 }
 
 export interface ErrorResult {
-  name: string;
-  actionName: string;
+  id?: BenchmarkId;
   error: Error;
 }
 
@@ -26,16 +25,12 @@ export abstract class Benchmark<
   A extends BenchmarkAction,
   R extends BenchmarkResult<A>,
 > {
-  name: string;
   protected _results: R[];
-  protected _error?: ErrorResult;
+  protected _errors: ErrorResult[];
 
-  constructor(name: string) {
-    this.name = name;
+  constructor() {
     this._results = [];
   }
-
-  abstract prepare(actions?: A[]): Promise<void>;
 
   abstract run(): Promise<void>;
 
@@ -43,12 +38,12 @@ export abstract class Benchmark<
     return this._results;
   }
 
-  error(): ErrorResult | undefined {
-    return this._error;
+  errors(): ErrorResult[] {
+    return this._errors;
   }
 
   protected reset(): void {
     this._results = [];
-    this._error = undefined;
+    this._errors = [];
   }
 }

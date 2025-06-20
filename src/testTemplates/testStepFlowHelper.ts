@@ -13,7 +13,7 @@ import {
 import { apexService } from '..';
 import { Connection } from '@salesforce/core';
 import { BenchmarkSingleResult } from '../service/apex';
-import { LimitsContext } from '../benchmark/apex/schemas';
+import { LimitsContext } from '../benchmark/anon/schemas';
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits

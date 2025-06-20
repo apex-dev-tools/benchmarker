@@ -8,7 +8,7 @@ import {
   AnonApexBenchmarkOptions,
   AnonApexTransaction,
   AnonApexTransactionType,
-} from './anon';
+} from '../anon';
 import { GovernorLimits, LimitsContext, limitsSchema } from './schemas';
 
 /**

@@ -8,9 +8,9 @@ import * as exec from '../../../src/salesforce/execute';
 import {
   GovernorLimits,
   LimitsContext,
-} from '../../../src/benchmark/apex/schemas';
-import { LegacyAnonApexBenchmark } from '../../../src/benchmark/apex/legacy';
-import { AnonApexBenchmarkResult } from '../../../src/benchmark/apex/anon';
+} from '../../../src/benchmark/anon/schemas';
+import { LegacyAnonApexBenchmark } from '../../../src/benchmark/anon/legacy';
+import { AnonApexBenchmarkResult } from '../../../src/benchmark/anon';
 import { ErrorResult } from '../../../src/benchmark/base';
 import { MockRunContext } from '../../mocks';
 

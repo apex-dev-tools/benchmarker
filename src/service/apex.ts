@@ -2,63 +2,64 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import path from 'node:path';
 import { ErrorResult } from '../benchmark/base';
-import {
-  ApexAction,
-  ApexBenchmarkResult,
-  createAnonApexBenchmark,
-} from '../benchmark/apex';
-import {
-  findApexInDir,
-  readApexFromFile,
-  resolveApexPath,
-} from './apex/source';
 import { RunContext, RunContextOptions } from '../state/context';
 import {
   LimitsMetricProvider,
   LimitsMetricProviderOptions,
 } from '../metrics/limits';
 import { RunStore } from '../state/store';
-import { ExecuteAnonymousOptions } from '../salesforce/execute';
-import { ApexScriptParser, ApexScriptParserOptions } from '../parser/apex';
+import { ApexScriptParserOptions } from '../parser/apex';
+import {
+  AnonApexBenchmarker,
+  AnonApexBenchmarkerRequest,
+  AnonApexBenchmarkRun,
+} from './apex/runner';
+import {
+  LimitsAnonApexBenchmark,
+  LimitsBenchmarkOptions,
+} from '../benchmark/anon/limits';
+import { GovernorLimits, LimitsContext } from '../benchmark/anon/schemas';
+import { DegLimitsMetric } from '../metrics/limits/deg';
+import { AnonApexBenchmarkResult } from '../benchmark/anon';
 
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {
   limitsMetrics?: LimitsMetricProviderOptions;
   useLegacySchema?: boolean;
 }
 
-export interface BenchmarkDirectoryOptions {
-  parser?: ApexScriptParserOptions;
-  executeAnonymous?: ExecuteAnonymousOptions;
+export interface LimitsMetrics {
+  deg?: DegLimitsMetric;
 }
 
-export interface BenchmarkSingleOptions {
-  name: string;
-  actions?: ApexAction[];
-  parser?: ApexScriptParserOptions;
-  executeAnonymous?: ExecuteAnonymousOptions;
-}
+export type LimitsBenchmarker = AnonApexBenchmarker<
+  GovernorLimits,
+  LimitsContext,
+  LimitsBenchmarkOptions
+>;
 
-export interface BenchmarkDirectoryResult {
-  benchmarks: ApexBenchmarkResult[];
+export type LimitsBenchmarkResult = AnonApexBenchmarkResult<
+  GovernorLimits,
+  LimitsContext
+> &
+  LimitsMetrics;
+
+export interface LimitsBenchmarkRun {
+  benchmarks: LimitsBenchmarkResult[];
   errors: ErrorResult[];
-}
-
-export interface BenchmarkSingleResult {
-  benchmarks: ApexBenchmarkResult[];
-  error?: ErrorResult;
 }
 
 export class ApexBenchmarkService {
   protected setupCalled: boolean = false;
-  protected store: RunStore<ApexBenchmarkResult>;
-  protected scriptParser: ApexScriptParser;
+  protected store: RunStore<LimitsBenchmarkResult>;
+  protected limitsBenchmarker: LimitsBenchmarker;
   protected limitsMetrics: LimitsMetricProvider;
 
   constructor() {
     this.store = new RunStore();
-    this.scriptParser = new ApexScriptParser();
+    this.limitsBenchmarker = new AnonApexBenchmarker(
+      LimitsAnonApexBenchmark.create
+    );
     this.limitsMetrics = new LimitsMetricProvider();
   }
 
@@ -88,68 +89,27 @@ export class ApexBenchmarkService {
   }
 
   /**
-   * Run benchmarks for all apex files under the specified directory path.
+   * Run benchmark for governor limits on requested apex code or paths.
+   * Applies metrics to results if enabled.
    *
-   * @param apexPath Path to directory containing ".apex" files.
-   * @param options Additional options to customise the benchmark.
-   * @returns A merged list of results from all identified benchmarks.
+   * @param request Set either `code` or `paths` together with any options to
+   * customise the benchmark. Some benchmark options may not be applicable when used
+   * with multiple paths or directories.
+   * @returns A merged list of results from all requested benchmarks.
    */
-  async benchmarkDirectory(
-    apexPath: string,
-    options?: BenchmarkDirectoryOptions
-  ): Promise<BenchmarkDirectoryResult> {
-    await this.ensureSetup();
-    const { parser, ...opts } = options || {};
-
-    this.setupParser(parser);
-
-    const { benchmarks, errors } = await this.runBenchmarksInDir(
-      apexPath,
-      opts
-    );
-
-    return { benchmarks: await this.postProcessResults(benchmarks), errors };
-  }
-
-  /**
-   * Run a benchmark for a single apex file.
-   *
-   * @param apexFilePath Path to ".apex" file containing benchmark script.
-   * @param options Additional options to customise the benchmark.
-   * @returns An object with reported results and errors.
-   */
-  async benchmarkFile(
-    apexFilePath: string,
-    options?: BenchmarkSingleOptions
-  ): Promise<BenchmarkSingleResult> {
-    const absPath = await resolveApexPath(apexFilePath);
-    const code = await readApexFromFile(absPath);
-
-    return this.benchmarkCode(code, {
-      ...options,
-      name: options?.name || path.basename(absPath, '.apex'),
+  async benchmarkLimits(
+    request: AnonApexBenchmarkerRequest<LimitsBenchmarkOptions>
+  ): Promise<LimitsBenchmarkRun> {
+    const ctx = await this.ensureSetup();
+    const run = await this.limitsBenchmarker.runBenchmark({
+      ...request,
+      parser: this.setParserNamespaceExclusions(
+        ctx.org.getNamespaceRegExp(),
+        request.parser
+      ),
     });
-  }
 
-  /**
-   * Run a benchmark on Anonymous Apex code.
-   *
-   * @param apexCode Apex code to be benchmarked. Supports different formats.
-   * @param options Additional options to customise the benchmark.
-   * @returns An object with reported results and errors.
-   */
-  async benchmarkCode(
-    apexCode: string,
-    options: BenchmarkSingleOptions
-  ): Promise<BenchmarkSingleResult> {
-    await this.ensureSetup();
-    const { parser, ...opts } = options;
-
-    this.setupParser(parser);
-
-    const { benchmarks, error } = await this.runBenchmark(apexCode, opts);
-
-    return { benchmarks: await this.postProcessResults(benchmarks), error };
+    return this.postProcessResults(run);
   }
 
   /**
@@ -164,7 +124,7 @@ export class ApexBenchmarkService {
     const orgContext = await run.org.getContext();
 
     await run.forPostgres(mapper =>
-      mapper.saveApexResults(run, orgContext, results)
+      mapper.saveLimitsResults(run, orgContext, results)
     );
 
     this.store.moveCursor();
@@ -175,73 +135,32 @@ export class ApexBenchmarkService {
     return RunContext.current;
   }
 
-  private setupParser(options?: ApexScriptParserOptions): void {
-    this.scriptParser.setup(
-      RunContext.current.org.getNamespaceRegExp().map(ns => [ns, '']),
-      options
-    );
-  }
-
-  private async runBenchmarksInDir(
-    apexPath: string,
-    options: BenchmarkDirectoryOptions
-  ): Promise<BenchmarkDirectoryResult> {
-    const { root, paths } = await findApexInDir(apexPath);
-
-    const results: BenchmarkSingleResult[] = [];
-    for (const apexfile of paths) {
-      const code = await readApexFromFile(apexfile);
-      results.push(
-        await this.runBenchmark(code, {
-          ...options,
-          name: path.relative(root, apexfile).replace('.apex', ''),
-        })
-      );
+  private setParserNamespaceExclusions(
+    namespaces: RegExp[],
+    options?: ApexScriptParserOptions
+  ): ApexScriptParserOptions | undefined {
+    if (namespaces.length === 0) {
+      return options;
     }
 
-    return this.mergeDirResults(results);
-  }
-
-  private async runBenchmark(
-    code: string,
-    options: BenchmarkSingleOptions
-  ): Promise<BenchmarkSingleResult> {
-    const { actions, ...opts } = options;
-    const benchmark = createAnonApexBenchmark({
-      ...opts,
-      code: this.scriptParser.parse(code),
-    });
-
-    await benchmark.prepare(actions);
-
-    await benchmark.run();
-
     return {
-      benchmarks: benchmark.results(),
-      error: benchmark.error(),
+      exclude: (options?.exclude || []).concat(namespaces),
+      replace: options?.replace,
     };
   }
 
-  private mergeDirResults(
-    runs: BenchmarkSingleResult[]
-  ): BenchmarkDirectoryResult {
-    return runs.reduce(
-      (dir, res) => {
-        dir.benchmarks.push(...res.benchmarks);
-        if (res.error) dir.errors.push(res.error);
-        return dir;
-      },
-      { benchmarks: [], errors: [] } as BenchmarkDirectoryResult
-    );
-  }
-
   private async postProcessResults(
-    input: ApexBenchmarkResult[]
-  ): Promise<ApexBenchmarkResult[]> {
-    const benchmarks = await this.limitsMetrics.calculate(input);
+    input: AnonApexBenchmarkRun<GovernorLimits, LimitsContext>
+  ): Promise<LimitsBenchmarkRun> {
+    try {
+      const benchmarks = await this.limitsMetrics.calculate(input.benchmarks);
 
-    this.store.addItems(benchmarks);
+      this.store.addItems(benchmarks);
 
-    return benchmarks;
+      return { benchmarks, errors: input.errors };
+    } catch (e) {
+      input.errors.push({ error: e instanceof Error ? e : new Error(`${e}`) });
+      return input;
+    }
   }
 }

@@ -10,7 +10,7 @@ import { Alert } from './entity/alert';
 import { ExecutionInfo } from './entity/execution';
 import { OrgInfo } from './entity/org';
 import { PackageInfo } from './entity/package';
-import { ApexBenchmarkResult } from '../../benchmark/apex';
+import { LimitsBenchmarkResult } from '../../service/apex';
 import { OrgContext, OrgPackage } from '../../salesforce/org/context';
 import { RunContext } from '../../state/context';
 import { Degradation } from '../../metrics/limits/deg';
@@ -40,10 +40,10 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     this.packageRecordIds = {};
   }
 
-  async saveApexResults(
+  async saveLimitsResults(
     run: RunContext,
     org: OrgContext,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<void> {
     const orgId = await this.saveAndCacheOrg(org);
     const packageIds = await this.saveAndCachePackages(org);
@@ -62,7 +62,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   async findLimitsTenDayAverage(
     projectId: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<LimitsAvg[]> {
     const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
 
@@ -193,7 +193,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   private async saveTestResults(
     product: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<TestResult[]> {
     return this.testResults.save(
       results.map(({ name, action, data }) =>
@@ -249,7 +249,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   private async saveTestInfo(
     product: string,
-    results: ApexBenchmarkResult[]
+    results: LimitsBenchmarkResult[]
   ): Promise<void> {
     const { names, actionNames } = CommonDataUtil.idSetsFromResults(results);
     const infoRecords = await this.testInfos.findBy({
@@ -281,7 +281,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
   }
 
   private async saveDegradationAlerts(
-    results: ApexBenchmarkResult[],
+    results: LimitsBenchmarkResult[],
     testRecords: TestResult[]
   ): Promise<void> {
     const deg = results.filter(r => r.deg);
