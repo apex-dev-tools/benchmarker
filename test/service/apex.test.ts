@@ -20,6 +20,7 @@ import { MockRunContext } from '../mocks';
 import { BenchmarkOrg } from '../../src/salesforce/org';
 import { PostgresDataSource } from '../../src/database/postgres';
 import { AnonApexBenchmark } from '../../src/benchmark/anon';
+import { LimitsScriptFormat } from '../../src/benchmark/limits/factory';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -29,7 +30,7 @@ GovernorLimits limitsDiff = (new GovernorLimits()).getLimitsDiff(initialLimits, 
 System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-');
 `;
 
-function apexContent(id: number) {
+function apexContent(id: number): string {
   return `
   benchmark('script${id}');
 
@@ -41,10 +42,10 @@ function apexContent(id: number) {
   `;
 }
 
-function apexFormat(id: number) {
+function apexFormat(id: number): LimitsScriptFormat {
   return {
     name: `script${id}`,
-    blockIndex: 1,
+    headerEndIndex: 0,
     actions: [
       {
         name: `${id}`,
