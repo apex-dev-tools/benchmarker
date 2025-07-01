@@ -4,10 +4,7 @@
 
 import { expect } from 'chai';
 import sinon from 'sinon';
-import {
-  MockTestOrgData,
-  TestContext as SfTestContext,
-} from '@salesforce/core/testSetup';
+import type testSetup from '@salesforce/core/lib/testSetup';
 import { AuthInfo, Connection } from '@salesforce/core';
 import {
   ExecuteAnonymousResponse,
@@ -26,6 +23,26 @@ import {
   extractAssertionData,
 } from '../../src/salesforce/execute';
 import { NamedSchema } from '../../src/parser/json';
+
+// Temp hack because the testSetup is not longer accessible via commonjs
+// needs moduleResolution: node16/nodenext which breaks antlr4 atm
+// files are still accessible by requiring the direct path
+function getModulePath(name: string) {
+  // this can throw MODULE_NOT_FOUND
+  const main_export = require.resolve(name);
+  const suffix = `/node_modules/${name}/`;
+  const idx = main_export.lastIndexOf(suffix);
+  if (idx == -1) {
+    throw new Error(
+      `failed to parse module path from main export path ${main_export}`
+    );
+  }
+  const end = idx + suffix.length - 1;
+  return main_export.slice(0, end);
+}
+const sfTestSetup: typeof testSetup = require(
+  getModulePath('@salesforce/core') + '/lib/testSetup'
+);
 
 type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
@@ -81,12 +98,12 @@ describe('salesforce/execute', () => {
   });
 
   describe('executeAnonymous()', () => {
-    const $$ = new SfTestContext({ sinon });
-    let testData: MockTestOrgData;
+    const $$ = new sfTestSetup.TestContext({ sinon });
+    let testData: testSetup.MockTestOrgData;
     let conn: Connection;
 
     beforeEach(async () => {
-      testData = new MockTestOrgData();
+      testData = new sfTestSetup.MockTestOrgData();
       await $$.stubAuths(testData);
 
       conn = await Connection.create({
@@ -208,6 +225,7 @@ describe('salesforce/execute', () => {
       });
 
       expect(requestStub).to.have.been.calledOnce;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(requestStub.args[0][0]?.body).to.include(
         '<DebuggingHeader><categories><category>System</category><level>Debug</level></categories></DebuggingHeader>'
       );
