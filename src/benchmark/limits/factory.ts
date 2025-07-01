@@ -28,8 +28,8 @@ export interface LimitsAction {
 export interface LimitsScriptFormat {
   name: string;
   actions: LimitsAction[];
-  // first block - benchmark() call
-  blockIndex?: number;
+  // first describe - 1
+  headerEndIndex?: number;
 }
 
 const limitMethodNames = [
@@ -121,7 +121,7 @@ export class LimitsBenchmarkFactory
 
       return {
         name: this.script.getStringParam(call.node, 0),
-        blockIndex: desc.index, // header is upto first action for now
+        headerEndIndex: desc.index - 1, // header is upto first action for now
         actions: [],
       };
     }

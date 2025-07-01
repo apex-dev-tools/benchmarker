@@ -48,7 +48,9 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
     this.format = format;
     this.options = options;
     this.header =
-      format.blockIndex != null ? script.getText(0, format.blockIndex) : '';
+      format.headerEndIndex != null
+        ? script.getTextBetweenBlocks(0, format.headerEndIndex)
+        : '';
   }
 
   protected *nextTransaction(): Generator<AnonApexTransaction<LimitsContext>> {
@@ -57,7 +59,7 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
 
     for (const action of this.format.actions) {
       const transaction: AnonApexTransaction<LimitsContext> = {
-        code: `${limitsText}\n${benchmarkText}`,
+        code: `${limitsText}\n${benchmarkText}\n`,
         action: action.name,
         context: action.context,
         hasAssertionResult: true,
@@ -68,8 +70,9 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
         // no describe
         if (action.needsWrapping) {
           transaction.code += `start();\n${this.script.source}\nstop();`;
+        } else {
+          transaction.code += this.script.source;
         }
-        transaction.code += this.script.source;
       } else {
         // extract current describe block
         // join to header

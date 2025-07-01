@@ -44,12 +44,11 @@ export class ApexScript {
     return new ApexScript('', { children: [] });
   }
 
-  getTextBetweenBlocks(start: number, stop?: number): string {
-    const startIndex = this.blockNodes.at(start)?.blockLocation?.startIndex;
-    const stopIndex =
-      stop == null
-        ? this.blockNodes.length
-        : this.blockNodes.at(stop)?.blockLocation?.stopIndex;
+  getTextBetweenBlocks(start: number, stop: number = -1): string {
+    const startBlock = this.blockNodes.at(start);
+    const stopBlock = start === stop ? startBlock : this.blockNodes.at(stop);
+    const startIndex = startBlock?.blockLocation?.startIndex;
+    const stopIndex = stopBlock?.blockLocation?.stopIndex;
 
     if (startIndex == null || stopIndex == null) {
       throw new Error('Failed to extract text from Apex script.');
