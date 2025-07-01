@@ -20,12 +20,25 @@ export interface LimitsBenchmarkOptions {
  * present, the whole script is assumed to be a benchmark and the code is
  * wrapped with these calls.
  *
- * @example Expected test format
- * // setup
- * benchmark.start();
- * // Apex code to test
- * benchmark.stop();
- * // teardown, extra assertions
+ * @example Simple test format
+ *   // setup
+ * start();
+ *   // test code
+ * stop();
+ *   // teardown, extra assertions
+ *
+ * @example Advanced test format
+ * benchmark('name');
+ *   // shared code
+ * describe('action');
+ *   // exclusive code
+ *   start();
+ *   // test code
+ *   stop();
+ *
+ * // multiple describe blocks
+ * describe('action2');
+ *   ...
  */
 export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
   GovernorLimits,
