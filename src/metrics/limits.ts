@@ -2,9 +2,9 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexBenchmarkResult } from '../benchmark/apex';
-import { GovernorLimits } from '../benchmark/apex/schemas';
-import { BenchmarkResultId } from '../benchmark/base';
+import { LimitsBenchmarkResult } from '../service/apex';
+import { GovernorLimits } from '../benchmark/limits/schemas';
+import { BenchmarkId } from '../benchmark/base';
 import { PostgresCommonDataMapper } from '../database/interop';
 import { RunContext } from '../state/context';
 import { calculateDeg } from './limits/deg';
@@ -19,7 +19,7 @@ export type LimitsMetric<T = number> = Record<keyof GovernorLimits, T>;
 
 export type LimitsThresholds = Partial<LimitsMetric>;
 
-export type LimitsAvg = Partial<LimitsMetric> & BenchmarkResultId;
+export type LimitsAvg = Partial<LimitsMetric> & BenchmarkId;
 
 export class LimitsMetricProvider {
   protected globalEnabled: boolean = false;
@@ -37,8 +37,8 @@ export class LimitsMetricProvider {
   }
 
   async calculate(
-    results: ApexBenchmarkResult[]
-  ): Promise<ApexBenchmarkResult[]> {
+    results: LimitsBenchmarkResult[]
+  ): Promise<LimitsBenchmarkResult[]> {
     const enabled = this.identifyEnabled(results);
     if (enabled.length == 0) {
       return results;
@@ -55,8 +55,8 @@ export class LimitsMetricProvider {
         deg: calculateDeg(
           current.data,
           ranges,
-          current.action.context?.thresholds,
-          avgDict[current.name + current.action.name]
+          current.context?.thresholds,
+          avgDict[current.name + current.action]
         ),
       };
     });
@@ -64,9 +64,9 @@ export class LimitsMetricProvider {
     return resultsAndMetrics;
   }
 
-  private identifyEnabled(results: ApexBenchmarkResult[]): number[] {
+  private identifyEnabled(results: LimitsBenchmarkResult[]): number[] {
     return results.reduce<number[]>((acc, curr, idx) => {
-      const localEnabled = curr.action.context?.enableMetrics;
+      const localEnabled = curr.context?.enableMetrics;
       if (localEnabled || (localEnabled == null && this.globalEnabled)) {
         acc.push(idx);
       }
@@ -84,7 +84,7 @@ export class LimitsMetricProvider {
   }
 
   private async getRecentAverages(
-    results: ApexBenchmarkResult[],
+    results: LimitsBenchmarkResult[],
     indexes: number[]
   ): Promise<Partial<Record<string, LimitsAvg>>> {
     if (!this.dataMapper) {
@@ -101,7 +101,7 @@ export class LimitsMetricProvider {
     );
 
     return records.reduce<Partial<Record<string, LimitsAvg>>>((dict, rec) => {
-      dict[rec.name + rec.actionName] = rec;
+      dict[rec.name + rec.action] = rec;
       return dict;
     }, {});
   }

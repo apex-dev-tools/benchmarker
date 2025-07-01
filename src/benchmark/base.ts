@@ -2,53 +2,46 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-export interface BenchmarkAction {
+export interface BenchmarkId {
   name: string;
+  action: string;
 }
 
-export interface BenchmarkResult<A extends BenchmarkAction = BenchmarkAction> {
-  name: string;
-  action: A;
-}
-
-export interface BenchmarkResultId {
-  name: string;
-  actionName: string;
-}
+export interface BenchmarkResult extends BenchmarkId {}
 
 export interface ErrorResult {
-  name: string;
-  actionName: string;
+  benchmark?: BenchmarkId;
   error: Error;
 }
 
-export abstract class Benchmark<
-  A extends BenchmarkAction,
-  R extends BenchmarkResult<A>,
-> {
-  name: string;
+export abstract class Benchmark<R extends BenchmarkResult> {
   protected _results: R[];
-  protected _error?: ErrorResult;
+  protected _errors: ErrorResult[];
 
-  constructor(name: string) {
-    this.name = name;
+  constructor() {
     this._results = [];
   }
 
-  abstract prepare(actions?: A[]): Promise<void>;
-
   abstract run(): Promise<void>;
+
+  static coerceError(e: unknown): Error {
+    const error =
+      e instanceof Error
+        ? e
+        : new Error('Unexpected error not extending Error type.');
+    return error;
+  }
 
   results(): R[] {
     return this._results;
   }
 
-  error(): ErrorResult | undefined {
-    return this._error;
+  errors(): ErrorResult[] {
+    return this._errors;
   }
 
   protected reset(): void {
     this._results = [];
-    this._error = undefined;
+    this._errors = [];
   }
 }

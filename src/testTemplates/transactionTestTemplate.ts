@@ -117,6 +117,7 @@ export interface TestFlowOptions {
   tokenMap?: TokenReplacement[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace TransactionProcess {
   /**
    * Sets the configuration for the Test Template

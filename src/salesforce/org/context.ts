@@ -74,7 +74,7 @@ export async function getOrgContext(
 ): Promise<OrgContext> {
   const resp = await executeAnonymous(
     connection,
-    require('../../../scripts/apex/info.apex')
+    require('../../../scripts/apex/info.apex') as string
   );
 
   return {

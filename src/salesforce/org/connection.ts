@@ -73,9 +73,13 @@ export async function connectToSalesforceOrg(
       throw new Error('Password is required for non-SFDX login');
     }
   } catch (e) {
-    throw new Error(
-      `Exception happened in the Salesforce authentication process. Exception message: ${e}`
-    );
+    if (e instanceof Error) {
+      throw new Error(
+        `Exception happened in the Salesforce authentication process. Exception message: ${e.message}`
+      );
+    } else {
+      throw e;
+    }
   }
 
   return connection;
