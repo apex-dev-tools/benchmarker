@@ -31,7 +31,7 @@ describe('connection', () => {
     } catch (e) {
       expect(e).to.be.instanceof(Error);
       expect((e as Error).message).to.equal(
-        'Exception happened in the Salesforce authentication process. Exception message: NamedOrgNotFoundError: No authorization information found for bad.'
+        'Exception happened in the Salesforce authentication process. Exception message: No authorization information found for bad.'
       );
     }
   });
@@ -115,7 +115,7 @@ describe('connection', () => {
     } catch (e) {
       expect(e).to.be.instanceof(Error);
       expect((e as Error).message).to.equal(
-        'Exception happened in the Salesforce authentication process. Exception message: Error: INVALID_LOGIN: Invalid username, password, security token; or user locked out.'
+        'Exception happened in the Salesforce authentication process. Exception message: INVALID_LOGIN: Invalid username, password, security token; or user locked out.'
       );
     }
   });
