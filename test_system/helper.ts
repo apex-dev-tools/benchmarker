@@ -24,7 +24,7 @@ export function restore(): void {
 }
 
 export async function cleanDatabase(): Promise<void> {
-  const connection = (await getMapper()).dataSource;
+  const connection = getMapper().dataSource;
   const entities = connection.entityMetadatas;
   const tableNames = entities
     .map(entity => `${entity.schema}.${entity.tableName}`)
@@ -49,27 +49,24 @@ export async function createSampleAlertTestData(
 }
 
 export async function saveTestResults(results: TestResult[]): Promise<void> {
-  const pg = await getMapper();
-  await pg.testResults.save(results);
+  await getMapper().testResults.save(results);
 }
 
 export async function loadTestResults(): Promise<TestResult[]> {
-  const pg = await getMapper();
-  return pg.testResults.find();
+  return getMapper().testResults.find();
 }
 
 export async function loadAlerts(
   flowName: string,
   action: string
 ): Promise<Alert[]> {
-  const pg = await getMapper();
-  return pg.alerts.findBy({
+  return getMapper().alerts.findBy({
     flowName,
     action,
   });
 }
 
-async function getMapper(): Promise<LegacyDataMapper> {
+function getMapper(): LegacyDataMapper {
   const pg = RunContext.current.pgLegacy?.mapper;
   if (!pg) {
     throw new Error('Database not connected.');

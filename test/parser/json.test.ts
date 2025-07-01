@@ -4,7 +4,10 @@
 
 import { expect } from 'chai';
 import { parseType } from '../../src/parser/json';
-import { GovernorLimits, limitsSchema } from '../../src/benchmark/apex/schemas';
+import {
+  GovernorLimits,
+  limitsSchema,
+} from '../../src/benchmark/limits/schemas';
 
 describe('text/json', () => {
   it('should parse governor limits', () => {

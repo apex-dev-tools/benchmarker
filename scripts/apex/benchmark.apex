@@ -1,25 +1,18 @@
-public class Benchmark {
-	private GovernorLimits initialLimits;
-	private GovernorLimits limits;
+GovernorLimits limitsbench_initial;
+GovernorLimits limitsbench_diff;
 
-	public void begin() {}
+void benchmark(String name) {}
 
-	public void start() {
-		initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
-	}
+void describe(String action) {}
 
-	public void start(String action) {
-		this.start();
-	}
-
-	public void stop() {
-		limits = (new GovernorLimits()).getLimitsDiff(initialLimits, (new GovernorLimits()).getCurrentGovernorLimits());
-		initialLimits = null;
-	}
-
-	public void end() {
-		System.assert(false, '-_' + JSON.serialize(limits) + '_-');
-	}
+void start() {
+	limitsbench_initial = (new GovernorLimits()).getCurrentGovernorLimits();
 }
 
-Benchmark benchmark = new Benchmark();
+void stop() {
+	limitsbench_diff = (new GovernorLimits()).getLimitsDiff(limitsbench_initial, (new GovernorLimits()).getCurrentGovernorLimits());
+}
+
+void done() {
+	System.assert(false, '-_' + JSON.serialize(limitsbench_diff) + '_-');
+}

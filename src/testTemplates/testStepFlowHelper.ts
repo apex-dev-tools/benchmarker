@@ -12,8 +12,8 @@ import {
 } from './transactionTestTemplate';
 import { apexService } from '..';
 import { Connection } from '@salesforce/core';
-import { BenchmarkSingleResult } from '../service/apex';
-import { LimitsContext } from '../benchmark/apex/schemas';
+import { LimitsContext } from '../benchmark/limits/schemas';
+import { LimitsBenchmarkRequest, LimitsBenchmarkRun } from '../service/apex';
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
@@ -22,29 +22,18 @@ import { LimitsContext } from '../benchmark/apex/schemas';
  * @param testStepDescription adds information about the name of the flow to be executed and the action perfromed
  * @param [testFlowOptions] optional, replaces values in the Apex scripts, for examples datetimes values
  */
-export const createApexExecutionTestStepFlow = async (
+export const createApexExecutionTestStepFlow = (
   connection: Connection,
   apexScriptPath: string,
   testStepDescription: TestStepDescription,
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
-  return async alertInfo => {
-    const { flowName, action, additionalData } = testStepDescription;
-    console.log(`Executing '${flowName} - ${action}' performance test...`);
-
-    const result = await apexService.benchmarkFile(apexScriptPath, {
-      name: flowName,
-      actions: [
-        {
-          name: action,
-          context: toLimitsContext(alertInfo, additionalData),
-        },
-      ],
-      parser: { replace: toReplaceDict(testFlowOptions?.tokenMap) },
-    });
-
-    return toTestFlowOutput(testStepDescription, result);
-  };
+  return Promise.resolve(
+    toFlowStep(testStepDescription, {
+      paths: [apexScriptPath],
+      parserOptions: { replace: toReplaceDict(testFlowOptions?.tokenMap) },
+    })
+  );
 };
 
 /**
@@ -53,35 +42,44 @@ export const createApexExecutionTestStepFlow = async (
  * @param apexCode the apex code which the FlowStep object should be constructed with
  * @param testStepDescription adds information about the name of the flow to be executed and the action perfromed
  */
-export const createApexExecutionTestStepFlowFromApex = async (
+export const createApexExecutionTestStepFlowFromApex = (
   connection: Connection,
   apexCode: string,
   testStepDescription: TestStepDescription
 ): Promise<FlowStep> => {
-  return async alertInfo => {
-    const { flowName, action, additionalData } = testStepDescription;
-    console.log(`Executing '${flowName} - ${action}' performance test...`);
-
-    const result = await apexService.benchmarkCode(apexCode, {
-      name: flowName,
-      actions: [
-        {
-          name: action,
-          context: toLimitsContext(alertInfo, additionalData),
-        },
-      ],
-    });
-
-    return toTestFlowOutput(testStepDescription, result);
-  };
+  return Promise.resolve(
+    toFlowStep(testStepDescription, {
+      code: apexCode,
+    })
+  );
 };
 
 // Compatibility functions to new API
 
-function toLimitsContext(
-  alertInfo?: AlertInfo,
-  jsonData?: string
-): LimitsContext {
+function toFlowStep(
+  testStepDescription: TestStepDescription,
+  request: LimitsBenchmarkRequest
+): FlowStep {
+  return async alertInfo => {
+    const { flowName, action, additionalData } = testStepDescription;
+    console.log(`Executing '${flowName} - ${action}' performance test...`);
+
+    const result = await apexService.benchmarkLimits({
+      ...request,
+      options: {
+        id: {
+          name: flowName,
+          action,
+        },
+        context: toLimitsContext(alertInfo, additionalData),
+      },
+    });
+
+    return toTestFlowOutput(testStepDescription, result);
+  };
+}
+
+function toLimitsContext(alertInfo?: AlertInfo, data?: string): LimitsContext {
   const { storeAlerts, thresholds } = alertInfo || {};
 
   return {
@@ -94,7 +92,7 @@ function toLimitsContext(
       queryRows: thresholds?.queryRowsThreshold,
       soqlQueries: thresholds?.soqlQueriesThreshold,
     },
-    jsonData,
+    data,
   };
 }
 
@@ -109,11 +107,12 @@ function toReplaceDict(
 
 function toTestFlowOutput(
   testStepDescription: TestStepDescription,
-  result: BenchmarkSingleResult
+  result: LimitsBenchmarkRun
 ): TestFlowOutput {
   const { flowName, action } = testStepDescription;
-  if (result.error) {
-    const { error } = result.error;
+  const lastError = result.errors && result.errors.at(-1);
+  if (lastError) {
+    const { error } = lastError;
     console.log(
       `Failure during '${flowName} - ${action}' process execution: ${error.message}`
     );

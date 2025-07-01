@@ -85,7 +85,7 @@ class FakeTooling {
     this.failureCounts = failureCounts;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await
   async query(soql: string): Promise<any> {
     if (this.failureCounts.query > 0) {
       this.failureCounts.query -= 1;
@@ -104,6 +104,7 @@ class FakeTooling {
     else return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async create(nameAndBody: NameAndBody): Promise<void> {
     if (this.failureCounts.create > 0) {
       this.failureCounts.create -= 1;
@@ -113,6 +114,7 @@ class FakeTooling {
     this.created.push(nameAndBody);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async delete(id: string): Promise<void> {
     if (this.failureCounts.delete > 0) {
       this.failureCounts.delete -= 1;
