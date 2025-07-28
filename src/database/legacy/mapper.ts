@@ -274,7 +274,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
             product,
             flowName: name,
             action: action,
-            additionalData: context?.data,
+            additionalData: this.ensureJson(context?.data),
           })
       )
     );
@@ -318,5 +318,14 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     // at least one overThreshold is non zero for metric to exist
     // use overThreshold as fall back if avg unusable
     return overThreshold > 0 ? overAvg || overThreshold : 0;
+  }
+
+  private ensureJson(maybeJson: unknown): string | undefined {
+    if (maybeJson != null) {
+      return typeof maybeJson == 'string'
+        ? maybeJson
+        : JSON.stringify(maybeJson);
+    }
+    return undefined;
   }
 }
