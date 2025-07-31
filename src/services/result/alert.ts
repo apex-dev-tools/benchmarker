@@ -46,7 +46,8 @@ export async function generateValidAlerts(
         alert.dmlStatementsDegraded > 0 ||
         alert.heapSizeDegraded > 0 ||
         alert.queryRowsDegraded > 0 ||
-        alert.soqlQueriesDegraded > 0
+        alert.soqlQueriesDegraded > 0 ||
+        alert.loadTimeDegraded > 0
       );
     });
   } catch (err) {

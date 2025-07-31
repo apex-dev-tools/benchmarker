@@ -204,6 +204,7 @@ export async function addAlertByComparingAvg(
       dmlrowavg: number;
       heapavg: number;
       queryrowavg: number;
+      loadtimeavg: number;
       runcount: number;
     };
   },
@@ -255,6 +256,13 @@ export async function addAlertByComparingAvg(
         ? output.soqlQueries - Number(averageResults.soqlavg)
         : 0
       : 0;
+    alert.loadTimeDegraded = output.alertInfo.thresholds.loadTimeThreshold
+      ? output.loadTime
+        ? output.loadTime > output.alertInfo.thresholds.loadTimeThreshold
+          ? output.loadTime - Number(averageResults.loadtimeavg)
+          : 0
+        : 0
+      : 0;
   } else {
     const thresholds = getOffsetThresholdsByRange(
       averageResults,
@@ -301,6 +309,16 @@ export async function addAlertByComparingAvg(
         Number(thresholds.queryRowThreshold) +
           Number(averageResults.queryrowavg)
         ? output.queryRows - Number(averageResults.queryrowavg)
+        : 0
+      : 0;
+
+    console.log(`loadtimeavg: ${averageResults.loadtimeavg}\n`);
+
+    alert.loadTimeDegraded = thresholds.loadTimeThreshold
+      ? output.loadTime
+        ? Number(averageResults.loadtimeavg) > thresholds.loadTimeThreshold
+          ? output.loadTime - Number(averageResults.loadtimeavg)
+          : 0
         : 0
       : 0;
   }

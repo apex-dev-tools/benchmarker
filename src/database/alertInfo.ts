@@ -30,6 +30,7 @@ export async function getAverageLimitValuesFromDB(
       ROUND(AVG(dml_rows)::numeric, 0) AS dmlrowavg,
       ROUND(AVG(heap_size)::numeric, 0) AS heapavg,
       ROUND(AVG(query_rows)::numeric, 0) AS queryrowavg,
+      ROUND(AVG(duration)::numeric, 0) AS loadtimeavg,
       COUNT(*) AS run_count
     FROM performance.test_result
     WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS')
@@ -47,6 +48,7 @@ export async function getAverageLimitValuesFromDB(
       dmlrowavg: number;
       heapavg: number;
       queryrowavg: number;
+      loadtimeavg: number;
       runcount: number;
     };
   } = {};
@@ -65,6 +67,7 @@ export async function getAverageLimitValuesFromDB(
         dmlrowavg: number;
         heapavg: number;
         queryrowavg: number;
+        loadtimeavg: number;
         run_count: number;
       }) => {
         const key = `${row.flow_name}_${row.action}`;
@@ -75,6 +78,7 @@ export async function getAverageLimitValuesFromDB(
           dmlrowavg: row.dmlrowavg ?? 0,
           heapavg: row.heapavg ?? 0,
           queryrowavg: row.queryrowavg ?? 0,
+          loadtimeavg: row.loadtimeavg ?? 0,
           runcount: row.run_count,
         };
       }

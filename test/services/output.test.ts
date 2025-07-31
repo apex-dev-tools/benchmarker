@@ -72,6 +72,7 @@ describe('Test Utilities', () => {
         dmlrowavg: 50,
         heapavg: 50,
         queryrowavg: 50,
+        loadtimeavg: 50,
       };
 
       //When
@@ -115,6 +116,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 50,
           heapavg: 100,
           queryrowavg: 400,
+          loadtimeavg: 9000,
           runcount: 10,
         },
       };
@@ -172,6 +174,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 50,
           heapavg: 100,
           queryrowavg: 400,
+          loadtimeavg: 1000,
           runcount: 3,
         },
       };
@@ -241,6 +244,7 @@ describe('Test Utilities', () => {
           dmlrowavg: 200,
           heapavg: 300,
           queryrowavg: 200,
+          loadtimeavg: 1000,
           runcount: 10,
         },
       };

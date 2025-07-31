@@ -40,6 +40,9 @@ export class Alert extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'soql_queries_degraded' })
   public soqlQueriesDegraded = DEFAULT_NUMERIC_VALUE;
 
+  @Column('integer', { nullable: true, name: 'load_time_degraded' })
+  public loadTimeDegraded = DEFAULT_NUMERIC_VALUE;
+
   public constructor() {
     super();
   }
