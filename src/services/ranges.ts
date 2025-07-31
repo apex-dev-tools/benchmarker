@@ -7,6 +7,7 @@ export interface OffsetThresholdRange {
   start_range: number;
   end_range: number;
   offset_threshold: number;
+  enforce?: boolean;
 }
 
 export interface RangeCollection {
@@ -16,4 +17,5 @@ export interface RangeCollection {
   dmlRows_ranges: OffsetThresholdRange[];
   heap_ranges: OffsetThresholdRange[];
   queryRows_ranges: OffsetThresholdRange[];
+  loadTime_ranges?: OffsetThresholdRange[];
 }

@@ -106,6 +106,7 @@ export function getOffsetThresholdsByRange(
     dmlrowavg: number;
     heapavg: number;
     queryrowavg: number;
+    loadtimeavg: number;
   },
   rangeCollection: RangeCollection
 ) {
@@ -146,6 +147,13 @@ export function getOffsetThresholdsByRange(
       averageResults.queryrowavg <= e.end_range
   );
 
+  const loadTimeRanges = rangeCollection.loadTime_ranges?.filter(
+    (e: OffsetThresholdRange) =>
+      e.enforce &&
+      averageResults.loadtimeavg >= e.start_range &&
+      averageResults.loadtimeavg <= e.end_range
+  );
+
   //get threasholds based on the ranges
   const dmlThreshold = dmlRanges[0]?.offset_threshold || 0;
   const soqlThreshold = soqlRanges[0]?.offset_threshold || 0;
@@ -153,6 +161,9 @@ export function getOffsetThresholdsByRange(
   const dmlRowThreshold = dmlRowRanges[0]?.offset_threshold || 0;
   const heapThreshold = heapRanges[0]?.offset_threshold || 0;
   const queryRowThreshold = queryRowRanges[0]?.offset_threshold || 0;
+  const loadTimeThreshold = loadTimeRanges
+    ? loadTimeRanges[0]?.offset_threshold || 0
+    : 0;
 
   return {
     dmlThreshold,
@@ -161,6 +172,7 @@ export function getOffsetThresholdsByRange(
     dmlRowThreshold,
     heapThreshold,
     queryRowThreshold,
+    loadTimeThreshold,
   };
 }
 

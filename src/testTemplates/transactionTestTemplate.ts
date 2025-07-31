@@ -82,6 +82,7 @@ export class Thresholds {
   heapSizeThreshold: number;
   queryRowsThreshold: number;
   soqlQueriesThreshold: number;
+  loadTimeThreshold?: number;
 }
 
 /**
