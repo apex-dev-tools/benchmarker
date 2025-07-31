@@ -37,6 +37,7 @@ export const saveResults = async (
       soqlQueries: result.soqlQueries,
       queueableJobs: result.queueableJobs,
       futureCalls: result.futureCalls,
+      loadTime: result.loadTime,
       action,
       flowName,
       additionalData: flowOutput.testStepDescription.additionalData

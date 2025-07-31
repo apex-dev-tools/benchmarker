@@ -38,6 +38,7 @@ describe('src/testTemplates/saveResult', () => {
             soqlQueries: 8,
             queueableJobs: 9,
             futureCalls: 10,
+            loadTime: 20,
           },
           alertInfo: {
             storeAlerts: true,
@@ -113,6 +114,7 @@ describe('src/testTemplates/saveResult', () => {
             soqlQueries: 8,
             queueableJobs: 9,
             futureCalls: 10,
+            loadTime: 20,
           },
           error: 'Exception processing flow',
         },

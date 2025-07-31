@@ -50,6 +50,7 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       queueableJobs: 1,
       futureCalls: 1,
       timer: 1,
+      loadTime: 1,
     };
     sinon
       .stub(salesforceUtils, 'extractGovernorMetricsFromGenericApexFlow')
@@ -107,6 +108,7 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       queueableJobs: 1,
       futureCalls: 1,
       timer: 1,
+      loadTime: 1,
     };
     const extractGovernorMetricsFromGenericApexFlowStub = sinon
       .stub(salesforceUtils, 'extractGovernorMetricsFromGenericApexFlow')
@@ -161,6 +163,7 @@ describe('src/testTemplates/testStepFlowHelper', () => {
       queueableJobs: 1,
       futureCalls: 1,
       timer: 1,
+      loadTime: 1,
     };
     const extractGovernorMetricsFromGenericApexFlowStub = sinon
       .stub(salesforceUtils, 'extractGovernorMetricsFromGenericApexFlow')

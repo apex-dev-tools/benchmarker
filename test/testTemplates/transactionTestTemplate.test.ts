@@ -74,6 +74,7 @@ describe('src/testTemplates/transactionTestTemplate', () => {
           soqlQueries: 7,
           queueableJobs: 8,
           futureCalls: 9,
+          loadTime: 10,
         },
       };
       const flowStep: FlowStep = stub().resolves(result);
@@ -121,6 +122,7 @@ describe('src/testTemplates/transactionTestTemplate', () => {
           soqlQueries: 7,
           queueableJobs: 8,
           futureCalls: 9,
+          loadTime: 10,
         },
       };
       const alertInfo: AlertInfo = {

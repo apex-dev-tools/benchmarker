@@ -20,6 +20,7 @@ export interface GovernorMetricsResult {
   soqlQueries: number;
   queueableJobs: number;
   futureCalls: number;
+  loadTime: number;
 }
 
 export interface ProcessParams {
@@ -167,6 +168,7 @@ export namespace TransactionProcess {
             queueableJobs: -1,
             futureCalls: -1,
             timer: -1,
+            loadTime: -1,
           },
         });
       } else {

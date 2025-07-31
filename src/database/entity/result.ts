@@ -76,6 +76,9 @@ export class TestResult extends PerformanceBaseEntity {
   @Column('text', { nullable: true, name: 'source_ref' })
   public sourceRef = DEFAULT_STRING_VALUE;
 
+  @Column('integer', { nullable: true, name: 'load_time' })
+  public loadTime = DEFAULT_NUMERIC_VALUE;
+
   public constructor() {
     super();
   }

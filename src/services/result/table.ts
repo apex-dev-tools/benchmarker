@@ -39,6 +39,7 @@ const outputGovernorLimits: DataTableRow[] = [
   { label: 'SOQL queries', field: 'soqlQueries' },
   { label: 'Queueables', field: 'queueableJobs' },
   { label: 'Futures', field: 'futureCalls' },
+  { label: 'Load Time', field: 'loadTime' },
 ];
 
 const outputErrors: DataTableRow[] = [
@@ -120,7 +121,8 @@ function filterData(data: TestResult[]) {
       isDefaultNumericValue(item.dmlStatements) &&
       isDefaultNumericValue(item.heapSize) &&
       isDefaultNumericValue(item.queryRows) &&
-      isDefaultNumericValue(item.soqlQueries)
+      isDefaultNumericValue(item.soqlQueries) &&
+      isDefaultNumericValue(item.loadTime)
   );
   const dataGovernorLimits = data.filter(
     item =>
@@ -130,7 +132,8 @@ function filterData(data: TestResult[]) {
         !isDefaultNumericValue(item.dmlStatements) ||
         !isDefaultNumericValue(item.heapSize) ||
         !isDefaultNumericValue(item.queryRows) ||
-        !isDefaultNumericValue(item.soqlQueries))
+        !isDefaultNumericValue(item.soqlQueries) ||
+        !isDefaultNumericValue(item.loadTime))
   );
   const dataErrors = data.filter(item => item.error !== '');
   return { dataMetrics, dataErrors, dataGovernorLimits };

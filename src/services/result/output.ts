@@ -38,6 +38,7 @@ export interface TestResultOutput {
   soqlQueries?: number;
   queueableJobs?: number;
   futureCalls?: number;
+  loadTime?: number;
 
   // alert info
   alertInfo?: AlertInfo;
@@ -90,6 +91,8 @@ export function convertOutputToTestResult(
     output.futureCalls !== undefined
       ? output.futureCalls
       : DEFAULT_NUMERIC_VALUE;
+  testResult.loadTime =
+    output.loadTime !== undefined ? output.loadTime : DEFAULT_NUMERIC_VALUE;
   testResult.sourceRef = getSourceRef();
 
   return testResult;
