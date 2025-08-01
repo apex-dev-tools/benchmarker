@@ -5,7 +5,7 @@
  * @module @apexdevtools/benchmarker
  */
 
-import { ApexBenchmarkService } from './service/apex';
+import { ApexBenchmarkService } from './service/apex.js';
 
 export const apexService: ApexBenchmarkService = new ApexBenchmarkService();
 
@@ -20,10 +20,10 @@ export {
   AlertInfo,
   Thresholds,
   TokenReplacement,
-} from './testTemplates/transactionTestTemplate';
+} from './testTemplates/transactionTestTemplate.js';
 export {
   createApexExecutionTestStepFlow,
   createApexExecutionTestStepFlowFromApex,
-} from './testTemplates/testStepFlowHelper';
-export { saveResults } from './testTemplates/saveResult';
-export type { BenchmarkOrgConnection as SalesforceConnection } from './salesforce/org/connection';
+} from './testTemplates/testStepFlowHelper.js';
+export { saveResults } from './testTemplates/saveResult.js';
+export type { BenchmarkOrgConnection as SalesforceConnection } from './salesforce/org/connection.js';

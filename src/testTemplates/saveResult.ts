@@ -2,11 +2,11 @@
  * Copyright (c) 2019 Certinia Inc. All rights reserved.
  */
 
-import { apexService } from '..';
+import { apexService } from '../index.js';
 import {
   TransactionTestTemplate,
   TestFlowOutput,
-} from './transactionTestTemplate';
+} from './transactionTestTemplate.js';
 import Table from 'cli-table';
 
 /**

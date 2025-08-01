@@ -7,7 +7,10 @@ export interface BenchmarkId {
   action: string;
 }
 
-export interface BenchmarkResult extends BenchmarkId {}
+export interface BenchmarkResult {
+  name: string;
+  action: string;
+}
 
 export interface ErrorResult {
   benchmark?: BenchmarkId;
@@ -24,12 +27,12 @@ export abstract class Benchmark<R extends BenchmarkResult> {
 
   abstract run(): Promise<void>;
 
-  static coerceError(e: unknown): Error {
+  static coerceError(e: unknown, id?: BenchmarkId): ErrorResult {
     const error =
       e instanceof Error
         ? e
         : new Error('Unexpected error not extending Error type.');
-    return error;
+    return { benchmark: id, error };
   }
 
   results(): R[] {

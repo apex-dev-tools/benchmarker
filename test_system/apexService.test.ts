@@ -3,8 +3,8 @@
  */
 
 import { expect } from 'chai';
-import { ApexBenchmarkService } from '../src/service/apex';
-import { restore } from './helper';
+import { ApexBenchmarkService } from '../src/service/apex.js';
+import { restore } from './helper.js';
 
 describe('service/apex', () => {
   let apex: ApexBenchmarkService;

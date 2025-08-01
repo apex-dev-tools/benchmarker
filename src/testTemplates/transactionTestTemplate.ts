@@ -2,9 +2,9 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { apexService } from '..';
-import { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection';
-import { RunContext } from '../state/context';
+import { apexService } from '../index.js';
+import { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection.js';
+import { RunContext } from '../state/context.js';
 
 export interface GovernorMetricsResult {
   timer: number;

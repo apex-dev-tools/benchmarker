@@ -3,11 +3,11 @@
  */
 
 import * as dotenv from 'dotenv';
-import { Alert } from '../src/database/legacy/entity/alert';
-import { TestResult } from '../src/database/legacy/entity/result';
-import { LegacyDataMapper } from '../src/database/legacy/mapper';
-import { RunContext } from '../src/state/context';
-import { MockEnv, MockRunContext } from '../test/mocks';
+import { Alert } from '../src/database/legacy/entity/alert.js';
+import { TestResult } from '../src/database/legacy/entity/result.js';
+import { LegacyDataMapper } from '../src/database/legacy/mapper.js';
+import { RunContext } from '../src/state/context.js';
+import { MockEnv, MockRunContext } from '../test/mocks.js';
 
 export function loadEnv(env?: MockEnv): void {
   // replace with either .env file or set specifics

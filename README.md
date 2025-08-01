@@ -4,7 +4,7 @@ A performance testing framework, which orchestrates, profiles, and persists stat
 
 ## Usage
 
-Tests are executed using different templates in a JavaScript testing framework (For example, Mocha, Jest). Results are saved to a provided PostgreSQL database. Alerts for performance degradations can be stored in the database as well. See [the alerts documentation](./docs/user/alerts.md) for more details.
+Tests are executed using different templates in a JavaScript testing framework (For example, Mocha). Results are saved to a provided PostgreSQL database. Alerts for performance degradations can be stored in the database as well. See [the alerts documentation](./docs/user/alerts.md) for more details.
 
 The `TransactionTestTemplate` calls a function (`FlowStep`, most often created by helpers) to execute some anonymous Apex code provided for the test. The Apex can come from a file or inline as a string. This Apex code can also collect Governor limit metrics which will be extracted at the end of the test. After all tests are complete, data attributed to the template can be saved. For a sample execution, see `test_system/basic.test.ts`.
 
@@ -16,6 +16,9 @@ Available scripts:
 
 * `npm run build` - Clean rebuild ready to pack or run.
 * `npm run compile` - Run typescript compile only.
+* `npm run compile:apex` - Generate `src/scripts/apex.ts` file with inlined apex scripts.
+  * Use after changing `scripts/apex/*.apex` files.
+  * Creates string constants with the apex content to use in exec calls.
 * `npm test` - Run unit tests.
 * `npm run test:only --` - Run tests with args passed to mocha.
   * e.g. `npm run test:only -- 'path/to/test.ts' -f 'specific test case'`
@@ -23,7 +26,7 @@ Available scripts:
 
 ### Testing
 
-Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI, and have a Dev Hub set up. To use an org with username and password, more environment variables need setting, see `.env.example` and `test_system/.env`.
+Running system tests requires a Salesforce Org and Docker. The instructions below assume you have installed Docker, Salesforce CLI, and have a Dev Hub set up. To use an org with username and password, more environment variables need setting, see `.env.example` and `test_system/config/.env` template.
 
 1. Create a scratch org:
 

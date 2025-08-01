@@ -10,15 +10,15 @@ import {
   Thresholds,
   TransactionProcess,
   TransactionTestTemplate,
-} from '../src';
-import { Alert } from '../src/database/legacy/entity/alert';
+} from '../src/index.js';
+import { Alert } from '../src/database/legacy/entity/alert.js';
 import {
   cleanDatabase,
   createSampleAlertTestData,
   loadAlerts,
   loadEnv,
   restore,
-} from './helper';
+} from './helper.js';
 
 describe('alert', () => {
   let test: TransactionTestTemplate;

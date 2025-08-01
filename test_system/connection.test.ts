@@ -3,8 +3,8 @@
  */
 
 import { expect } from 'chai';
-import { connectToSalesforceOrg } from '../src/salesforce/org/connection';
-import { loadEnv, restore } from './helper';
+import { connectToSalesforceOrg } from '../src/salesforce/org/connection.js';
+import { loadEnv, restore } from './helper.js';
 
 describe('connection', () => {
   let username: string;

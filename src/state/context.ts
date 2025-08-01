@@ -3,10 +3,10 @@
  */
 
 import * as dotenv from 'dotenv';
-import { BenchmarkOrg, OrgOptions } from '../salesforce/org';
-import { PostgresDataSource, PostgresOptions } from '../database/postgres';
-import { LegacyDataSource } from '../database/legacy';
-import { PostgresCommonDataMapper } from '../database/interop';
+import { BenchmarkOrg, OrgOptions } from '../salesforce/org.js';
+import { PostgresDataSource, PostgresOptions } from '../database/postgres.js';
+import { LegacyDataSource } from '../database/legacy.js';
+import { PostgresCommonDataMapper } from '../database/interop.js';
 
 export interface GlobalOptions {
   // id/name for current run e.g. build number

@@ -4,12 +4,15 @@
 
 import * as dotenv from 'dotenv';
 import { SinonSandbox, SinonStubbedInstance } from 'sinon';
-import { GlobalOptions, RunContext } from '../src/state/context';
-import { BenchmarkOrg } from '../src/salesforce/org';
-import { PostgresDataSource } from '../src/database/postgres';
-import { PostgresCommonDataMapper } from '../src/database/interop';
-import { BenchmarkOrgConnection } from '../src/salesforce/org/connection';
-import { LegacyDataSource } from '../src/database/legacy';
+import { AuthInfo } from '@salesforce/core';
+import { MockTestOrgData } from '@salesforce/core/testSetup';
+import { GlobalOptions, RunContext } from '../src/state/context.js';
+import { BenchmarkOrg } from '../src/salesforce/org.js';
+import { PostgresDataSource } from '../src/database/postgres.js';
+import { PostgresCommonDataMapper } from '../src/database/interop.js';
+import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
+import { LegacyDataSource } from '../src/database/legacy.js';
+import { GovernorLimits } from '../src/benchmark/limits/schemas.js';
 
 const envKeys = [
   'BENCH_PROJECT_ID',
@@ -26,12 +29,26 @@ const envKeys = [
 
 export type MockEnv = { [K in (typeof envKeys)[number]]?: string };
 
+export const mockLimits: GovernorLimits = {
+  duration: 8,
+  cpuTime: 9,
+  dmlRows: 0,
+  dmlStatements: 0,
+  heapSize: 40131,
+  queryRows: 0,
+  soqlQueries: 0,
+  queueableJobs: 0,
+  futureCalls: 0,
+};
+
 export class MockRunContext extends RunContext {
   sandbox: SinonSandbox;
+  orgMockData: MockTestOrgData;
 
   constructor(sandbox: SinonSandbox) {
     super();
     this.sandbox = sandbox;
+    this.orgMockData = new MockTestOrgData();
   }
 
   static createMock(sandbox: SinonSandbox): MockRunContext {
@@ -67,14 +84,23 @@ export class MockRunContext extends RunContext {
     }
   }
 
-  stubOrg(
-    connection: BenchmarkOrgConnection = {} as BenchmarkOrgConnection
+  async stubSfConnection(): Promise<BenchmarkOrgConnection> {
+    return (await BenchmarkOrgConnection.create({
+      authInfo: await AuthInfo.create({ username: this.orgMockData.username }),
+    })) as BenchmarkOrgConnection;
+  }
+
+  stubSfOrg(
+    connection?: BenchmarkOrgConnection
   ): SinonStubbedInstance<BenchmarkOrg> {
     const org = this.sandbox.createStubInstance(BenchmarkOrg);
     org.connect.resolves();
     org.getUnmanagedNamespaces.returns([]);
     org.getNamespaceRegExp.returns([]);
-    this.sandbox.stub(org, 'connection').value(connection);
+
+    if (connection) {
+      this.sandbox.stub(org, 'connection').value(connection);
+    }
 
     this.org = org;
     return org;

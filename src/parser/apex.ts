@@ -5,10 +5,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ApexParserFactory } from '@apexdevtools/apex-parser';
-import { ApexScript } from './apex/script';
-import { ApexScriptVisitor } from './apex/visitor';
-import { ApexScriptError } from './apex/error';
-import { AnonNodeWrapper, ApexScriptNode } from './apex/tree';
+import { ApexScript } from './apex/script.js';
+import { ApexScriptVisitor } from './apex/visitor.js';
+import { ApexScriptError } from './apex/error.js';
+import { AnonNodeWrapper, ApexScriptNode } from './apex/tree.js';
 
 export interface ApexScriptParserOptions {
   /**

@@ -5,24 +5,24 @@
 import {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
-} from '../benchmark/anon';
-import { Benchmark, ErrorResult } from '../benchmark/base';
-import { LimitsBenchmarkOptions } from '../benchmark/limits';
-import { LimitsBenchmarkFactory } from '../benchmark/limits/factory';
-import { GovernorLimits, LimitsContext } from '../benchmark/limits/schemas';
+} from '../benchmark/anon.js';
+import { Benchmark, ErrorResult } from '../benchmark/base.js';
+import { LimitsBenchmarkOptions } from '../benchmark/limits.js';
+import { LimitsBenchmarkFactory } from '../benchmark/limits/factory.js';
+import { GovernorLimits, LimitsContext } from '../benchmark/limits/schemas.js';
 import {
   LimitsMetricProvider,
   LimitsMetricProviderOptions,
-} from '../metrics/limits';
-import { DegLimitsMetric } from '../metrics/limits/deg';
-import { ApexScriptParserOptions } from '../parser/apex';
-import { RunContext, RunContextOptions } from '../state/context';
-import { RunStore } from '../state/store';
+} from '../metrics/limits.js';
+import { DegLimitsMetric } from '../metrics/limits/deg.js';
+import { ApexScriptParserOptions } from '../parser/apex.js';
+import { RunContext, RunContextOptions } from '../state/context.js';
+import { RunStore } from '../state/store.js';
 import {
   AnonApexBenchmarker,
   AnonApexBenchmarkerRequest,
   AnonApexBenchmarkRun,
-} from './apex/runner';
+} from './apex/runner.js';
 
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {
   limitsMetrics?: LimitsMetricProviderOptions;
@@ -177,7 +177,7 @@ export class ApexBenchmarkService {
 
       return { benchmarks, errors: input.errors };
     } catch (e) {
-      input.errors.push({ error: Benchmark.coerceError(e) });
+      input.errors.push(Benchmark.coerceError(e));
       return input;
     }
   }

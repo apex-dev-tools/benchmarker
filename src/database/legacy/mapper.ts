@@ -3,18 +3,18 @@
  */
 
 import { Brackets, DataSource, In, Repository } from 'typeorm';
-import { TestResult } from './entity/result';
-import { LimitsAvg } from '../../metrics/limits';
-import { CommonDataUtil, PostgresCommonDataMapper } from '../interop';
-import { Alert } from './entity/alert';
-import { ExecutionInfo } from './entity/execution';
-import { OrgInfo } from './entity/org';
-import { PackageInfo } from './entity/package';
-import { LimitsBenchmarkResult } from '../../service/apex';
-import { OrgContext, OrgPackage } from '../../salesforce/org/context';
-import { RunContext } from '../../state/context';
-import { Degradation } from '../../metrics/limits/deg';
-import { TestInfo } from './entity/info';
+import { TestResult } from './entity/result.js';
+import { LimitsAvg } from '../../metrics/limits.js';
+import { CommonDataUtil, PostgresCommonDataMapper } from '../interop.js';
+import { Alert } from './entity/alert.js';
+import { ExecutionInfo } from './entity/execution.js';
+import { OrgInfo } from './entity/org.js';
+import { PackageInfo } from './entity/package.js';
+import { LimitsBenchmarkResult } from '../../service/apex.js';
+import { OrgContext, OrgPackage } from '../../salesforce/org/context.js';
+import { RunContext } from '../../state/context.js';
+import { Degradation } from '../../metrics/limits/deg.js';
+import { TestInfo } from './entity/info.js';
 
 export class LegacyDataMapper implements PostgresCommonDataMapper {
   dataSource: DataSource;
@@ -274,7 +274,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
             product,
             flowName: name,
             action: action,
-            additionalData: context?.data,
+            additionalData: this.ensureJson(context?.data),
           })
       )
     );
@@ -318,5 +318,14 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     // at least one overThreshold is non zero for metric to exist
     // use overThreshold as fall back if avg unusable
     return overThreshold > 0 ? overAvg || overThreshold : 0;
+  }
+
+  private ensureJson(maybeJson: unknown): string | undefined {
+    if (maybeJson != null) {
+      return typeof maybeJson == 'string'
+        ? maybeJson
+        : JSON.stringify(maybeJson);
+    }
+    return undefined;
   }
 }

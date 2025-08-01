@@ -6,11 +6,11 @@ import {
   ApexScript,
   MethodCallDictionary,
   MethodCallGroups,
-} from '../../parser/apex/script';
-import { AnonApexBenchmark, AnonApexBenchmarkFactory } from '../anon';
-import { LimitsAnonApexBenchmark, LimitsBenchmarkOptions } from '../limits';
-import { LegacyAnonApexBenchmark } from './legacy';
-import { GovernorLimits, LimitsContext } from './schemas';
+} from '../../parser/apex/script.js';
+import { AnonApexBenchmark, AnonApexBenchmarkFactory } from '../anon.js';
+import { LimitsAnonApexBenchmark, LimitsBenchmarkOptions } from '../limits.js';
+import { LegacyAnonApexBenchmark } from './legacy.js';
+import { GovernorLimits, LimitsContext } from './schemas.js';
 
 export interface LimitsAction {
   name: string;

@@ -2,6 +2,6 @@ color: true
 extension: ['ts']
 full-trace: true
 recursive: true
+node-option: 'import=tsx'
 require:
-  - 'ts-node/register'
   - './test/setup.ts'
