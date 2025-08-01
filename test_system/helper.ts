@@ -12,7 +12,7 @@ import { MockEnv, MockRunContext } from '../test/mocks.js';
 export function loadEnv(env?: MockEnv): void {
   // replace with either .env file or set specifics
   if (!env) {
-    dotenv.config({ override: true });
+    dotenv.config({ override: true, quiet: true });
   } else {
     MockRunContext.replaceEnv(env);
   }

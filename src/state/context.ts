@@ -15,6 +15,9 @@ export interface GlobalOptions {
   // id/name for project / product - mark created records
   projectId?: string;
 
+  // id/name for git ref - mark created records
+  sourceId?: string;
+
   // path to custom env - default: cwd/.env
   envFile?: string;
 }
@@ -31,6 +34,7 @@ export class RunContext {
   pg: PostgresDataSource;
   pgLegacy?: LegacyDataSource;
   buildId?: string;
+  sourceId?: string;
 
   constructor() {
     this.org = new BenchmarkOrg();
@@ -81,7 +85,7 @@ export class RunContext {
   protected loadEnv(global: GlobalOptions = {}) {
     if (this.projectId.length != 0) return;
 
-    dotenv.config({ path: global.envFile || '.env' });
+    dotenv.config({ path: global.envFile || '.env', quiet: true });
 
     const id = global.projectId || process.env.BENCH_PROJECT_ID;
     if (id == null || id.length == 0) {
@@ -90,6 +94,7 @@ export class RunContext {
 
     this.projectId = id;
     this.buildId = global.buildId || process.env.BENCH_BUILD_ID;
+    this.sourceId = global.sourceId || process.env.BENCH_SOURCE_ID;
   }
 }
 

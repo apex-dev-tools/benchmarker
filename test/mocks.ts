@@ -17,6 +17,7 @@ import { GovernorLimits } from '../src/benchmark/limits/schemas.js';
 const envKeys = [
   'BENCH_PROJECT_ID',
   'BENCH_BUILD_ID',
+  'BENCH_SOURCE_ID',
   'BENCH_ORG_USERNAME',
   'BENCH_ORG_PASSWORD',
   'BENCH_ORG_LOGIN_URL',
@@ -65,6 +66,7 @@ export class MockRunContext extends RunContext {
   static replaceEnv(env: MockEnv): void {
     dotenv.populate(process.env as dotenv.DotenvPopulateInput, env, {
       override: true,
+      quiet: true,
     });
   }
 
@@ -78,9 +80,11 @@ export class MockRunContext extends RunContext {
     if (opts) {
       this.projectId = opts.projectId || '';
       this.buildId = opts.buildId;
+      this.sourceId = opts.sourceId;
     } else {
       this.projectId = 'MockProduct';
       this.buildId = 'Build #1';
+      this.sourceId = 'main';
     }
   }
 
