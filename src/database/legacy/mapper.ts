@@ -47,7 +47,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
   ): Promise<void> {
     const orgId = await this.saveAndCacheOrg(org);
     const packageIds = await this.saveAndCachePackages(org);
-    const tests = await this.saveTestResults(run.projectId, results);
+    const tests = await this.saveTestResults(run, results);
 
     await this.saveExecutionInfo(
       tests.map(t => t.id),
@@ -192,13 +192,14 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
   }
 
   private async saveTestResults(
-    product: string,
+    run: RunContext,
     results: LimitsBenchmarkResult[]
   ): Promise<TestResult[]> {
     return this.testResults.save(
       results.map(({ name, action, data }) =>
         this.testResults.create({
-          product,
+          product: run.projectId,
+          sourceRef: run.sourceId,
           flowName: name,
           action,
           testType: 'Transaction Process',

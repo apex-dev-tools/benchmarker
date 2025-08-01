@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2020 FinancialForce.com, inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
@@ -65,4 +65,7 @@ export class TestResult extends PerformanceBaseEntity {
 
   @Column('integer', { nullable: true, name: 'future_calls' })
   public futureCalls: number;
+
+  @Column('text', { nullable: true, name: 'source_ref' })
+  public sourceRef: string;
 }

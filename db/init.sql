@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS performance.test_result (
     query_rows integer,
     soql_queries integer,
     queueable_jobs integer,
-    future_calls integer
+    future_calls integer,
+    source_ref text
 );
 
 CREATE TABLE IF NOT EXISTS performance.alert (

@@ -1,5 +1,16 @@
 # Benchmarker - Changelog
 
+## 4.0.0
+
+### Breaking Changes
+
+- Database schema updated: Use `db/migrations/V4__source_ref_column.sql` script to upgrade existing PostgreSQL database before using this package version.
+
+### Added
+
+- New environment variable `SOURCE_REF` to set a grouping field (`source_ref`) on the `test_result` table.
+  - Intended to be used for source control references, e.g. branch, tag. Though any string is allowed.
+
 ## 3.0.0
 
 ### Breaking Changes
