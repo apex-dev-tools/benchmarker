@@ -3,11 +3,11 @@
  */
 
 import { expect } from 'chai';
-import { loadEnv, restore } from './helper';
+import { loadEnv, restore } from './helper.js';
 import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
-} from '../src/salesforce/org/connection';
+} from '../src/salesforce/org/connection.js';
 
 describe('deploy', () => {
   let connection: BenchmarkOrgConnection;

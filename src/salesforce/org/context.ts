@@ -3,9 +3,9 @@
  */
 
 import { Connection } from '@salesforce/core';
-import { executeAnonymous, extractAssertionData } from '../execute';
-import { NamedSchema } from '../../parser/json';
-import { infoApex } from '../../scripts/apex';
+import { executeAnonymous, extractAssertionData } from '../execute.js';
+import { NamedSchema } from '../../parser/json.js';
+import { infoApex } from '../../scripts/apex.js';
 
 export interface OrgInformation {
   id: string;

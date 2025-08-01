@@ -43,7 +43,7 @@ import {
   ApexNature,
   ApexScriptNode,
   methodParamNatures,
-} from './tree';
+} from './tree.js';
 
 // Method is on all rules
 type VisitableApex = ApexParseTree & {

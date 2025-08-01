@@ -9,11 +9,11 @@ import {
   TestFlowOutput,
   AlertInfo,
   TokenReplacement,
-} from './transactionTestTemplate';
-import { apexService } from '..';
+} from './transactionTestTemplate.js';
+import { apexService } from '../index.js';
 import { Connection } from '@salesforce/core';
-import { LimitsContext } from '../benchmark/limits/schemas';
-import { LimitsBenchmarkRequest, LimitsBenchmarkRun } from '../service/apex';
+import { LimitsContext } from '../benchmark/limits/schemas.js';
+import { LimitsBenchmarkRequest, LimitsBenchmarkRun } from '../service/apex.js';
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits

@@ -3,7 +3,7 @@
  */
 
 import { Entity, Column } from 'typeorm';
-import { PerformanceBaseEntity } from './base';
+import { PerformanceBaseEntity } from './base.js';
 
 @Entity({ name: 'execution_info' })
 export class ExecutionInfo extends PerformanceBaseEntity {

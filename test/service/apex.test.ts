@@ -5,15 +5,16 @@
 import { expect } from 'chai';
 import sinon, { SinonStub, SinonStubbedInstance } from 'sinon';
 import mockfs from 'mock-fs';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { TestContext } from '@salesforce/core/testSetup';
 import {
   ApexBenchmarkService,
   LimitsBenchmarkResult,
-} from '../../src/service/apex';
-import { mockLimits, MockRunContext } from '../mocks';
-import { BenchmarkOrg } from '../../src/salesforce/org';
-import { PostgresDataSource } from '../../src/database/postgres';
-import { execAnonDataResponse, sfTestSetup } from '../helpers';
-import { HttpRequest } from '@jsforce/jsforce-node';
+} from '../../src/service/apex.js';
+import { mockLimits, MockRunContext } from '../mocks.js';
+import { BenchmarkOrg } from '../../src/salesforce/org.js';
+import { PostgresDataSource } from '../../src/database/postgres.js';
+import { execAnonDataResponse } from '../helpers.js';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -38,7 +39,7 @@ function apexContent(id: number): string {
 const apexCode = [1, 2, 3].map(i => apexContent(i));
 
 describe('service/apex', () => {
-  const $$ = new sfTestSetup.TestContext({ sinon });
+  const $$ = new TestContext({ sinon });
   let requestStub: SinonStub;
   let orgStub: SinonStubbedInstance<BenchmarkOrg>;
   let pgStub: SinonStubbedInstance<PostgresDataSource>;

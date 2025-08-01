@@ -2,13 +2,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexScript } from '../parser/apex/script';
-import { ExecuteAnonymousOptions } from '../salesforce/execute';
-import { benchmarkApex, limitsApex } from '../scripts/apex';
-import { AnonApexBenchmark, AnonApexTransaction } from './anon';
-import { BenchmarkId } from './base';
-import { LimitsScriptFormat } from './limits/factory';
-import { GovernorLimits, LimitsContext, limitsSchema } from './limits/schemas';
+import { ApexScript } from '../parser/apex/script.js';
+import { ExecuteAnonymousOptions } from '../salesforce/execute.js';
+import { benchmarkApex, limitsApex } from '../scripts/apex.js';
+import { AnonApexBenchmark, AnonApexTransaction } from './anon.js';
+import { BenchmarkId } from './base.js';
+import { LimitsScriptFormat } from './limits/factory.js';
+import {
+  GovernorLimits,
+  LimitsContext,
+  limitsSchema,
+} from './limits/schemas.js';
 
 export interface LimitsBenchmarkOptions {
   id?: BenchmarkId;

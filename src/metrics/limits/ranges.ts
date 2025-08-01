@@ -4,9 +4,9 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { NamedSchema, parseType } from '../../parser/json';
-import { JTDSchemaType } from 'ajv/dist/core';
-import { LimitsMetric } from '../limits';
+import { NamedSchema, parseType } from '../../parser/json.js';
+import { JTDSchemaType } from 'ajv/dist/core.js';
+import { LimitsMetric } from '../limits.js';
 
 export interface ThresholdOffsetRange {
   rangeStart: number;

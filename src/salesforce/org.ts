@@ -7,8 +7,8 @@ import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
   OrgAuthInfo,
-} from './org/connection';
-import { getOrgContext, OrgContext } from './org/context';
+} from './org/connection.js';
+import { getOrgContext, OrgContext } from './org/context.js';
 
 export interface OrgOptions {
   // use existing connection to create internal one

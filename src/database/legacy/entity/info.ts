@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
-import { PerformanceBaseEntity } from './base';
+import { PerformanceBaseEntity } from './base.js';
 
 @Entity({ name: 'test_info' })
 export class TestInfo extends PerformanceBaseEntity {

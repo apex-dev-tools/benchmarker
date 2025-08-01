@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexFile } from '../apex';
+import { ApexFile } from '../apex.js';
 import {
   AnonExpression,
   AnonLiteralBoolean,
@@ -13,7 +13,7 @@ import {
   AnonNodeWrapper,
   AnyAnonNode,
   ApexNature,
-} from './tree';
+} from './tree.js';
 
 export interface Block<T extends AnyAnonNode> {
   node: T;

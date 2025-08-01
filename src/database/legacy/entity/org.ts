@@ -3,7 +3,7 @@
  */
 
 import { Entity, Column } from 'typeorm';
-import { PerformanceBaseEntity } from './base';
+import { PerformanceBaseEntity } from './base.js';
 
 @Entity({ name: 'org_info' })
 export class OrgInfo extends PerformanceBaseEntity {

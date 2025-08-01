@@ -4,16 +4,15 @@
 
 import * as dotenv from 'dotenv';
 import { SinonSandbox, SinonStubbedInstance } from 'sinon';
-import { GlobalOptions, RunContext } from '../src/state/context';
-import { BenchmarkOrg } from '../src/salesforce/org';
-import { PostgresDataSource } from '../src/database/postgres';
-import { PostgresCommonDataMapper } from '../src/database/interop';
-import { BenchmarkOrgConnection } from '../src/salesforce/org/connection';
-import { LegacyDataSource } from '../src/database/legacy';
 import { AuthInfo } from '@salesforce/core';
-import { type MockTestOrgData } from '@salesforce/core/lib/testSetup';
-import { sfTestSetup } from './helpers';
-import { GovernorLimits } from '../src/benchmark/limits/schemas';
+import { MockTestOrgData } from '@salesforce/core/testSetup';
+import { GlobalOptions, RunContext } from '../src/state/context.js';
+import { BenchmarkOrg } from '../src/salesforce/org.js';
+import { PostgresDataSource } from '../src/database/postgres.js';
+import { PostgresCommonDataMapper } from '../src/database/interop.js';
+import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
+import { LegacyDataSource } from '../src/database/legacy.js';
+import { GovernorLimits } from '../src/benchmark/limits/schemas.js';
 
 const envKeys = [
   'BENCH_PROJECT_ID',
@@ -49,7 +48,7 @@ export class MockRunContext extends RunContext {
   constructor(sandbox: SinonSandbox) {
     super();
     this.sandbox = sandbox;
-    this.orgMockData = new sfTestSetup.MockTestOrgData();
+    this.orgMockData = new MockTestOrgData();
   }
 
   static createMock(sandbox: SinonSandbox): MockRunContext {

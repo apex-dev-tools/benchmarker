@@ -2,7 +2,7 @@
  * Copyright (c) 2020 FinancialForce.com, inc. All rights reserved.
  */
 import { Entity, Column } from 'typeorm';
-import { PerformanceBaseEntity } from './base';
+import { PerformanceBaseEntity } from './base.js';
 
 @Entity({ name: 'test_result' })
 export class TestResult extends PerformanceBaseEntity {

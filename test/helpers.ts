@@ -2,8 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ExecuteAnonymousSoapResponse } from '../src/salesforce/soap/executeAnonymous';
-import type testSetup from '@salesforce/core/lib/testSetup';
+import { ExecuteAnonymousSoapResponse } from '../src/salesforce/soap/executeAnonymous.js';
 
 export type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
@@ -76,23 +75,3 @@ export function execAnonSoapResponse(
     },
   };
 }
-
-// Temp hack, the testSetup is not accessible due to package json exports
-// needs moduleResolution: node16/nodenext which breaks antlr4 atm
-// files are still accessible by requiring the direct path
-function getModulePath(name: string) {
-  // this can throw MODULE_NOT_FOUND
-  const main_export = require.resolve(name);
-  const suffix = `/node_modules/${name}/`;
-  const idx = main_export.lastIndexOf(suffix);
-  if (idx == -1) {
-    throw new Error(
-      `failed to parse module path from main export path ${main_export}`
-    );
-  }
-  const end = idx + suffix.length - 1;
-  return main_export.slice(0, end);
-}
-export const sfTestSetup: typeof testSetup = require(
-  getModulePath('@salesforce/core') + '/lib/testSetup'
-);

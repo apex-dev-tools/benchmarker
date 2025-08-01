@@ -6,9 +6,9 @@ import { Connection } from '@salesforce/core';
 import {
   ExecuteAnonymousResponse,
   executeAnonymousSoap,
-} from './soap/executeAnonymous';
-import { DebugLogInfo } from './soap/debug';
-import { NamedSchema, parseType } from '../parser/json';
+} from './soap/executeAnonymous.js';
+import { DebugLogInfo } from './soap/debug.js';
+import { NamedSchema, parseType } from '../parser/json.js';
 
 export interface ExecuteAnonymousOptions {
   /**

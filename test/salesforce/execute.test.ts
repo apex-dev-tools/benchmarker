@@ -5,22 +5,22 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { AuthInfo, Connection } from '@salesforce/core';
-import { ExecuteAnonymousResponse } from '../../src/salesforce/soap/executeAnonymous';
+import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
 import { HttpRequest } from '@jsforce/jsforce-node';
+import { ExecuteAnonymousResponse } from '../../src/salesforce/soap/executeAnonymous.js';
 import {
   DebugLogCategory,
   DebugLogCategoryLevel,
-} from '../../src/salesforce/soap/debug';
+} from '../../src/salesforce/soap/debug.js';
 import {
   assertAnonymousError,
   executeAnonymous,
   ExecuteAnonymousCompileError,
   ExecuteAnonymousError,
   extractAssertionData,
-} from '../../src/salesforce/execute';
-import { NamedSchema } from '../../src/parser/json';
-import { execAnonSoapResponse, sfTestSetup } from '../helpers';
-import { type MockTestOrgData } from '@salesforce/core/lib/testSetup';
+} from '../../src/salesforce/execute.js';
+import { NamedSchema } from '../../src/parser/json.js';
+import { execAnonSoapResponse } from '../helpers.js';
 
 describe('salesforce/execute', () => {
   afterEach(() => {
@@ -28,12 +28,12 @@ describe('salesforce/execute', () => {
   });
 
   describe('executeAnonymous()', () => {
-    const $$ = new sfTestSetup.TestContext({ sinon });
+    const $$ = new TestContext({ sinon });
     let testData: MockTestOrgData;
     let conn: Connection;
 
     beforeEach(async () => {
-      testData = new sfTestSetup.MockTestOrgData();
+      testData = new MockTestOrgData();
       await $$.stubAuths(testData);
 
       conn = await Connection.create({

@@ -3,9 +3,9 @@
  */
 
 import { Connection } from '@salesforce/core';
-import { postSoapRequest } from './request';
-import { escapeXml } from '../../parser/xml';
-import { apexDebugHeader, DebugLogInfo } from './debug';
+import { postSoapRequest } from './request.js';
+import { escapeXml } from '../../parser/xml.js';
+import { apexDebugHeader, DebugLogInfo } from './debug.js';
 
 export interface ExecuteAnonymousResponse {
   column: string;

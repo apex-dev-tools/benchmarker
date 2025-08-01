@@ -7,8 +7,8 @@ import {
   TransactionProcess,
   createApexExecutionTestStepFlow,
   saveResults,
-} from '../src/';
-import { cleanDatabase, loadEnv, loadTestResults, restore } from './helper';
+} from '../src/index.js';
+import { cleanDatabase, loadEnv, loadTestResults, restore } from './helper.js';
 
 describe('basic', () => {
   let test: TransactionTestTemplate;

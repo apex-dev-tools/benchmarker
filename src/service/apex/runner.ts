@@ -5,12 +5,15 @@
 import {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
-} from '../../benchmark/anon';
-import { Benchmark, ErrorResult } from '../../benchmark/base';
-import { ApexScriptParser, ApexScriptParserOptions } from '../../parser/apex';
-import { ApexScriptError } from '../../parser/apex/error';
-import { ApexScript } from '../../parser/apex/script';
-import { RunContext } from '../../state/context';
+} from '../../benchmark/anon.js';
+import { Benchmark, ErrorResult } from '../../benchmark/base.js';
+import {
+  ApexScriptParser,
+  ApexScriptParserOptions,
+} from '../../parser/apex.js';
+import { ApexScriptError } from '../../parser/apex/error.js';
+import { ApexScript } from '../../parser/apex/script.js';
+import { RunContext } from '../../state/context.js';
 
 export interface AnonApexBenchmarkerRequest<O> {
   code?: string;

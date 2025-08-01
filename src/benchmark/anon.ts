@@ -2,17 +2,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Benchmark, BenchmarkResult, ErrorResult } from './base';
+import { Benchmark, BenchmarkResult, ErrorResult } from './base.js';
 import {
   executeAnonymous,
   assertAnonymousError,
   extractAssertionData,
   ExecuteAnonymousOptions,
-} from '../salesforce/execute';
-import { ExecuteAnonymousResponse } from '../salesforce/soap/executeAnonymous';
-import { RunContext } from '../state/context';
-import { NamedSchema } from '../parser/json';
-import { ApexScript } from '../parser/apex/script';
+} from '../salesforce/execute.js';
+import { ExecuteAnonymousResponse } from '../salesforce/soap/executeAnonymous.js';
+import { RunContext } from '../state/context.js';
+import { NamedSchema } from '../parser/json.js';
+import { ApexScript } from '../parser/apex/script.js';
 
 export interface AnonApexBenchmarkFactory<T, C, O> {
   create(script: ApexScript, options?: O): AnonApexBenchmark<T, C>;

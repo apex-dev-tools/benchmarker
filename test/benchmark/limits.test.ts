@@ -4,28 +4,25 @@
 
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
-import { ExecuteAnonymousError } from '../../src/salesforce/execute';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { TestContext } from '@salesforce/core/testSetup';
+import { ExecuteAnonymousError } from '../../src/salesforce/execute.js';
 import {
   AnonApexBenchmark,
   AnonApexBenchmarkResult,
-} from '../../src/benchmark/anon';
+} from '../../src/benchmark/anon.js';
 import {
   GovernorLimits,
   LimitsContext,
-} from '../../src/benchmark/limits/schemas';
-import { ErrorResult } from '../../src/benchmark/base';
-import { mockLimits, MockRunContext } from '../mocks';
-import { LimitsBenchmarkOptions } from '../../src/benchmark/limits';
-import { ApexScriptParser } from '../../src/parser/apex';
-import { LimitsBenchmarkFactory } from '../../src/benchmark/limits/factory';
-import { ApexScriptError } from '../../src/parser/apex/error';
-import {
-  execAnonDataResponse,
-  execAnonErrorResponse,
-  sfTestSetup,
-} from '../helpers';
-import { HttpRequest } from '@jsforce/jsforce-node';
-import { escapeXml } from '../../src/parser/xml';
+} from '../../src/benchmark/limits/schemas.js';
+import { ErrorResult } from '../../src/benchmark/base.js';
+import { mockLimits, MockRunContext } from '../mocks.js';
+import { LimitsBenchmarkOptions } from '../../src/benchmark/limits.js';
+import { ApexScriptParser } from '../../src/parser/apex.js';
+import { LimitsBenchmarkFactory } from '../../src/benchmark/limits/factory.js';
+import { ApexScriptError } from '../../src/parser/apex/error.js';
+import { execAnonDataResponse, execAnonErrorResponse } from '../helpers.js';
+import { escapeXml } from '../../src/parser/xml.js';
 
 const parser = new ApexScriptParser();
 const factory = new LimitsBenchmarkFactory();
@@ -42,7 +39,7 @@ function createBenchmark(
 }
 
 describe('benchmark/limits', () => {
-  const $$ = new sfTestSetup.TestContext({ sinon });
+  const $$ = new TestContext({ sinon });
   let requestStub: SinonStub;
 
   beforeEach(async () => {

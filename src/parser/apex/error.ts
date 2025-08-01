@@ -3,7 +3,7 @@
  */
 
 import { ApexSyntaxError } from '@apexdevtools/apex-parser';
-import { ApexFile } from '../apex';
+import { ApexFile } from '../apex.js';
 
 export class ApexScriptError extends Error {
   file?: ApexFile;

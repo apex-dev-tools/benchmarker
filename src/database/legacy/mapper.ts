@@ -3,18 +3,18 @@
  */
 
 import { Brackets, DataSource, In, Repository } from 'typeorm';
-import { TestResult } from './entity/result';
-import { LimitsAvg } from '../../metrics/limits';
-import { CommonDataUtil, PostgresCommonDataMapper } from '../interop';
-import { Alert } from './entity/alert';
-import { ExecutionInfo } from './entity/execution';
-import { OrgInfo } from './entity/org';
-import { PackageInfo } from './entity/package';
-import { LimitsBenchmarkResult } from '../../service/apex';
-import { OrgContext, OrgPackage } from '../../salesforce/org/context';
-import { RunContext } from '../../state/context';
-import { Degradation } from '../../metrics/limits/deg';
-import { TestInfo } from './entity/info';
+import { TestResult } from './entity/result.js';
+import { LimitsAvg } from '../../metrics/limits.js';
+import { CommonDataUtil, PostgresCommonDataMapper } from '../interop.js';
+import { Alert } from './entity/alert.js';
+import { ExecutionInfo } from './entity/execution.js';
+import { OrgInfo } from './entity/org.js';
+import { PackageInfo } from './entity/package.js';
+import { LimitsBenchmarkResult } from '../../service/apex.js';
+import { OrgContext, OrgPackage } from '../../salesforce/org/context.js';
+import { RunContext } from '../../state/context.js';
+import { Degradation } from '../../metrics/limits/deg.js';
+import { TestInfo } from './entity/info.js';
 
 export class LegacyDataMapper implements PostgresCommonDataMapper {
   dataSource: DataSource;
