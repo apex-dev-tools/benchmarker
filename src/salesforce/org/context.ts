@@ -5,6 +5,7 @@
 import { Connection } from '@salesforce/core';
 import { executeAnonymous, extractAssertionData } from '../execute';
 import { NamedSchema } from '../../parser/json';
+import { infoApex } from '../../scripts/apex';
 
 export interface OrgInformation {
   id: string;
@@ -72,10 +73,7 @@ const orgInfoSchema: NamedSchema<OrgInformation> = {
 export async function getOrgContext(
   connection: Connection
 ): Promise<OrgContext> {
-  const resp = await executeAnonymous(
-    connection,
-    require('../../../scripts/apex/info.apex') as string
-  );
+  const resp = await executeAnonymous(connection, infoApex);
 
   return {
     ...extractAssertionData(resp, orgInfoSchema),

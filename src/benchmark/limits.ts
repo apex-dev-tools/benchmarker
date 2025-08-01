@@ -4,6 +4,7 @@
 
 import { ApexScript } from '../parser/apex/script';
 import { ExecuteAnonymousOptions } from '../salesforce/execute';
+import { benchmarkApex, limitsApex } from '../scripts/apex';
 import { AnonApexBenchmark, AnonApexTransaction } from './anon';
 import { BenchmarkId } from './base';
 import { LimitsScriptFormat } from './limits/factory';
@@ -67,12 +68,9 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
   }
 
   protected *nextTransaction(): Generator<AnonApexTransaction<LimitsContext>> {
-    const limitsText = require('../../scripts/apex/limits.apex');
-    const benchmarkText = require('../../scripts/apex/benchmark.apex');
-
     for (const action of this.format.actions) {
       const transaction: AnonApexTransaction<LimitsContext> = {
-        code: `${limitsText}\n${benchmarkText}\n`,
+        code: `${limitsApex}\n${benchmarkApex}\n`,
         action: action.name,
         context: action.context,
         hasAssertionResult: true,

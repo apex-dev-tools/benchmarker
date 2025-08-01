@@ -58,7 +58,7 @@ export class AnonApexBenchmarker<T, C, O> {
     } catch (e) {
       return {
         benchmarks: [],
-        errors: [{ error: Benchmark.coerceError(e) }],
+        errors: [Benchmark.coerceError(e)],
       };
     }
   }

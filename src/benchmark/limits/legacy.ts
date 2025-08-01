@@ -3,6 +3,7 @@
  */
 
 import { ApexScript } from '../../parser/apex/script';
+import { limitsApex } from '../../scripts/apex';
 import { AnonApexBenchmark, AnonApexTransaction } from '../anon';
 import { LimitsBenchmarkOptions } from '../limits';
 import { LimitsScriptFormat } from './factory';
@@ -40,7 +41,7 @@ export class LegacyAnonApexBenchmark extends AnonApexBenchmark<
       context,
       hasAssertionResult: true,
       executeAnonymous: options.executeAnonymous,
-      code: require('../../../scripts/apex/limits.apex') + script.source,
+      code: limitsApex + script.source,
     };
   }
 

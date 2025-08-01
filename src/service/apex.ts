@@ -177,7 +177,7 @@ export class ApexBenchmarkService {
 
       return { benchmarks, errors: input.errors };
     } catch (e) {
-      input.errors.push({ error: Benchmark.coerceError(e) });
+      input.errors.push(Benchmark.coerceError(e));
       return input;
     }
   }

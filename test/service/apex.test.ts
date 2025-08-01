@@ -5,22 +5,15 @@
 import { expect } from 'chai';
 import sinon, { SinonStub, SinonStubbedInstance } from 'sinon';
 import mockfs from 'mock-fs';
-import * as limits from '../../src/benchmark/limits';
-import * as legacy from '../../src/benchmark/limits/legacy';
 import {
   ApexBenchmarkService,
   LimitsBenchmarkResult,
 } from '../../src/service/apex';
-
-import {
-  GovernorLimits,
-  LimitsContext,
-} from '../../src/benchmark/limits/schemas';
-import { MockRunContext } from '../mocks';
+import { mockLimits, MockRunContext } from '../mocks';
 import { BenchmarkOrg } from '../../src/salesforce/org';
 import { PostgresDataSource } from '../../src/database/postgres';
-import { AnonApexBenchmark } from '../../src/benchmark/anon';
-import { LimitsScriptFormat } from '../../src/benchmark/limits/factory';
+import { execAnonDataResponse, sfTestSetup } from '../helpers';
+import { HttpRequest } from '@jsforce/jsforce-node';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -42,59 +35,24 @@ function apexContent(id: number): string {
   `;
 }
 
-function apexFormat(id: number): LimitsScriptFormat {
-  return {
-    name: `script${id}`,
-    headerEndIndex: 0,
-    actions: [
-      {
-        name: `${id}`,
-        blockBeginIndex: 1,
-        blockEndIndex: undefined,
-        needsEnding: true,
-      },
-    ],
-  };
-}
-
 const apexCode = [1, 2, 3].map(i => apexContent(i));
 
 describe('service/apex', () => {
-  let anonStub: SinonStub;
-  let anonStubInstance: SinonStubbedInstance<
-    AnonApexBenchmark<GovernorLimits, LimitsContext>
-  >;
-  let legacyStub: SinonStub;
-  let legacyStubInstance: SinonStubbedInstance<
-    AnonApexBenchmark<GovernorLimits, LimitsContext>
-  >;
+  const $$ = new sfTestSetup.TestContext({ sinon });
+  let requestStub: SinonStub;
   let orgStub: SinonStubbedInstance<BenchmarkOrg>;
   let pgStub: SinonStubbedInstance<PostgresDataSource>;
   let service: ApexBenchmarkService;
 
-  beforeEach(() => {
-    const mockRun = MockRunContext.createMock(sinon);
-    mockRun.stubGlobals();
-    orgStub = mockRun.stubOrg();
-    pgStub = mockRun.stubPg(true);
+  beforeEach(async () => {
+    const ctx = MockRunContext.createMock(sinon);
+    ctx.stubGlobals();
+    orgStub = ctx.stubSfOrg(await ctx.stubSfConnection());
+    pgStub = ctx.stubPg(true);
 
-    anonStubInstance = sinon.createStubInstance(limits.LimitsAnonApexBenchmark);
-    legacyStubInstance = sinon.createStubInstance(
-      legacy.LegacyAnonApexBenchmark
-    );
-    anonStub = sinon
-      .stub(limits, 'LimitsAnonApexBenchmark')
-      .returns(anonStubInstance);
-    legacyStub = sinon
-      .stub(legacy, 'LegacyAnonApexBenchmark')
-      .returns(legacyStubInstance);
-
-    anonStubInstance.results.returns([]);
-    anonStubInstance.errors.returns([]);
-    anonStubInstance.run.resolves();
-    legacyStubInstance.results.returns([]);
-    legacyStubInstance.errors.returns([]);
-    legacyStubInstance.run.resolves();
+    requestStub = sinon.stub();
+    $$.fakeConnectionRequest = requestStub;
+    requestStub.resolves(execAnonDataResponse(mockLimits));
 
     mockfs({
       'test/scripts/': {
@@ -125,53 +83,48 @@ describe('service/apex', () => {
       {
         name: 'script1',
         action: '1',
-        data: {} as GovernorLimits,
+        data: mockLimits,
+        context: undefined,
       },
     ];
-    anonStubInstance.results.onFirstCall().returns(results);
 
     const res = await service.benchmarkFileLimits('test/scripts/script1.apex');
 
-    expect(res.errors).to.be.empty;
     expect(orgStub.connect.calledOnce).to.be.true;
     expect(pgStub.connect.calledOnce).to.be.true;
-    expect(anonStub).to.be.calledOnceWith(sinon.match.any, apexFormat(1));
-    expect(anonStubInstance.run.calledOnce).to.be.true;
+    expect(requestStub).to.be.calledOnce;
+    expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
   });
 
   it('should run benchmarks on a script directory', async () => {
     const results: LimitsBenchmarkResult[] = [
       {
+        name: 'script3',
+        action: '3',
+        data: mockLimits,
+        context: undefined,
+      },
+      {
         name: 'script1',
         action: '1',
-        data: {} as GovernorLimits,
+        data: mockLimits,
+        context: undefined,
       },
       {
         name: 'script2',
         action: '2',
-        data: {} as GovernorLimits,
-      },
-      {
-        name: 'script3',
-        action: '3',
-        data: {} as GovernorLimits,
+        data: mockLimits,
+        context: undefined,
       },
     ];
-    anonStubInstance.results.onFirstCall().returns([results[0]]);
-    anonStubInstance.results.onSecondCall().returns([results[1]]);
-    anonStubInstance.results.onThirdCall().returns([results[2]]);
 
     const res = await service.benchmarkLimits({ paths: ['test/scripts'] });
 
-    expect(res.errors).to.be.empty;
     expect(orgStub.connect.calledOnce).to.be.true;
     expect(pgStub.connect.calledOnce).to.be.true;
-    expect(anonStub).to.be.calledThrice;
-    expect(anonStub).to.be.calledWith(sinon.match.any, apexFormat(1));
-    expect(anonStub).to.be.calledWith(sinon.match.any, apexFormat(2));
-    expect(anonStub).to.be.calledWith(sinon.match.any, apexFormat(3));
-    expect(anonStubInstance.run.calledThrice).to.be.true;
+    expect(requestStub).to.be.calledThrice;
+    expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
   });
 
@@ -180,17 +133,13 @@ describe('service/apex', () => {
       {
         name: 'script1',
         action: '1',
-        data: {} as GovernorLimits,
+        data: mockLimits,
+        context: undefined,
       },
     ];
-    anonStubInstance.results.onFirstCall().returns(results);
-
+    const code = 'start(); Integer i = 0; stop();';
     const res = await service.benchmarkLimits({
-      code: `
-      start();
-      Integer i = 0;
-      stop();
-      `,
+      code,
       options: {
         id: {
           name: 'script1',
@@ -199,21 +148,12 @@ describe('service/apex', () => {
       },
     });
 
-    expect(res.errors).to.be.empty;
     expect(orgStub.connect.calledOnce).to.be.true;
     expect(pgStub.connect.calledOnce).to.be.true;
-    expect(anonStub).to.be.calledOnceWith(sinon.match.any, {
-      name: 'script1',
-      actions: [
-        {
-          name: '1',
-          needsWrapping: false,
-          needsEnding: true,
-          context: undefined,
-        },
-      ],
-    });
-    expect(anonStubInstance.run.calledOnce).to.be.true;
+    expect(requestStub).to.be.calledOnce;
+    const req = requestStub.firstCall.args[0] as HttpRequest;
+    expect(req.body).to.include(`${code}\ndone();`);
+    expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
   });
 
@@ -222,10 +162,10 @@ describe('service/apex', () => {
       {
         name: 'script4',
         action: '4',
-        data: {} as GovernorLimits,
+        data: mockLimits,
+        context: undefined,
       },
     ];
-    legacyStubInstance.results.onFirstCall().returns(results);
 
     const res = await service.benchmarkLimits({
       paths: ['legacy/test/scripts/script4.apex'],
@@ -237,19 +177,10 @@ describe('service/apex', () => {
       },
     });
 
-    expect(res.errors).to.be.empty;
     expect(orgStub.connect.calledOnce).to.be.true;
     expect(pgStub.connect.calledOnce).to.be.true;
-    expect(legacyStub).to.be.calledOnceWith(sinon.match.any, {
-      name: 'script4',
-      actions: [
-        {
-          name: '4',
-          context: undefined,
-        },
-      ],
-    });
-    expect(legacyStubInstance.run.calledOnce).to.be.true;
+    expect(requestStub).to.be.calledOnce;
+    expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
   });
 

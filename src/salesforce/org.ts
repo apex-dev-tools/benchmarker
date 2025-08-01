@@ -32,6 +32,10 @@ export class BenchmarkOrg {
   protected namespaces?: string[];
   protected namespaceRegExp?: RegExp[];
 
+  get isConnected(): boolean {
+    return this.orgConnection != null;
+  }
+
   get connection(): BenchmarkOrgConnection {
     if (!this.orgConnection) {
       throw new Error('Org connection not yet established.');

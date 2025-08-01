@@ -98,12 +98,9 @@ export abstract class AnonApexBenchmark<T, C> extends Benchmark<
     e: unknown,
     transaction: AnonApexTransaction<C>
   ): ErrorResult {
-    return {
-      benchmark: {
-        name: this.name,
-        action: transaction.action,
-      },
-      error: Benchmark.coerceError(e),
-    };
+    return Benchmark.coerceError(e, {
+      name: this.name,
+      action: transaction.action,
+    });
   }
 }

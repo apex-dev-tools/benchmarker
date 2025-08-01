@@ -4,7 +4,7 @@
 
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
-import * as exec from '../../src/salesforce/execute';
+import { ExecuteAnonymousError } from '../../src/salesforce/execute';
 import {
   AnonApexBenchmark,
   AnonApexBenchmarkResult,
@@ -14,23 +14,18 @@ import {
   LimitsContext,
 } from '../../src/benchmark/limits/schemas';
 import { ErrorResult } from '../../src/benchmark/base';
-import { MockRunContext } from '../mocks';
+import { mockLimits, MockRunContext } from '../mocks';
 import { LimitsBenchmarkOptions } from '../../src/benchmark/limits';
 import { ApexScriptParser } from '../../src/parser/apex';
 import { LimitsBenchmarkFactory } from '../../src/benchmark/limits/factory';
 import { ApexScriptError } from '../../src/parser/apex/error';
-
-const mockResponse: GovernorLimits = {
-  duration: 8,
-  cpuTime: 9,
-  dmlRows: 0,
-  dmlStatements: 0,
-  heapSize: 40131,
-  queryRows: 0,
-  soqlQueries: 0,
-  queueableJobs: 0,
-  futureCalls: 0,
-};
+import {
+  execAnonDataResponse,
+  execAnonErrorResponse,
+  sfTestSetup,
+} from '../helpers';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { escapeXml } from '../../src/parser/xml';
 
 const parser = new ApexScriptParser();
 const factory = new LimitsBenchmarkFactory();
@@ -47,24 +42,16 @@ function createBenchmark(
 }
 
 describe('benchmark/limits', () => {
-  let execStub: SinonStub;
-  let extractStub: SinonStub;
+  const $$ = new sfTestSetup.TestContext({ sinon });
+  let requestStub: SinonStub;
 
-  beforeEach(() => {
-    MockRunContext.createMock(sinon).stubOrg();
+  beforeEach(async () => {
+    const ctx = MockRunContext.createMock(sinon);
+    ctx.stubSfOrg(await ctx.stubSfConnection());
 
-    execStub = sinon.stub(exec, 'executeAnonymous').resolves({
-      column: '-1',
-      compiled: true,
-      compileProblem: '',
-      exceptionMessage: '',
-      exceptionStackTrace: '',
-      line: '-1',
-      success: false,
-    });
-    extractStub = sinon
-      .stub(exec, 'extractAssertionData')
-      .returns(mockResponse);
+    requestStub = sinon.stub();
+    $$.fakeConnectionRequest = requestStub;
+    requestStub.resolves(execAnonDataResponse(mockLimits));
   });
 
   afterEach(() => {
@@ -82,17 +69,17 @@ describe('benchmark/limits', () => {
 
     await bench.run();
 
-    expect(execStub).to.be.calledOnce;
-    const finalCode = execStub.firstCall.args[1];
-    expect(finalCode).to.include('GovernorLimits');
-    expect(finalCode).to.include('void start()');
-    expect(finalCode).to.include('start();');
+    expect(requestStub).to.be.calledOnce;
+    const req = requestStub.firstCall.args[0] as HttpRequest;
+    expect(req.body).to.include('GovernorLimits');
+    expect(req.body).to.include('void start()');
+    expect(req.body).to.include('start();');
     expect(bench.errors()).to.be.empty;
     expect(bench.results()).to.eql([
       {
         name: 'for',
         action: 'loop 10k',
-        data: mockResponse,
+        data: mockLimits,
         context: undefined,
       } as AnonApexBenchmarkResult<GovernorLimits, LimitsContext>,
     ]);
@@ -114,18 +101,18 @@ describe('benchmark/limits', () => {
 
     await bench.run();
 
-    expect(execStub).to.be.calledOnce;
-    const finalCode = execStub.firstCall.args[1];
-    expect(finalCode).to.include('class GovernorLimits');
-    expect(finalCode).to.include(code);
-    expect(finalCode).not.to.include('void start()');
-    expect(finalCode).not.to.include('start();');
+    expect(requestStub).to.be.calledOnce;
+    const req = requestStub.firstCall.args[0] as HttpRequest;
+    expect(req.body).to.include('class GovernorLimits');
+    expect(req.body).to.include(escapeXml(code));
+    expect(req.body).not.to.include('void start()');
+    expect(req.body).not.to.include('start();');
     expect(bench.errors()).to.be.empty;
     expect(bench.results()).to.eql([
       {
         name: 'for',
         action: 'loop 10k',
-        data: mockResponse,
+        data: mockLimits,
         context: undefined,
       } as AnonApexBenchmarkResult<GovernorLimits, LimitsContext>,
     ]);
@@ -144,10 +131,10 @@ describe('benchmark/limits', () => {
 
     await bench.run();
 
-    expect(execStub).to.be.calledOnce;
-    const finalCode = execStub.firstCall.args[1];
-    expect(finalCode).to.not.include('start();\nstart();');
-    expect(finalCode).to.not.include('stop();\nstop();');
+    expect(requestStub).to.be.calledOnce;
+    const req = requestStub.firstCall.args[0] as HttpRequest;
+    expect(req.body).to.not.include('start();\nstart();');
+    expect(req.body).to.not.include('stop();\nstop();');
     expect(bench.errors()).to.be.empty;
   });
 
@@ -163,14 +150,14 @@ describe('benchmark/limits', () => {
     await bench.run();
     await bench.run();
 
-    expect(execStub).to.be.calledThrice;
+    expect(requestStub).to.be.calledThrice;
     expect(bench.errors()).to.be.empty;
     expect(bench.results().length).to.eql(1);
   });
 
   it('should catch and save error results', async () => {
-    const error = new exec.ExecuteAnonymousError('Apex Exception');
-    extractStub.throws(error);
+    const error = new ExecuteAnonymousError('System.FooException: ...');
+    requestStub.resolves(execAnonErrorResponse('System.FooException: ...'));
 
     const bench = createBenchmark('for (Integer i=0; i<10000; i++) {}', {
       id: {

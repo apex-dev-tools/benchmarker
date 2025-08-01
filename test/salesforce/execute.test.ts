@@ -4,12 +4,8 @@
 
 import { expect } from 'chai';
 import sinon from 'sinon';
-import type testSetup from '@salesforce/core/lib/testSetup';
 import { AuthInfo, Connection } from '@salesforce/core';
-import {
-  ExecuteAnonymousResponse,
-  ExecuteAnonymousSoapResponse,
-} from '../../src/salesforce/soap/executeAnonymous';
+import { ExecuteAnonymousResponse } from '../../src/salesforce/soap/executeAnonymous';
 import { HttpRequest } from '@jsforce/jsforce-node';
 import {
   DebugLogCategory,
@@ -23,74 +19,8 @@ import {
   extractAssertionData,
 } from '../../src/salesforce/execute';
 import { NamedSchema } from '../../src/parser/json';
-
-// Temp hack because the testSetup is not longer accessible via commonjs
-// needs moduleResolution: node16/nodenext which breaks antlr4 atm
-// files are still accessible by requiring the direct path
-function getModulePath(name: string) {
-  // this can throw MODULE_NOT_FOUND
-  const main_export = require.resolve(name);
-  const suffix = `/node_modules/${name}/`;
-  const idx = main_export.lastIndexOf(suffix);
-  if (idx == -1) {
-    throw new Error(
-      `failed to parse module path from main export path ${main_export}`
-    );
-  }
-  const end = idx + suffix.length - 1;
-  return main_export.slice(0, end);
-}
-const sfTestSetup: typeof testSetup = require(
-  getModulePath('@salesforce/core') + '/lib/testSetup'
-);
-
-type ExecBody =
-  ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];
-type ExecHeader =
-  ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Header'];
-
-function execAnonSoapResponse(
-  body?: Partial<ExecBody>,
-  header?: ExecHeader
-): ExecuteAnonymousSoapResponse {
-  // if args are empty - success response
-  return {
-    'soapenv:Envelope': {
-      $: {
-        'xmlns:soapenv': 'http://schemas.xmlsoap.org/soap/envelope/',
-        xmlns: 'http://soap.sforce.com/2006/08/apex',
-        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-      },
-      'soapenv:Header': header,
-      'soapenv:Body': {
-        executeAnonymousResponse: {
-          result: {
-            column: '-1',
-            compileProblem: {
-              $: {
-                'xsi:nil': 'true',
-              },
-            },
-            compiled: 'true',
-            exceptionMessage: {
-              $: {
-                'xsi:nil': 'true',
-              },
-            },
-            exceptionStackTrace: {
-              $: {
-                'xsi:nil': 'true',
-              },
-            },
-            line: '-1',
-            success: 'true',
-            ...body, // override
-          },
-        },
-      },
-    },
-  };
-}
+import { execAnonSoapResponse, sfTestSetup } from '../helpers';
+import { type MockTestOrgData } from '@salesforce/core/lib/testSetup';
 
 describe('salesforce/execute', () => {
   afterEach(() => {
@@ -99,7 +29,7 @@ describe('salesforce/execute', () => {
 
   describe('executeAnonymous()', () => {
     const $$ = new sfTestSetup.TestContext({ sinon });
-    let testData: testSetup.MockTestOrgData;
+    let testData: MockTestOrgData;
     let conn: Connection;
 
     beforeEach(async () => {
