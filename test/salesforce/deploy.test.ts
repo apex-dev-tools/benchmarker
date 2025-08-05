@@ -2,59 +2,59 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import { AuthInfo } from '@salesforce/core';
-import { expect } from 'chai';
-import sinon from 'sinon';
-import { BenchmarkOrgConnection } from '../../src/salesforce/org/connection.js';
+import { AuthInfo } from "@salesforce/core";
+import { expect } from "chai";
+import sinon from "sinon";
+import { BenchmarkOrgConnection } from "../../src/salesforce/org/connection.js";
 
-describe('salesforce/deploy', () => {
-  it('should create new class', async () => {
+describe("salesforce/deploy", () => {
+  it("should create new class", async () => {
     const tooling = new FakeTooling([]);
     const connection = await createConnection(tooling);
 
-    await connection.replaceClasses(new Map([['Foo', 'public class Foo {}']]));
+    await connection.replaceClasses(new Map([["Foo", "public class Foo {}"]]));
     expect(tooling.deletedIds).to.deep.equal([]);
     expect(tooling.created).to.deep.equal([
       {
-        name: 'Foo',
-        body: 'public class Foo {}',
+        name: "Foo",
+        body: "public class Foo {}",
       },
     ]);
   });
 
-  it('should create multiple new classes', async () => {
+  it("should create multiple new classes", async () => {
     const tooling = new FakeTooling([]);
     const connection = await createConnection(tooling);
 
     await connection.replaceClasses(
       new Map([
-        ['Foo', 'public class Foo {}'],
-        ['Bar', 'public class Bar {}'],
+        ["Foo", "public class Foo {}"],
+        ["Bar", "public class Bar {}"],
       ])
     );
     expect(tooling.deletedIds).to.deep.equal([]);
     expect(tooling.created).to.deep.equal([
       {
-        name: 'Foo',
-        body: 'public class Foo {}',
+        name: "Foo",
+        body: "public class Foo {}",
       },
       {
-        name: 'Bar',
-        body: 'public class Bar {}',
+        name: "Bar",
+        body: "public class Bar {}",
       },
     ]);
   });
 
-  it('should replace an existing class', async () => {
-    const tooling = new FakeTooling(['anId']);
+  it("should replace an existing class", async () => {
+    const tooling = new FakeTooling(["anId"]);
     const connection = await createConnection(tooling);
 
-    await connection.replaceClasses(new Map([['Foo', 'public class Foo {}']]));
-    expect(tooling.deletedIds).to.deep.equal(['anId']);
+    await connection.replaceClasses(new Map([["Foo", "public class Foo {}"]]));
+    expect(tooling.deletedIds).to.deep.equal(["anId"]);
     expect(tooling.created).to.deep.equal([
       {
-        name: 'Foo',
-        body: 'public class Foo {}',
+        name: "Foo",
+        body: "public class Foo {}",
       },
     ]);
   });
@@ -89,7 +89,7 @@ class FakeTooling {
   async query(soql: string): Promise<any> {
     if (this.failureCounts.query > 0) {
       this.failureCounts.query -= 1;
-      throw new Error('Query failure');
+      throw new Error("Query failure");
     }
     const ids = this.existingClassIds.map(id => {
       return {
@@ -100,7 +100,7 @@ class FakeTooling {
   }
 
   sobject(name: string): FakeTooling | null {
-    if (name == 'ApexClass') return this;
+    if (name == "ApexClass") return this;
     else return null;
   }
 
@@ -108,7 +108,7 @@ class FakeTooling {
   async create(nameAndBody: NameAndBody): Promise<void> {
     if (this.failureCounts.create > 0) {
       this.failureCounts.create -= 1;
-      throw new Error('Create failure');
+      throw new Error("Create failure");
     }
 
     this.created.push(nameAndBody);
@@ -118,7 +118,7 @@ class FakeTooling {
   async delete(id: string): Promise<void> {
     if (this.failureCounts.delete > 0) {
       this.failureCounts.delete -= 1;
-      throw new Error('Delete failure');
+      throw new Error("Delete failure");
     }
 
     this.deletedIds.push(id);
@@ -130,9 +130,9 @@ async function createConnection(
 ): Promise<BenchmarkOrgConnection> {
   const connection = new BenchmarkOrgConnection({
     authInfo: await AuthInfo.create({
-      username: '00D000000000000!',
+      username: "00D000000000000!",
     }),
   });
-  sinon.stub(connection, 'tooling').value(tooling);
+  sinon.stub(connection, "tooling").value(tooling);
   return connection;
 }

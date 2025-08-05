@@ -2,36 +2,36 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import { expect } from 'chai';
+import { expect } from "chai";
 import {
   TransactionProcess,
   type TransactionTestTemplate,
   createApexExecutionTestStepFlow,
   saveResults,
-} from '../src/index.js';
-import { cleanDatabase, loadEnv, loadTestResults, restore } from './helper.js';
+} from "../src/index.js";
+import { cleanDatabase, loadEnv, loadTestResults, restore } from "./helper.js";
 
-describe('async', () => {
+describe("async", () => {
   let test: TransactionTestTemplate;
 
   before(async () => {
     restore();
     loadEnv({
-      BENCH_POSTGRES_LEGACY: 'true',
+      BENCH_POSTGRES_LEGACY: "true",
     });
 
-    test = await TransactionProcess.build('MockProduct');
+    test = await TransactionProcess.build("MockProduct");
 
     await cleanDatabase();
   });
 
-  it('should execute successfully', async () => {
+  it("should execute successfully", async () => {
     await TransactionProcess.executeTestStep(
       test,
       await createApexExecutionTestStepFlow(
         test.connection,
-        __dirname + '/scripts/async.apex',
-        { flowName: 'Async system test', action: 'Run' }
+        __dirname + "/scripts/async.apex",
+        { flowName: "Async system test", action: "Run" }
       )
     );
 

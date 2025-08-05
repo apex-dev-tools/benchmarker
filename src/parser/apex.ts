@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexParserFactory } from '@apexdevtools/apex-parser';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { ApexScriptError } from './apex/error.js';
-import { ApexScript } from './apex/script.js';
-import type { AnonNodeWrapper, ApexScriptNode } from './apex/tree.js';
-import { ApexScriptVisitor } from './apex/visitor.js';
+import { ApexParserFactory } from "@apexdevtools/apex-parser";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { ApexScriptError } from "./apex/error.js";
+import { ApexScript } from "./apex/script.js";
+import type { AnonNodeWrapper, ApexScriptNode } from "./apex/tree.js";
+import { ApexScriptVisitor } from "./apex/visitor.js";
 
 export interface ApexScriptParserOptions {
   /**
@@ -58,7 +58,7 @@ export class ApexScriptParser {
       const root = this.visitor.visit(unit);
 
       if (!this.isAnonNodeWrapper(root)) {
-        return new ApexScriptError('Invalid parse tree.', file, source);
+        return new ApexScriptError("Invalid parse tree.", file, source);
       }
 
       return new ApexScript(source, root, file);
@@ -106,7 +106,7 @@ export class ApexScriptParser {
     file: ApexFile
   ): Promise<ApexScript | ApexScriptError> {
     try {
-      const code = await fs.readFile(file.path, { encoding: 'utf8' });
+      const code = await fs.readFile(file.path, { encoding: "utf8" });
       return this.parse(code, file);
     } catch (e) {
       return new ApexScriptError(e, file);
@@ -122,7 +122,7 @@ export class ApexScriptParser {
   }
 
   private hasApexExt(filePath: string): boolean {
-    return path.extname(filePath).toLowerCase() === '.apex';
+    return path.extname(filePath).toLowerCase() === ".apex";
   }
 
   private createReplacePatterns(
@@ -133,11 +133,11 @@ export class ApexScriptParser {
 
     if (replace) {
       Object.entries(replace).forEach(([token, value]) =>
-        entries.push([new RegExp(this.escapeRegex(token), 'g'), value])
+        entries.push([new RegExp(this.escapeRegex(token), "g"), value])
       );
     }
 
-    exclude?.forEach(ent => entries.push([new RegExp(ent, 'g'), '']));
+    exclude?.forEach(ent => entries.push([new RegExp(ent, "g"), ""]));
 
     return entries;
   }
@@ -150,7 +150,7 @@ export class ApexScriptParser {
   }
 
   private escapeRegex(text: string): string {
-    return text.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+    return text.replace(/[-[\]/{}()*+?.\\^$|]/g, "\\$&");
   }
 
   private isAnonNodeWrapper(node: ApexScriptNode): node is AnonNodeWrapper {

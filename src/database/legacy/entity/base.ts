@@ -6,15 +6,15 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
 export class PerformanceBaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @CreateDateColumn({ name: 'create_date_time' })
+  @CreateDateColumn({ name: "create_date_time" })
   public createDateTime: Date;
 
-  @UpdateDateColumn({ name: 'update_date_time' })
+  @UpdateDateColumn({ name: "update_date_time" })
   public updateDateTime: Date;
 }

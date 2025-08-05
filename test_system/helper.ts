@@ -2,12 +2,12 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import * as dotenv from 'dotenv';
-import type { Alert } from '../src/database/legacy/entity/alert.js';
-import { TestResult } from '../src/database/legacy/entity/result.js';
-import type { LegacyDataMapper } from '../src/database/legacy/mapper.js';
-import { RunContext } from '../src/state/context.js';
-import { type MockEnv, MockRunContext } from '../test/mocks.js';
+import * as dotenv from "dotenv";
+import type { Alert } from "../src/database/legacy/entity/alert.js";
+import { TestResult } from "../src/database/legacy/entity/result.js";
+import type { LegacyDataMapper } from "../src/database/legacy/mapper.js";
+import { RunContext } from "../src/state/context.js";
+import { type MockEnv, MockRunContext } from "../test/mocks.js";
 
 export function loadEnv(env?: MockEnv): void {
   // replace with either .env file or set specifics
@@ -28,7 +28,7 @@ export async function cleanDatabase(): Promise<void> {
   const entities = connection.entityMetadatas;
   const tableNames = entities
     .map(entity => `${entity.schema}.${entity.tableName}`)
-    .join(', ');
+    .join(", ");
 
   await connection.query(`TRUNCATE ${tableNames} CASCADE;`);
 }
@@ -69,7 +69,7 @@ export async function loadAlerts(
 function getMapper(): LegacyDataMapper {
   const pg = RunContext.current.pgLegacy?.mapper;
   if (!pg) {
-    throw new Error('Database not connected.');
+    throw new Error("Database not connected.");
   }
   return pg;
 }

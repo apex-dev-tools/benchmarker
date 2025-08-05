@@ -2,17 +2,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import type { ApexScript } from '../parser/apex/script.js';
-import type { ExecuteAnonymousOptions } from '../salesforce/execute.js';
-import { benchmarkApex, limitsApex } from '../scripts/apex.js';
-import { AnonApexBenchmark, type AnonApexTransaction } from './anon.js';
-import type { BenchmarkId } from './base.js';
-import type { LimitsScriptFormat } from './limits/factory.js';
+import type { ApexScript } from "../parser/apex/script.js";
+import type { ExecuteAnonymousOptions } from "../salesforce/execute.js";
+import { benchmarkApex, limitsApex } from "../scripts/apex.js";
+import { AnonApexBenchmark, type AnonApexTransaction } from "./anon.js";
+import type { BenchmarkId } from "./base.js";
+import type { LimitsScriptFormat } from "./limits/factory.js";
 import {
   type GovernorLimits,
   type LimitsContext,
   limitsSchema,
-} from './limits/schemas.js';
+} from "./limits/schemas.js";
 
 export interface LimitsBenchmarkOptions {
   id?: BenchmarkId;
@@ -68,7 +68,7 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
     this.header =
       format.headerEndIndex != null
         ? script.getTextBetweenBlocks(0, format.headerEndIndex)
-        : '';
+        : "";
   }
 
   protected *nextTransaction(): Generator<AnonApexTransaction<LimitsContext>> {
@@ -99,7 +99,7 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
       }
 
       if (action.needsEnding) {
-        transaction.code += '\ndone();';
+        transaction.code += "\ndone();";
       }
 
       yield transaction;

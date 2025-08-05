@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import jsforce, { type HttpRequest } from '@jsforce/jsforce-node';
+import jsforce, { type HttpRequest } from "@jsforce/jsforce-node";
 import {
   AuthInfo,
   ConfigAggregator,
   Connection,
   StateAggregator,
-} from '@salesforce/core';
+} from "@salesforce/core";
 
 export interface OrgAuthInfo {
   username: string;
@@ -24,19 +24,19 @@ export class BenchmarkOrgConnection extends Connection {
   async replaceClasses(sources: Map<string, string>) {
     const nameList = Array.from(sources.keys())
       .map(name => `'${name}'`)
-      .join(', ');
+      .join(", ");
     const existingClasses = await this.tooling.query(
       `Select Id From ApexClass where Name in (${nameList})`
     );
     const ids = existingClasses.records.map(r => r.Id) as string[];
     for (const id of ids) {
-      await this.tooling.sobject('ApexClass').delete(id);
+      await this.tooling.sobject("ApexClass").delete(id);
     }
 
     for (const name of sources.keys()) {
       const body = sources.get(name);
       if (body) {
-        await this.tooling.sobject('ApexClass').create({ name, body });
+        await this.tooling.sobject("ApexClass").create({ name, body });
       }
     }
   }
@@ -55,8 +55,8 @@ export async function connectToSalesforceOrg(
   let version = authInfoWrapper.version;
   if (!version) {
     const configAggregator = await ConfigAggregator.create();
-    const value = configAggregator.getInfo('org-api-version').value;
-    version = typeof value == 'string' ? value : undefined;
+    const value = configAggregator.getInfo("org-api-version").value;
+    version = typeof value == "string" ? value : undefined;
   }
 
   try {
@@ -70,7 +70,7 @@ export async function connectToSalesforceOrg(
         version
       );
     } else {
-      throw new Error('Password is required for non-SFDX login');
+      throw new Error("Password is required for non-SFDX login");
     }
   } catch (e) {
     if (e instanceof Error) {
@@ -104,7 +104,7 @@ async function connectWithSFDXAliasOrUsername(
   // Refresh auth after we have a connection
   const requestInfo: HttpRequest = {
     url: connection.baseUrl(),
-    method: 'GET',
+    method: "GET",
   };
   await connection.request(requestInfo);
 

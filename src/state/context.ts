@@ -2,14 +2,14 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import * as dotenv from 'dotenv';
-import type { PostgresCommonDataMapper } from '../database/interop.js';
-import { LegacyDataSource } from '../database/legacy.js';
+import * as dotenv from "dotenv";
+import type { PostgresCommonDataMapper } from "../database/interop.js";
+import { LegacyDataSource } from "../database/legacy.js";
 import type {
   PostgresDataSource,
   PostgresOptions,
-} from '../database/postgres.js';
-import { BenchmarkOrg, type OrgOptions } from '../salesforce/org.js';
+} from "../database/postgres.js";
+import { BenchmarkOrg, type OrgOptions } from "../salesforce/org.js";
 
 export interface GlobalOptions {
   // id/name for current run e.g. build number
@@ -42,7 +42,7 @@ export class RunContext {
   constructor() {
     this.org = new BenchmarkOrg();
     this.pg = new LegacyDataSource(); // TODO new schema
-    this.projectId = '';
+    this.projectId = "";
   }
 
   static get current(): RunContext {
@@ -88,11 +88,11 @@ export class RunContext {
   protected loadEnv(global: GlobalOptions = {}) {
     if (this.projectId.length != 0) return;
 
-    dotenv.config({ path: global.envFile || '.env', quiet: true });
+    dotenv.config({ path: global.envFile || ".env", quiet: true });
 
     const id = global.projectId || process.env.BENCH_PROJECT_ID;
     if (id == null || id.length == 0) {
-      throw new Error('global.projectId or $BENCH_PROJECT_ID env is required');
+      throw new Error("global.projectId or $BENCH_PROJECT_ID env is required");
     }
 
     this.projectId = id;

@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import pgstr from 'pg-connection-string';
-import type { PostgresCommonDataMapper } from './interop.js';
+import pgstr from "pg-connection-string";
+import type { PostgresCommonDataMapper } from "./interop.js";
 
 export interface PostgresOptions {
   enable?: boolean;
@@ -41,7 +41,7 @@ export abstract class PostgresDataSource {
     }
 
     return {
-      host: host || 'localhost',
+      host: host || "localhost",
       port: port ? parseInt(port) : 5432,
       database,
       username: user,

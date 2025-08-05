@@ -2,19 +2,19 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Brackets, type DataSource, In, type Repository } from 'typeorm';
-import type { LimitsAvg } from '../../metrics/limits.js';
-import type { Degradation } from '../../metrics/limits/deg.js';
-import type { OrgContext, OrgPackage } from '../../salesforce/org/context.js';
-import type { LimitsBenchmarkResult } from '../../service/apex.js';
-import type { RunContext } from '../../state/context.js';
-import { CommonDataUtil, type PostgresCommonDataMapper } from '../interop.js';
-import { Alert } from './entity/alert.js';
-import { ExecutionInfo } from './entity/execution.js';
-import { TestInfo } from './entity/info.js';
-import { OrgInfo } from './entity/org.js';
-import { PackageInfo } from './entity/package.js';
-import { TestResult } from './entity/result.js';
+import { Brackets, type DataSource, In, type Repository } from "typeorm";
+import type { LimitsAvg } from "../../metrics/limits.js";
+import type { Degradation } from "../../metrics/limits/deg.js";
+import type { OrgContext, OrgPackage } from "../../salesforce/org/context.js";
+import type { LimitsBenchmarkResult } from "../../service/apex.js";
+import type { RunContext } from "../../state/context.js";
+import { CommonDataUtil, type PostgresCommonDataMapper } from "../interop.js";
+import { Alert } from "./entity/alert.js";
+import { ExecutionInfo } from "./entity/execution.js";
+import { TestInfo } from "./entity/info.js";
+import { OrgInfo } from "./entity/org.js";
+import { PackageInfo } from "./entity/package.js";
+import { TestResult } from "./entity/result.js";
 
 export class LegacyDataMapper implements PostgresCommonDataMapper {
   dataSource: DataSource;
@@ -67,44 +67,44 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     const { names, actions } = CommonDataUtil.idSetsFromResults(results);
 
     return this.testResults
-      .createQueryBuilder('res')
-      .select('res.flow_name', 'name')
-      .addSelect('res.action', 'action')
-      .addSelect('COALESCE(ROUND(AVG(res.duration), 0), 0)::int', 'duration')
-      .addSelect('COALESCE(ROUND(AVG(res.cpu_time), 0), 0)::int', 'cpuTime')
-      .addSelect('COALESCE(ROUND(AVG(res.dml_rows), 0), 0)::int', 'dmlRows')
+      .createQueryBuilder("res")
+      .select("res.flow_name", "name")
+      .addSelect("res.action", "action")
+      .addSelect("COALESCE(ROUND(AVG(res.duration), 0), 0)::int", "duration")
+      .addSelect("COALESCE(ROUND(AVG(res.cpu_time), 0), 0)::int", "cpuTime")
+      .addSelect("COALESCE(ROUND(AVG(res.dml_rows), 0), 0)::int", "dmlRows")
       .addSelect(
-        'COALESCE(ROUND(AVG(res.dml_statements), 0), 0)::int',
-        'dmlStatements'
+        "COALESCE(ROUND(AVG(res.dml_statements), 0), 0)::int",
+        "dmlStatements"
       )
-      .addSelect('COALESCE(ROUND(AVG(res.heap_size), 0), 0)::int', 'heapSize')
-      .addSelect('COALESCE(ROUND(AVG(res.query_rows), 0), 0)::int', 'queryRows')
+      .addSelect("COALESCE(ROUND(AVG(res.heap_size), 0), 0)::int", "heapSize")
+      .addSelect("COALESCE(ROUND(AVG(res.query_rows), 0), 0)::int", "queryRows")
       .addSelect(
-        'COALESCE(ROUND(AVG(res.soql_queries), 0), 0)::int',
-        'soqlQueries'
-      )
-      .addSelect(
-        'COALESCE(ROUND(AVG(res.queueable_jobs), 0), 0)::int',
-        'queueableJobs'
+        "COALESCE(ROUND(AVG(res.soql_queries), 0), 0)::int",
+        "soqlQueries"
       )
       .addSelect(
-        'COALESCE(ROUND(AVG(res.future_calls), 0), 0)::int',
-        'futureCalls'
+        "COALESCE(ROUND(AVG(res.queueable_jobs), 0), 0)::int",
+        "queueableJobs"
       )
-      .where('res.product = :projectId', { projectId })
-      .andWhere('res.flow_name IN (:...names)', { names })
-      .andWhere('res.action IN (:...actions)', {
+      .addSelect(
+        "COALESCE(ROUND(AVG(res.future_calls), 0), 0)::int",
+        "futureCalls"
+      )
+      .where("res.product = :projectId", { projectId })
+      .andWhere("res.flow_name IN (:...names)", { names })
+      .andWhere("res.action IN (:...actions)", {
         actions,
       })
       .andWhere(
-        new Brackets(qb => qb.where('error IS NULL').orWhere("error = ''"))
+        new Brackets(qb => qb.where("error IS NULL").orWhere("error = ''"))
       )
       .andWhere(
         "res.create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS'"
       )
-      .groupBy('res.flow_name')
-      .addGroupBy('res.action')
-      .having('COUNT(*) >= 5')
+      .groupBy("res.flow_name")
+      .addGroupBy("res.action")
+      .having("COUNT(*) >= 5")
       .getRawMany();
   }
 
@@ -202,7 +202,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
           sourceRef: run.sourceId,
           flowName: name,
           action,
-          testType: 'Transaction Process',
+          testType: "Transaction Process",
           duration: data.duration,
           cpuTime: data.cpuTime,
           dmlRows: data.dmlRows,
@@ -323,7 +323,7 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
 
   private ensureJson(maybeJson: unknown): string | undefined {
     if (maybeJson != null) {
-      return typeof maybeJson == 'string'
+      return typeof maybeJson == "string"
         ? maybeJson
         : JSON.stringify(maybeJson);
     }

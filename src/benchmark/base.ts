@@ -31,7 +31,7 @@ export abstract class Benchmark<R extends BenchmarkResult> {
     const error =
       e instanceof Error
         ? e
-        : new Error('Unexpected error not extending Error type.');
+        : new Error("Unexpected error not extending Error type.");
     return { benchmark: id, error };
   }
 

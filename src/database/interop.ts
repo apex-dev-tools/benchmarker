@@ -2,11 +2,11 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import type { BenchmarkResult } from '../benchmark/base.js';
-import type { LimitsAvg } from '../metrics/limits.js';
-import type { OrgContext } from '../salesforce/org/context.js';
-import type { LimitsBenchmarkResult } from '../service/apex.js';
-import type { RunContext } from '../state/context.js';
+import type { BenchmarkResult } from "../benchmark/base.js";
+import type { LimitsAvg } from "../metrics/limits.js";
+import type { OrgContext } from "../salesforce/org/context.js";
+import type { LimitsBenchmarkResult } from "../service/apex.js";
+import type { RunContext } from "../state/context.js";
 
 /**
  * Interface for common operations between different postgres mappers.

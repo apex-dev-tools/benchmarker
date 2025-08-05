@@ -2,7 +2,7 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import type { Connection } from '@salesforce/core';
+import type { Connection } from "@salesforce/core";
 
 /**
  * Make a POST request to Salesforce SOAP API at given soapaction.
@@ -26,8 +26,8 @@ export async function postSoapRequest<R>(
     // The `accessToken` flow does not provide one. Safest to always force a refresh.
     if (
       e instanceof Error &&
-      e.name === 'ERROR_HTTP_500' &&
-      e.message.includes('INVALID_SESSION_ID')
+      e.name === "ERROR_HTTP_500" &&
+      e.message.includes("INVALID_SESSION_ID")
     ) {
       await connection.refreshAuth();
       return postRequest<R>(
@@ -47,11 +47,11 @@ function postRequest<R>(
   body: string
 ): Promise<R> {
   return connection.request<R>({
-    method: 'POST',
+    method: "POST",
     url: `${connection.instanceUrl}/services/Soap/s/${connection.version}`,
     body,
     headers: {
-      'content-type': 'text/xml',
+      "content-type": "text/xml",
       soapaction,
     },
   });

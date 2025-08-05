@@ -3,11 +3,11 @@
  */
 
 const xmlCharMap: { [index: string]: string } = {
-  '<': '&lt;',
-  '>': '&gt;',
-  '&': '&amp;',
-  '"': '&quot;',
-  "'": '&apos;',
+  "<": "&lt;",
+  ">": "&gt;",
+  "&": "&amp;",
+  '"': "&quot;",
+  "'": "&apos;",
 };
 
 export function escapeXml(data: string): string {

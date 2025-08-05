@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import type { Connection } from '@salesforce/core';
+import type { Connection } from "@salesforce/core";
 import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
   type OrgAuthInfo,
-} from './org/connection.js';
-import { getOrgContext, type OrgContext } from './org/context.js';
+} from "./org/connection.js";
+import { getOrgContext, type OrgContext } from "./org/context.js";
 
 export interface OrgOptions {
   // use existing connection to create internal one
@@ -38,7 +38,7 @@ export class BenchmarkOrg {
 
   get connection(): BenchmarkOrgConnection {
     if (!this.orgConnection) {
-      throw new Error('Org connection not yet established.');
+      throw new Error("Org connection not yet established.");
     }
     return this.orgConnection;
   }
@@ -74,7 +74,7 @@ export class BenchmarkOrg {
     if (!this.namespaces) {
       this.namespaces =
         this.options.unmanagedNamespaces ||
-        process.env.BENCH_ORG_UNMANAGED_NAMESPACES?.split(',') ||
+        process.env.BENCH_ORG_UNMANAGED_NAMESPACES?.split(",") ||
         [];
     }
     return this.namespaces;
@@ -83,7 +83,7 @@ export class BenchmarkOrg {
   getNamespaceRegExp(): RegExp[] {
     if (!this.namespaceRegExp) {
       this.namespaceRegExp = this.getUnmanagedNamespaces().map(
-        e => new RegExp(e + '(__|.)', 'g')
+        e => new RegExp(e + "(__|.)", "g")
       );
     }
     return this.namespaceRegExp;

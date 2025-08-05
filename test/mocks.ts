@@ -2,30 +2,30 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { AuthInfo } from '@salesforce/core';
-import { MockTestOrgData } from '@salesforce/core/testSetup';
-import * as dotenv from 'dotenv';
-import type { SinonSandbox, SinonStubbedInstance } from 'sinon';
-import type { GovernorLimits } from '../src/benchmark/limits/schemas.js';
-import type { PostgresCommonDataMapper } from '../src/database/interop.js';
-import { LegacyDataSource } from '../src/database/legacy.js';
-import type { PostgresDataSource } from '../src/database/postgres.js';
-import { BenchmarkOrg } from '../src/salesforce/org.js';
-import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
-import { type GlobalOptions, RunContext } from '../src/state/context.js';
+import { AuthInfo } from "@salesforce/core";
+import { MockTestOrgData } from "@salesforce/core/testSetup";
+import * as dotenv from "dotenv";
+import type { SinonSandbox, SinonStubbedInstance } from "sinon";
+import type { GovernorLimits } from "../src/benchmark/limits/schemas.js";
+import type { PostgresCommonDataMapper } from "../src/database/interop.js";
+import { LegacyDataSource } from "../src/database/legacy.js";
+import type { PostgresDataSource } from "../src/database/postgres.js";
+import { BenchmarkOrg } from "../src/salesforce/org.js";
+import { BenchmarkOrgConnection } from "../src/salesforce/org/connection.js";
+import { type GlobalOptions, RunContext } from "../src/state/context.js";
 
 const envKeys = [
-  'BENCH_PROJECT_ID',
-  'BENCH_BUILD_ID',
-  'BENCH_SOURCE_ID',
-  'BENCH_ORG_USERNAME',
-  'BENCH_ORG_PASSWORD',
-  'BENCH_ORG_LOGIN_URL',
-  'BENCH_ORG_UNMANAGED_NAMESPACES',
-  'BENCH_POSTGRES_URL',
-  'BENCH_POSTGRES_LEGACY',
-  'BENCH_METRICS',
-  'BENCH_METRICS_LIMIT_RANGES',
+  "BENCH_PROJECT_ID",
+  "BENCH_BUILD_ID",
+  "BENCH_SOURCE_ID",
+  "BENCH_ORG_USERNAME",
+  "BENCH_ORG_PASSWORD",
+  "BENCH_ORG_LOGIN_URL",
+  "BENCH_ORG_UNMANAGED_NAMESPACES",
+  "BENCH_POSTGRES_URL",
+  "BENCH_POSTGRES_LEGACY",
+  "BENCH_METRICS",
+  "BENCH_METRICS_LIMIT_RANGES",
 ] as const;
 
 export type MockEnv = { [K in (typeof envKeys)[number]]?: string };
@@ -78,13 +78,13 @@ export class MockRunContext extends RunContext {
 
   stubGlobals(opts?: GlobalOptions): void {
     if (opts) {
-      this.projectId = opts.projectId || '';
+      this.projectId = opts.projectId || "";
       this.buildId = opts.buildId;
       this.sourceId = opts.sourceId;
     } else {
-      this.projectId = 'MockProduct';
-      this.buildId = 'Build #1';
-      this.sourceId = 'main';
+      this.projectId = "MockProduct";
+      this.buildId = "Build #1";
+      this.sourceId = "main";
     }
   }
 
@@ -103,7 +103,7 @@ export class MockRunContext extends RunContext {
     org.getNamespaceRegExp.returns([]);
 
     if (connection) {
-      this.sandbox.stub(org, 'connection').value(connection);
+      this.sandbox.stub(org, "connection").value(connection);
     }
 
     this.org = org;
@@ -116,8 +116,8 @@ export class MockRunContext extends RunContext {
   ): SinonStubbedInstance<PostgresDataSource> {
     const pg = this.sandbox.createStubInstance(LegacyDataSource); // temp
     pg.connect.resolves();
-    this.sandbox.stub(pg, 'isConnected').value(pgMapper != null);
-    this.sandbox.stub(pg, 'commonMapper').value(pgMapper);
+    this.sandbox.stub(pg, "isConnected").value(pgMapper != null);
+    this.sandbox.stub(pg, "commonMapper").value(pgMapper);
 
     this.pg = pg;
     if (andLegacy) {

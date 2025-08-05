@@ -5,15 +5,15 @@
 import type {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
-} from '../../benchmark/anon.js';
-import { Benchmark, type ErrorResult } from '../../benchmark/base.js';
+} from "../../benchmark/anon.js";
+import { Benchmark, type ErrorResult } from "../../benchmark/base.js";
 import {
   ApexScriptParser,
   type ApexScriptParserOptions,
-} from '../../parser/apex.js';
-import { ApexScriptError } from '../../parser/apex/error.js';
-import type { ApexScript } from '../../parser/apex/script.js';
-import { RunContext } from '../../state/context.js';
+} from "../../parser/apex.js";
+import { ApexScriptError } from "../../parser/apex/error.js";
+import type { ApexScript } from "../../parser/apex/script.js";
+import { RunContext } from "../../state/context.js";
 
 export interface AnonApexBenchmarkerRequest<O> {
   code?: string;
@@ -55,7 +55,7 @@ export class AnonApexBenchmarker<T, C, O> {
         return this.mergeRuns(runs);
       } else {
         throw new Error(
-          'Empty benchmark request - must specify code or at least one path'
+          "Empty benchmark request - must specify code or at least one path"
         );
       }
     } catch (e) {

@@ -2,9 +2,9 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { apexService } from '../index.js';
-import type { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection.js';
-import { RunContext } from '../state/context.js';
+import { apexService } from "../index.js";
+import type { BenchmarkOrgConnection as SalesforceConnection } from "../salesforce/org/connection.js";
+import { RunContext } from "../state/context.js";
 
 export interface GovernorMetricsResult {
   timer: number;
@@ -126,7 +126,7 @@ export namespace TransactionProcess {
    */
   export const build = async (
     product: string,
-    testType: string = 'Transaction Process'
+    testType: string = "Transaction Process"
   ): Promise<TransactionTestTemplate> => {
     const processTestTemplate = new TransactionTestTemplate();
     processTestTemplate.product = product;
