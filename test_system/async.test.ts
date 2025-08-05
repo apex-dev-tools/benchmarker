@@ -1,10 +1,11 @@
-/**
+/*
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
+
 import { expect } from 'chai';
 import {
-  TransactionTestTemplate,
   TransactionProcess,
+  type TransactionTestTemplate,
   createApexExecutionTestStepFlow,
   saveResults,
 } from '../src/index.js';

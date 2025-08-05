@@ -2,12 +2,12 @@
  * Copyright (c) 2019 Certinia Inc. All rights reserved.
  */
 
+import Table from 'cli-table';
 import { apexService } from '../index.js';
-import {
+import type {
   TransactionTestTemplate,
   TestFlowOutput,
 } from './transactionTestTemplate.js';
-import Table from 'cli-table';
 
 /**
  * Retrieve peformance metrics from a tests execution and save them

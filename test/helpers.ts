@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ExecuteAnonymousSoapResponse } from '../src/salesforce/soap/executeAnonymous.js';
+import type { ExecuteAnonymousSoapResponse } from '../src/salesforce/soap/executeAnonymous.js';
 
 export type ExecBody =
   ExecuteAnonymousSoapResponse['soapenv:Envelope']['soapenv:Body']['executeAnonymousResponse']['result'];

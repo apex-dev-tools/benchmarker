@@ -2,26 +2,29 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import {
+import type {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
 } from '../benchmark/anon.js';
-import { Benchmark, ErrorResult } from '../benchmark/base.js';
-import { LimitsBenchmarkOptions } from '../benchmark/limits.js';
+import { Benchmark, type ErrorResult } from '../benchmark/base.js';
+import type { LimitsBenchmarkOptions } from '../benchmark/limits.js';
 import { LimitsBenchmarkFactory } from '../benchmark/limits/factory.js';
-import { GovernorLimits, LimitsContext } from '../benchmark/limits/schemas.js';
+import type {
+  GovernorLimits,
+  LimitsContext,
+} from '../benchmark/limits/schemas.js';
 import {
   LimitsMetricProvider,
-  LimitsMetricProviderOptions,
+  type LimitsMetricProviderOptions,
 } from '../metrics/limits.js';
-import { DegLimitsMetric } from '../metrics/limits/deg.js';
-import { ApexScriptParserOptions } from '../parser/apex.js';
-import { RunContext, RunContextOptions } from '../state/context.js';
+import type { DegLimitsMetric } from '../metrics/limits/deg.js';
+import type { ApexScriptParserOptions } from '../parser/apex.js';
+import { RunContext, type RunContextOptions } from '../state/context.js';
 import { RunStore } from '../state/store.js';
 import {
   AnonApexBenchmarker,
-  AnonApexBenchmarkerRequest,
-  AnonApexBenchmarkRun,
+  type AnonApexBenchmarkerRequest,
+  type AnonApexBenchmarkRun,
 } from './apex/runner.js';
 
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {

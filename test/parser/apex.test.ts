@@ -4,9 +4,9 @@
 
 import { ApexParserFactory } from '@apexdevtools/apex-parser';
 import { expect } from 'chai';
-import { ApexScriptVisitor } from '../../src/parser/apex/visitor.js';
 import { ApexScript } from '../../src/parser/apex/script.js';
-import { AnonNodeWrapper } from '../../src/parser/apex/tree.js';
+import type { AnonNodeWrapper } from '../../src/parser/apex/tree.js';
+import { ApexScriptVisitor } from '../../src/parser/apex/visitor.js';
 
 describe('parser/apex', () => {
   it('should parse apex script', () => {

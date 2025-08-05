@@ -2,9 +2,9 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import sinon from 'sinon';
-import { expect } from 'chai';
 import { AuthInfo } from '@salesforce/core';
+import { expect } from 'chai';
+import sinon from 'sinon';
 import { BenchmarkOrgConnection } from '../../src/salesforce/org/connection.js';
 
 describe('salesforce/deploy', () => {

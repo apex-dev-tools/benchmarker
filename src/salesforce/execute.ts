@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
+import type { Connection } from '@salesforce/core';
+import { type NamedSchema, parseType } from '../parser/json.js';
+import type { DebugLogInfo } from './soap/debug.js';
 import {
-  ExecuteAnonymousResponse,
+  type ExecuteAnonymousResponse,
   executeAnonymousSoap,
 } from './soap/executeAnonymous.js';
-import { DebugLogInfo } from './soap/debug.js';
-import { NamedSchema, parseType } from '../parser/json.js';
 
 export interface ExecuteAnonymousOptions {
   /**

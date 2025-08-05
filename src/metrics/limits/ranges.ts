@@ -2,11 +2,11 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
+import type { JTDSchemaType } from 'ajv/dist/core.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { NamedSchema, parseType } from '../../parser/json.js';
-import { JTDSchemaType } from 'ajv/dist/core.js';
-import { LimitsMetric } from '../limits.js';
+import { type NamedSchema, parseType } from '../../parser/json.js';
+import type { LimitsMetric } from '../limits.js';
 
 export interface ThresholdOffsetRange {
   rangeStart: number;

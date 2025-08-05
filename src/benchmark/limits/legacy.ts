@@ -2,12 +2,16 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexScript } from '../../parser/apex/script.js';
+import type { ApexScript } from '../../parser/apex/script.js';
 import { limitsApex } from '../../scripts/apex.js';
-import { AnonApexBenchmark, AnonApexTransaction } from '../anon.js';
-import { LimitsBenchmarkOptions } from '../limits.js';
-import { LimitsScriptFormat } from './factory.js';
-import { GovernorLimits, LimitsContext, limitsSchema } from './schemas.js';
+import { AnonApexBenchmark, type AnonApexTransaction } from '../anon.js';
+import type { LimitsBenchmarkOptions } from '../limits.js';
+import type { LimitsScriptFormat } from './factory.js';
+import {
+  type GovernorLimits,
+  type LimitsContext,
+  limitsSchema,
+} from './schemas.js';
 
 /**
  * Old (deprecated) script structure, with manual tracking and return of limits.

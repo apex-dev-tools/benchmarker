@@ -2,17 +2,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import {
+import type {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
 } from '../../benchmark/anon.js';
-import { Benchmark, ErrorResult } from '../../benchmark/base.js';
+import { Benchmark, type ErrorResult } from '../../benchmark/base.js';
 import {
   ApexScriptParser,
-  ApexScriptParserOptions,
+  type ApexScriptParserOptions,
 } from '../../parser/apex.js';
 import { ApexScriptError } from '../../parser/apex/error.js';
-import { ApexScript } from '../../parser/apex/script.js';
+import type { ApexScript } from '../../parser/apex/script.js';
 import { RunContext } from '../../state/context.js';
 
 export interface AnonApexBenchmarkerRequest<O> {

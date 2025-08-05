@@ -2,10 +2,10 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
-import { executeAnonymous, extractAssertionData } from '../execute.js';
-import { NamedSchema } from '../../parser/json.js';
+import type { Connection } from '@salesforce/core';
+import type { NamedSchema } from '../../parser/json.js';
 import { infoApex } from '../../scripts/apex.js';
+import { executeAnonymous, extractAssertionData } from '../execute.js';
 
 export interface OrgInformation {
   id: string;

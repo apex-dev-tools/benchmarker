@@ -2,16 +2,12 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { expect } from 'chai';
-import sinon from 'sinon';
+import type { HttpRequest } from '@jsforce/jsforce-node';
 import { AuthInfo, Connection } from '@salesforce/core';
 import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
-import { HttpRequest } from '@jsforce/jsforce-node';
-import { ExecuteAnonymousResponse } from '../../src/salesforce/soap/executeAnonymous.js';
-import {
-  DebugLogCategory,
-  DebugLogCategoryLevel,
-} from '../../src/salesforce/soap/debug.js';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import type { NamedSchema } from '../../src/parser/json.js';
 import {
   assertAnonymousError,
   executeAnonymous,
@@ -19,7 +15,11 @@ import {
   ExecuteAnonymousError,
   extractAssertionData,
 } from '../../src/salesforce/execute.js';
-import { NamedSchema } from '../../src/parser/json.js';
+import {
+  DebugLogCategory,
+  DebugLogCategoryLevel,
+} from '../../src/salesforce/soap/debug.js';
+import type { ExecuteAnonymousResponse } from '../../src/salesforce/soap/executeAnonymous.js';
 import { execAnonSoapResponse } from '../helpers.js';
 
 describe('salesforce/execute', () => {

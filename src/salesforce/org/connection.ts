@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
+import jsforce, { type HttpRequest } from '@jsforce/jsforce-node';
 import {
-  Connection,
   AuthInfo,
   ConfigAggregator,
+  Connection,
   StateAggregator,
 } from '@salesforce/core';
-import jsforce, { HttpRequest } from '@jsforce/jsforce-node';
 
 export interface OrgAuthInfo {
   username: string;

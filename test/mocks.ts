@@ -2,17 +2,17 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import * as dotenv from 'dotenv';
-import { SinonSandbox, SinonStubbedInstance } from 'sinon';
 import { AuthInfo } from '@salesforce/core';
 import { MockTestOrgData } from '@salesforce/core/testSetup';
-import { GlobalOptions, RunContext } from '../src/state/context.js';
-import { BenchmarkOrg } from '../src/salesforce/org.js';
-import { PostgresDataSource } from '../src/database/postgres.js';
-import { PostgresCommonDataMapper } from '../src/database/interop.js';
-import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
+import * as dotenv from 'dotenv';
+import type { SinonSandbox, SinonStubbedInstance } from 'sinon';
+import type { GovernorLimits } from '../src/benchmark/limits/schemas.js';
+import type { PostgresCommonDataMapper } from '../src/database/interop.js';
 import { LegacyDataSource } from '../src/database/legacy.js';
-import { GovernorLimits } from '../src/benchmark/limits/schemas.js';
+import type { PostgresDataSource } from '../src/database/postgres.js';
+import { BenchmarkOrg } from '../src/salesforce/org.js';
+import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
+import { type GlobalOptions, RunContext } from '../src/state/context.js';
 
 const envKeys = [
   'BENCH_PROJECT_ID',

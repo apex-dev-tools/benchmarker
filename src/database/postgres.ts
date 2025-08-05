@@ -3,7 +3,7 @@
  */
 
 import pgstr from 'pg-connection-string';
-import { PostgresCommonDataMapper } from './interop.js';
+import type { PostgresCommonDataMapper } from './interop.js';
 
 export interface PostgresOptions {
   enable?: boolean;

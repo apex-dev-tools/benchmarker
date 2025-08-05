@@ -2,19 +2,19 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Brackets, DataSource, In, Repository } from 'typeorm';
-import { TestResult } from './entity/result.js';
-import { LimitsAvg } from '../../metrics/limits.js';
-import { CommonDataUtil, PostgresCommonDataMapper } from '../interop.js';
+import { Brackets, type DataSource, In, type Repository } from 'typeorm';
+import type { LimitsAvg } from '../../metrics/limits.js';
+import type { Degradation } from '../../metrics/limits/deg.js';
+import type { OrgContext, OrgPackage } from '../../salesforce/org/context.js';
+import type { LimitsBenchmarkResult } from '../../service/apex.js';
+import type { RunContext } from '../../state/context.js';
+import { CommonDataUtil, type PostgresCommonDataMapper } from '../interop.js';
 import { Alert } from './entity/alert.js';
 import { ExecutionInfo } from './entity/execution.js';
+import { TestInfo } from './entity/info.js';
 import { OrgInfo } from './entity/org.js';
 import { PackageInfo } from './entity/package.js';
-import { LimitsBenchmarkResult } from '../../service/apex.js';
-import { OrgContext, OrgPackage } from '../../salesforce/org/context.js';
-import { RunContext } from '../../state/context.js';
-import { Degradation } from '../../metrics/limits/deg.js';
-import { TestInfo } from './entity/info.js';
+import { TestResult } from './entity/result.js';
 
 export class LegacyDataMapper implements PostgresCommonDataMapper {
   dataSource: DataSource;

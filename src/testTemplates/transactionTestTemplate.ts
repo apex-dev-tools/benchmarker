@@ -3,7 +3,7 @@
  */
 
 import { apexService } from '../index.js';
-import { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection.js';
+import type { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection.js';
 import { RunContext } from '../state/context.js';
 
 export interface GovernorMetricsResult {

@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
+import type { Connection } from '@salesforce/core';
 import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
-  OrgAuthInfo,
+  type OrgAuthInfo,
 } from './org/connection.js';
-import { getOrgContext, OrgContext } from './org/context.js';
+import { getOrgContext, type OrgContext } from './org/context.js';
 
 export interface OrgOptions {
   // use existing connection to create internal one

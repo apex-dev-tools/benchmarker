@@ -2,27 +2,27 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { expect } from 'chai';
-import sinon, { SinonStub } from 'sinon';
-import { HttpRequest } from '@jsforce/jsforce-node';
+import type { HttpRequest } from '@jsforce/jsforce-node';
 import { TestContext } from '@salesforce/core/testSetup';
-import { ExecuteAnonymousError } from '../../src/salesforce/execute.js';
-import {
+import { expect } from 'chai';
+import sinon, { type SinonStub } from 'sinon';
+import type {
   AnonApexBenchmark,
   AnonApexBenchmarkResult,
 } from '../../src/benchmark/anon.js';
-import {
+import type { ErrorResult } from '../../src/benchmark/base.js';
+import type { LimitsBenchmarkOptions } from '../../src/benchmark/limits.js';
+import { LimitsBenchmarkFactory } from '../../src/benchmark/limits/factory.js';
+import type {
   GovernorLimits,
   LimitsContext,
 } from '../../src/benchmark/limits/schemas.js';
-import { ErrorResult } from '../../src/benchmark/base.js';
-import { mockLimits, MockRunContext } from '../mocks.js';
-import { LimitsBenchmarkOptions } from '../../src/benchmark/limits.js';
 import { ApexScriptParser } from '../../src/parser/apex.js';
-import { LimitsBenchmarkFactory } from '../../src/benchmark/limits/factory.js';
 import { ApexScriptError } from '../../src/parser/apex/error.js';
-import { execAnonDataResponse, execAnonErrorResponse } from '../helpers.js';
 import { escapeXml } from '../../src/parser/xml.js';
+import { ExecuteAnonymousError } from '../../src/salesforce/execute.js';
+import { execAnonDataResponse, execAnonErrorResponse } from '../helpers.js';
+import { mockLimits, MockRunContext } from '../mocks.js';
 
 const parser = new ApexScriptParser();
 const factory = new LimitsBenchmarkFactory();

@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
+import { ApexParserFactory } from '@apexdevtools/apex-parser';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ApexParserFactory } from '@apexdevtools/apex-parser';
-import { ApexScript } from './apex/script.js';
-import { ApexScriptVisitor } from './apex/visitor.js';
 import { ApexScriptError } from './apex/error.js';
-import { AnonNodeWrapper, ApexScriptNode } from './apex/tree.js';
+import { ApexScript } from './apex/script.js';
+import type { AnonNodeWrapper, ApexScriptNode } from './apex/tree.js';
+import { ApexScriptVisitor } from './apex/visitor.js';
 
 export interface ApexScriptParserOptions {
   /**

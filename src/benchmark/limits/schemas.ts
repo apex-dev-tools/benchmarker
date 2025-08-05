@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { LimitsThresholds } from '../../metrics/limits.js';
-import { NamedSchema } from '../../parser/json.js';
+import type { LimitsThresholds } from '../../metrics/limits.js';
+import type { NamedSchema } from '../../parser/json.js';
 
 // retrieved from anonymous
 export interface GovernorLimits {

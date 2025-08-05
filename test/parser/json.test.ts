@@ -3,11 +3,11 @@
  */
 
 import { expect } from 'chai';
-import { parseType } from '../../src/parser/json.js';
 import {
-  GovernorLimits,
+  type GovernorLimits,
   limitsSchema,
 } from '../../src/benchmark/limits/schemas.js';
+import { parseType } from '../../src/parser/json.js';
 
 describe('text/json', () => {
   it('should parse governor limits', () => {

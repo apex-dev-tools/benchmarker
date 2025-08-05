@@ -2,10 +2,10 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { GovernorLimits } from '../../benchmark/limits/schemas.js';
-import { LimitsAvg, LimitsMetric, LimitsThresholds } from '../limits.js';
+import type { GovernorLimits } from '../../benchmark/limits/schemas.js';
+import type { LimitsAvg, LimitsMetric, LimitsThresholds } from '../limits.js';
 import { createLimitMetric } from './factory.js';
-import { RangeCollection, ThresholdOffsetRange } from './ranges.js';
+import type { RangeCollection, ThresholdOffsetRange } from './ranges.js';
 
 export interface Degradation {
   overAvg: number;

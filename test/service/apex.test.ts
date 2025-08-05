@@ -2,19 +2,19 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { expect } from 'chai';
-import sinon, { SinonStub, SinonStubbedInstance } from 'sinon';
-import mockfs from 'mock-fs';
-import { HttpRequest } from '@jsforce/jsforce-node';
+import type { HttpRequest } from '@jsforce/jsforce-node';
 import { TestContext } from '@salesforce/core/testSetup';
+import { expect } from 'chai';
+import mockfs from 'mock-fs';
+import sinon, { type SinonStub, type SinonStubbedInstance } from 'sinon';
+import type { PostgresDataSource } from '../../src/database/postgres.js';
+import type { BenchmarkOrg } from '../../src/salesforce/org.js';
 import {
   ApexBenchmarkService,
-  LimitsBenchmarkResult,
+  type LimitsBenchmarkResult,
 } from '../../src/service/apex.js';
-import { mockLimits, MockRunContext } from '../mocks.js';
-import { BenchmarkOrg } from '../../src/salesforce/org.js';
-import { PostgresDataSource } from '../../src/database/postgres.js';
 import { execAnonDataResponse } from '../helpers.js';
+import { mockLimits, MockRunContext } from '../mocks.js';
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();

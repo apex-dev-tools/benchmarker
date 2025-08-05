@@ -1,17 +1,17 @@
-/**
+/*
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
 import { expect } from 'chai';
+import type { Alert } from '../src/database/legacy/entity/alert.js';
 import {
   AlertInfo,
   createApexExecutionTestStepFlow,
   saveResults,
   Thresholds,
   TransactionProcess,
-  TransactionTestTemplate,
+  type TransactionTestTemplate,
 } from '../src/index.js';
-import { Alert } from '../src/database/legacy/entity/alert.js';
 import {
   cleanDatabase,
   createSampleAlertTestData,

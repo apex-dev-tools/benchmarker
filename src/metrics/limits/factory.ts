@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { LimitsMetric } from '../limits.js';
+import type { LimitsMetric } from '../limits.js';
 
 const base: Readonly<LimitsMetric> = {
   duration: 0,

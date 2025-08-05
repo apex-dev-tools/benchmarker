@@ -2,7 +2,7 @@
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
+import type { Connection } from '@salesforce/core';
 
 /**
  * Make a POST request to Salesforce SOAP API at given soapaction.

@@ -1,13 +1,13 @@
-/**
+/*
  * Copyright (c) 2024 Certinia Inc. All rights reserved.
  */
 
 import { expect } from 'chai';
-import { loadEnv, restore } from './helper.js';
 import {
-  BenchmarkOrgConnection,
+  type BenchmarkOrgConnection,
   connectToSalesforceOrg,
 } from '../src/salesforce/org/connection.js';
+import { loadEnv, restore } from './helper.js';
 
 describe('deploy', () => {
   let connection: BenchmarkOrgConnection;

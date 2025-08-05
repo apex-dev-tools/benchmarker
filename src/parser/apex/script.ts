@@ -2,16 +2,16 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexFile } from '../apex.js';
+import type { ApexFile } from '../apex.js';
 import {
-  AnonExpression,
-  AnonLiteralBoolean,
-  AnonLiteralNumber,
-  AnonLiteralString,
-  AnonMethodCall,
-  AnonMethodParam,
-  AnonNodeWrapper,
-  AnyAnonNode,
+  type AnonExpression,
+  type AnonLiteralBoolean,
+  type AnonLiteralNumber,
+  type AnonLiteralString,
+  type AnonMethodCall,
+  type AnonMethodParam,
+  type AnonNodeWrapper,
+  type AnyAnonNode,
   ApexNature,
 } from './tree.js';
 

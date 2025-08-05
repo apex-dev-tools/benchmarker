@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { LimitsBenchmarkResult } from '../service/apex.js';
-import { GovernorLimits } from '../benchmark/limits/schemas.js';
-import { BenchmarkId } from '../benchmark/base.js';
-import { PostgresCommonDataMapper } from '../database/interop.js';
+import type { BenchmarkId } from '../benchmark/base.js';
+import type { GovernorLimits } from '../benchmark/limits/schemas.js';
+import type { PostgresCommonDataMapper } from '../database/interop.js';
+import type { LimitsBenchmarkResult } from '../service/apex.js';
 import { RunContext } from '../state/context.js';
 import { calculateDeg } from './limits/deg.js';
-import { getRangeCollection, RangeCollection } from './limits/ranges.js';
+import { getRangeCollection, type RangeCollection } from './limits/ranges.js';
 
 export interface LimitsMetricProviderOptions {
   enable?: boolean;

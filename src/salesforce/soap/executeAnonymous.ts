@@ -2,10 +2,10 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
-import { postSoapRequest } from './request.js';
+import type { Connection } from '@salesforce/core';
 import { escapeXml } from '../../parser/xml.js';
-import { apexDebugHeader, DebugLogInfo } from './debug.js';
+import { apexDebugHeader, type DebugLogInfo } from './debug.js';
+import { postSoapRequest } from './request.js';
 
 export interface ExecuteAnonymousResponse {
   column: string;

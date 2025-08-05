@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "importHelpers": true,
     "experimentalDecorators": true,
+    "verbatimModuleSyntax": true
   },
   "include": [
     "src",
