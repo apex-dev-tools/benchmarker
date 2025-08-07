@@ -3,10 +3,10 @@
  */
 
 import Table from "cli-table";
-import { apexService } from "../index.js";
+import { ApexBenchmarkService } from "../service/apex.js";
 import type {
-  TransactionTestTemplate,
   TestFlowOutput,
+  TransactionTestTemplate,
 } from "./transactionTestTemplate.js";
 
 /**
@@ -22,7 +22,7 @@ export const saveResults = async (
     console.log(createTable(results));
   }
 
-  await apexService.save();
+  await ApexBenchmarkService.default.save();
 };
 
 function createTable(data: TestFlowOutput[]): string {

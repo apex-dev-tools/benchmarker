@@ -56,6 +56,8 @@ export interface LimitsBenchmarkRun {
   errors: ErrorResult[];
 }
 
+let defaultService: ApexBenchmarkService | undefined;
+
 export class ApexBenchmarkService {
   protected setupCalled: boolean = false;
   protected limitsStore: RunStore<LimitsBenchmarkResult>;
@@ -68,6 +70,11 @@ export class ApexBenchmarkService {
       new LimitsBenchmarkFactory()
     );
     this.limitsMetrics = new LimitsMetricProvider();
+  }
+
+  static get default(): ApexBenchmarkService {
+    if (!defaultService) defaultService = new ApexBenchmarkService();
+    return defaultService;
   }
 
   /**

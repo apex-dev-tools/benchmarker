@@ -2,8 +2,8 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { apexService } from "../index.js";
 import type { BenchmarkOrgConnection as SalesforceConnection } from "../salesforce/org/connection.js";
+import { ApexBenchmarkService } from "../service/apex.js";
 import { RunContext } from "../state/context.js";
 
 export interface GovernorMetricsResult {
@@ -134,7 +134,7 @@ export namespace TransactionProcess {
     processTestTemplate.flowStepsResults = [];
     processTestTemplate.testType = testType;
 
-    await apexService.setup({
+    await ApexBenchmarkService.default.setup({
       global: {
         projectId: product,
       },
