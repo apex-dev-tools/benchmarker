@@ -95,10 +95,13 @@ export interface SalesforceAuthInfo {
   version?: string;
 }
 
+/**
+ * @deprecated This namespace will be removed in a future version.
+ */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace SFConnection {
   /**
-   * @deprecated This namespace will be removed in a future version.
+   * @deprecated This API has moved to a module export.
    *
    * Use:
    * ```
@@ -113,10 +116,13 @@ export namespace SFConnection {
   };
 }
 
+/**
+ * @deprecated This namespace will be removed in a future version.
+ */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace SFUtils {
   /**
-   * @deprecated This namespace will be removed in a future version.
+   * @deprecated This API has moved to `ApexBenchmarkService.execute()`.
    *
    * Use:
    * ```
