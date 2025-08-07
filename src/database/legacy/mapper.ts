@@ -2,7 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Brackets, type DataSource, In, type Repository } from "typeorm";
+import {
+  Brackets,
+  type DataSource,
+  In,
+  type Repository,
+  SelectQueryBuilder,
+} from "typeorm";
 import type { LimitsAvg } from "../../metrics/limits.js";
 import type { Degradation } from "../../metrics/limits/deg.js";
 import type { OrgContext, OrgPackage } from "../../salesforce/org/context.js";
@@ -61,15 +67,32 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
   }
 
   async findLimitsTenDayAverage(
-    projectId: string,
+    run: RunContext,
     results: LimitsBenchmarkResult[]
   ): Promise<LimitsAvg[]> {
-    const { names, actions } = CommonDataUtil.idSetsFromResults(results);
+    return this.whereMatchingResults(
+      run,
+      results,
+      this.selectLimitAvgFields(
+        this.testResults
+          .createQueryBuilder("res")
+          .select("res.flow_name", "name")
+          .addSelect("res.action", "action")
+      )
+    )
+      .andWhere(
+        "res.create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS'"
+      )
+      .groupBy("res.flow_name")
+      .addGroupBy("res.action")
+      .having("COUNT(*) >= 5")
+      .getRawMany();
+  }
 
-    return this.testResults
-      .createQueryBuilder("res")
-      .select("res.flow_name", "name")
-      .addSelect("res.action", "action")
+  private selectLimitAvgFields(
+    builder: SelectQueryBuilder<TestResult>
+  ): SelectQueryBuilder<TestResult> {
+    return builder
       .addSelect("COALESCE(ROUND(AVG(res.duration), 0), 0)::int", "duration")
       .addSelect("COALESCE(ROUND(AVG(res.cpu_time), 0), 0)::int", "cpuTime")
       .addSelect("COALESCE(ROUND(AVG(res.dml_rows), 0), 0)::int", "dmlRows")
@@ -90,22 +113,32 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
       .addSelect(
         "COALESCE(ROUND(AVG(res.future_calls), 0), 0)::int",
         "futureCalls"
-      )
-      .where("res.product = :projectId", { projectId })
+      );
+  }
+
+  private whereMatchingResults(
+    run: RunContext,
+    results: LimitsBenchmarkResult[],
+    builder: SelectQueryBuilder<TestResult>
+  ): SelectQueryBuilder<TestResult> {
+    const { names, actions } = CommonDataUtil.idSetsFromResults(results);
+
+    builder.where("res.product = :projectId", { projectId: run.projectId });
+
+    if (run.sourceId) {
+      builder.andWhere("res.source_ref = :sourceId", {
+        sourceId: run.sourceId,
+      });
+    }
+
+    return builder
       .andWhere("res.flow_name IN (:...names)", { names })
       .andWhere("res.action IN (:...actions)", {
         actions,
       })
       .andWhere(
         new Brackets(qb => qb.where("error IS NULL").orWhere("error = ''"))
-      )
-      .andWhere(
-        "res.create_date_time >= CURRENT_TIMESTAMP - INTERVAL '10 DAYS'"
-      )
-      .groupBy("res.flow_name")
-      .addGroupBy("res.action")
-      .having("COUNT(*) >= 5")
-      .getRawMany();
+      );
   }
 
   private async saveAndCacheOrg(orgContext: OrgContext): Promise<number> {

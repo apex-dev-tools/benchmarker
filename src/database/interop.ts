@@ -19,7 +19,7 @@ export interface PostgresCommonDataMapper {
   ): Promise<void>;
 
   findLimitsTenDayAverage(
-    projectId: string,
+    run: RunContext,
     results: LimitsBenchmarkResult[]
   ): Promise<LimitsAvg[]>;
 }
