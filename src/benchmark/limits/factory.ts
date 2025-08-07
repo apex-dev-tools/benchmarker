@@ -12,7 +12,7 @@ import {
   LimitsAnonApexBenchmark,
   type LimitsBenchmarkOptions,
 } from "../limits.js";
-import { LegacyAnonApexBenchmark } from "./legacy.js";
+import { LegacyAnonApexBenchmark } from "../legacy.js";
 import type { GovernorLimits, LimitsContext } from "./schemas.js";
 
 export interface LimitsAction {

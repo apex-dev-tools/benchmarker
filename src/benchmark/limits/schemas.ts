@@ -21,6 +21,7 @@ export interface GovernorLimits {
 export interface LimitsContext {
   enableMetrics?: boolean;
   thresholds?: LimitsThresholds;
+  // union like `string | object` not supported by jtd schema
   data?: any;
 }
 
