@@ -7,16 +7,6 @@ import type { NamedSchema } from "../../parser/json.js";
 import { infoApex } from "../../scripts/apex.js";
 import { executeAnonymous, extractAssertionData } from "../execute.js";
 
-export interface OrgInformation {
-  id: string;
-  instance: string;
-  edition: string;
-  isSandbox: boolean;
-  isTrial: boolean;
-  isMultiCurrency: boolean;
-  isLex: boolean;
-}
-
 export interface OrgRelease {
   label: string;
   url: string;
@@ -33,7 +23,14 @@ export interface OrgPackage {
   isBeta: boolean;
 }
 
-export interface OrgContext extends OrgInformation {
+export interface OrgContext {
+  id: string;
+  instance: string;
+  edition: string;
+  isSandbox: boolean;
+  isTrial: boolean;
+  isMultiCurrency: boolean;
+  isLex: boolean;
   release: OrgRelease;
   packages: OrgPackage[];
 }
@@ -55,7 +52,9 @@ interface InstalledSubscriberPackage {
   };
 }
 
-const orgInfoSchema: NamedSchema<OrgInformation> = {
+type OrgInfo = Omit<OrgContext, "release" | "packages">;
+
+const orgInfoSchema: NamedSchema<OrgInfo> = {
   name: "orgInfo",
   schema: {
     properties: {
