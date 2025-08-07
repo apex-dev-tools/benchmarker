@@ -10,7 +10,7 @@ import {
 } from "./org/connection.js";
 import { getOrgContext, type OrgContext } from "./org/context.js";
 
-export interface OrgOptions {
+export interface BenchmarkOrgOptions {
   // use existing connection to create internal one
   connection?: Connection;
   username?: string;
@@ -26,7 +26,7 @@ export interface OrgOptions {
 }
 
 export class BenchmarkOrg {
-  protected options: OrgOptions = {};
+  protected options: BenchmarkOrgOptions = {};
   protected orgConnection?: BenchmarkOrgConnection;
   protected context?: OrgContext;
   protected namespaces?: string[];
@@ -46,7 +46,7 @@ export class BenchmarkOrg {
   /**
    * Sets connection from options or environment
    */
-  async connect(options: OrgOptions = {}): Promise<void> {
+  async connect(options: BenchmarkOrgOptions = {}): Promise<void> {
     if (this.orgConnection) return;
 
     this.options = options;

@@ -83,10 +83,7 @@ export class ApexBenchmarkService {
       await run.setupPgLegacy(options.pg);
     }
 
-    this.limitsMetrics.setup(
-      run.pgLegacy?.commonMapper || run.pg.commonMapper,
-      options.limitsMetrics
-    );
+    this.limitsMetrics.setup(options.limitsMetrics);
   }
 
   restore() {
@@ -153,14 +150,15 @@ export class ApexBenchmarkService {
   async save(): Promise<void> {
     const run = RunContext.current;
     const results = this.limitsStore.getItemsFromCursor();
+    const mappers = run.getCommonMappers();
 
-    if (results.length === 0 || !run.isPostgresAvailable()) return;
+    if (results.length === 0 || mappers.length === 0) return;
 
     const orgContext = await run.org.getContext();
 
-    await run.forPostgres(mapper =>
-      mapper.saveLimitsResults(run, orgContext, results)
-    );
+    for (const mapper of mappers) {
+      await mapper.saveLimitsResults(run, orgContext, results);
+    }
 
     this.limitsStore.moveCursor();
   }

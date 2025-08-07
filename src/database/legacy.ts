@@ -16,12 +16,8 @@ import { PostgresDataSource, type PostgresOptions } from "./postgres.js";
 export class LegacyDataSource extends PostgresDataSource {
   mapper?: LegacyDataMapper;
 
-  get isConnected(): boolean {
+  get isActive(): boolean {
     return this.mapper != null;
-  }
-
-  get commonMapper(): PostgresCommonDataMapper | undefined {
-    return this.mapper;
   }
 
   async connect(options: PostgresOptions = {}): Promise<void> {

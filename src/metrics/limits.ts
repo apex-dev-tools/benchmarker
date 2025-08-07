@@ -23,16 +23,11 @@ export type LimitsAvg = Partial<LimitsMetric> & BenchmarkId;
 
 export class LimitsMetricProvider {
   protected globalEnabled: boolean = false;
-  protected dataMapper?: PostgresCommonDataMapper;
   protected rangesPath?: string;
   protected ranges?: RangeCollection;
 
-  setup(
-    dataMapper: PostgresCommonDataMapper | undefined,
-    options: LimitsMetricProviderOptions = {}
-  ) {
+  setup(options: LimitsMetricProviderOptions = {}) {
     this.globalEnabled = options.enable ?? Boolean(process.env.BENCH_METRICS);
-    this.dataMapper = dataMapper;
     this.rangesPath = options.limitRangesPath;
   }
 
@@ -87,22 +82,29 @@ export class LimitsMetricProvider {
     results: LimitsBenchmarkResult[],
     indexes: number[]
   ): Promise<Partial<Record<string, LimitsAvg>>> {
-    if (!this.dataMapper) {
-      return {};
-    }
     const toAvg =
       indexes.length === results.length
         ? results
         : indexes.map(i => results[i]);
 
-    const records = await this.dataMapper.findLimitsTenDayAverage(
-      RunContext.current.projectId,
-      toAvg
-    );
+    const records = await this.tryFindAvgQuery(RunContext.current, toAvg);
 
     return records.reduce<Partial<Record<string, LimitsAvg>>>((dict, rec) => {
       dict[rec.name + rec.action] = rec;
       return dict;
     }, {});
+  }
+
+  private async tryFindAvgQuery(
+    run: RunContext,
+    toAvg: LimitsBenchmarkResult[]
+  ): Promise<LimitsAvg[]> {
+    // new db may be empty/below 5 runs - use legacy as fallback if in use
+    const mappers = run.getCommonMappers();
+    for (const mapper of mappers) {
+      const records = await mapper.findLimitsTenDayAverage(run, toAvg);
+      if (records.length > 0) return records;
+    }
+    return [];
   }
 }
