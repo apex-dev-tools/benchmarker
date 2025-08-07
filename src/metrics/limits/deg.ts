@@ -13,8 +13,6 @@ export interface Degradation {
   isOffset: boolean;
 }
 
-export type DegLimitsMetric = LimitsMetric<Degradation>;
-
 export function calculateDeg(
   limits: GovernorLimits,
   ranges: RangeCollection,

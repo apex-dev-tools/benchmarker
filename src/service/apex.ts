@@ -15,9 +15,10 @@ import type {
 } from "../benchmark/limits/schemas.js";
 import {
   LimitsMetricProvider,
+  type LimitsMetric,
   type LimitsMetricProviderOptions,
 } from "../metrics/limits.js";
-import type { DegLimitsMetric } from "../metrics/limits/deg.js";
+import type { Degradation } from "../metrics/limits/deg.js";
 import type { ApexScriptParserOptions } from "../parser/apex.js";
 import { RunContext, type RunContextOptions } from "../state/context.js";
 import { RunStore } from "../state/store.js";
@@ -33,7 +34,7 @@ export interface ApexBenchmarkServiceOptions extends RunContextOptions {
 }
 
 export interface LimitsMetrics {
-  deg?: DegLimitsMetric;
+  deg?: LimitsMetric<Degradation>;
 }
 
 export type LimitsBenchmarker = AnonApexBenchmarker<

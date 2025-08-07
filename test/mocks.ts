@@ -9,10 +9,10 @@ import type { SinonSandbox, SinonStubbedInstance } from "sinon";
 import type { GovernorLimits } from "../src/benchmark/limits/schemas.js";
 import type { PostgresCommonDataMapper } from "../src/database/interop.js";
 import { LegacyDataSource } from "../src/database/legacy.js";
+import { MainDataSource } from "../src/database/main.js";
 import { BenchmarkOrg } from "../src/salesforce/org.js";
 import { BenchmarkOrgConnection } from "../src/salesforce/org/connection.js";
 import { type GlobalOptions, RunContext } from "../src/state/context.js";
-import { MainDataSource } from "../src/index.js";
 
 const envKeys = [
   "BENCH_PROJECT_ID",
