@@ -4,7 +4,6 @@
 
 import type { BenchmarkId } from "../benchmark/base.js";
 import type { GovernorLimits } from "../benchmark/limits/schemas.js";
-import type { PostgresCommonDataMapper } from "../database/interop.js";
 import type { LimitsBenchmarkResult } from "../service/apex.js";
 import { RunContext } from "../state/context.js";
 import { calculateDeg } from "./limits/deg.js";

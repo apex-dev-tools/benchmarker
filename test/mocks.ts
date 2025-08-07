@@ -9,10 +9,10 @@ import type { SinonSandbox, SinonStubbedInstance } from "sinon";
 import type { GovernorLimits } from "../src/benchmark/limits/schemas.js";
 import type { PostgresCommonDataMapper } from "../src/database/interop.js";
 import { LegacyDataSource } from "../src/database/legacy.js";
-import type { PostgresDataSource } from "../src/database/postgres.js";
 import { BenchmarkOrg } from "../src/salesforce/org.js";
 import { BenchmarkOrgConnection } from "../src/salesforce/org/connection.js";
 import { type GlobalOptions, RunContext } from "../src/state/context.js";
+import { MainDataSource } from "../src/index.js";
 
 const envKeys = [
   "BENCH_PROJECT_ID",
@@ -41,6 +41,12 @@ export const mockLimits: GovernorLimits = {
   queueableJobs: 0,
   futureCalls: 0,
 };
+
+export interface PgStubs {
+  main: SinonStubbedInstance<MainDataSource>;
+  mapper: SinonStubbedInstance<PostgresCommonDataMapper>;
+  legacy?: SinonStubbedInstance<LegacyDataSource>;
+}
 
 export class MockRunContext extends RunContext {
   sandbox: SinonSandbox;
@@ -110,19 +116,25 @@ export class MockRunContext extends RunContext {
     return org;
   }
 
-  stubPg(
-    andLegacy: boolean = false,
-    pgMapper?: PostgresCommonDataMapper
-  ): SinonStubbedInstance<PostgresDataSource> {
-    const pg = this.sandbox.createStubInstance(LegacyDataSource); // temp
-    pg.connect.resolves();
-    this.sandbox.stub(pg, "isConnected").value(pgMapper != null);
-    this.sandbox.stub(pg, "commonMapper").value(pgMapper);
+  stubPg(andLegacy: boolean = false): PgStubs {
+    const main = this.sandbox.createStubInstance(MainDataSource);
+    main.connect.resolves();
+    this.pg = main;
 
-    this.pg = pg;
+    let legacy: SinonStubbedInstance<LegacyDataSource> | undefined;
     if (andLegacy) {
-      this.pgLegacy = pg;
+      legacy = this.sandbox.createStubInstance(LegacyDataSource);
+      legacy.connect.resolves();
+      this.pgLegacy = legacy;
     }
-    return pg;
+
+    return {
+      main,
+      legacy,
+      mapper: {
+        findLimitsTenDayAverage: this.sandbox.stub(),
+        saveLimitsResults: this.sandbox.stub(),
+      },
+    };
   }
 }

@@ -7,14 +7,13 @@ import { TestContext } from "@salesforce/core/testSetup";
 import { expect } from "chai";
 import mockfs from "mock-fs";
 import sinon, { type SinonStub, type SinonStubbedInstance } from "sinon";
-import type { PostgresDataSource } from "../../src/database/postgres.js";
 import type { BenchmarkOrg } from "../../src/salesforce/org.js";
 import {
   ApexBenchmarkService,
   type LimitsBenchmarkResult,
 } from "../../src/service/apex.js";
 import { execAnonDataResponse } from "../helpers.js";
-import { mockLimits, MockRunContext } from "../mocks.js";
+import { mockLimits, MockRunContext, type PgStubs } from "../mocks.js";
 
 const legacyContent = `
 GovernorLimits initialLimits = (new GovernorLimits()).getCurrentGovernorLimits();
@@ -42,14 +41,14 @@ describe("service/apex", () => {
   const $$ = new TestContext({ sinon });
   let requestStub: SinonStub;
   let orgStub: SinonStubbedInstance<BenchmarkOrg>;
-  let pgStub: SinonStubbedInstance<PostgresDataSource>;
+  let pgStubs: PgStubs;
   let service: ApexBenchmarkService;
 
   beforeEach(async () => {
     const ctx = MockRunContext.createMock(sinon);
     ctx.stubGlobals();
     orgStub = ctx.stubSfOrg(await ctx.stubSfConnection());
-    pgStub = ctx.stubPg(true);
+    pgStubs = ctx.stubPg(true);
 
     requestStub = sinon.stub();
     $$.fakeConnectionRequest = requestStub;
@@ -92,7 +91,7 @@ describe("service/apex", () => {
     const res = await service.benchmarkFileLimits("test/scripts/script1.apex");
 
     expect(orgStub.connect.calledOnce).to.be.true;
-    expect(pgStub.connect.calledOnce).to.be.true;
+    expect(pgStubs.main.connect.calledOnce).to.be.true;
     expect(requestStub).to.be.calledOnce;
     expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
@@ -123,7 +122,7 @@ describe("service/apex", () => {
     const res = await service.benchmarkLimits({ paths: ["test/scripts"] });
 
     expect(orgStub.connect.calledOnce).to.be.true;
-    expect(pgStub.connect.calledOnce).to.be.true;
+    expect(pgStubs.main.connect.calledOnce).to.be.true;
     expect(requestStub).to.be.calledThrice;
     expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);
@@ -150,7 +149,7 @@ describe("service/apex", () => {
     });
 
     expect(orgStub.connect.calledOnce).to.be.true;
-    expect(pgStub.connect.calledOnce).to.be.true;
+    expect(pgStubs.main.connect.calledOnce).to.be.true;
     expect(requestStub).to.be.calledOnce;
     const req = requestStub.firstCall.args[0] as HttpRequest;
     expect(req.body).to.include(`${code}\ndone();`);
@@ -179,7 +178,7 @@ describe("service/apex", () => {
     });
 
     expect(orgStub.connect.calledOnce).to.be.true;
-    expect(pgStub.connect.calledOnce).to.be.true;
+    expect(pgStubs.main.connect.calledOnce).to.be.true;
     expect(requestStub).to.be.calledOnce;
     expect(res.errors).to.be.empty;
     expect(res.benchmarks).to.eql(results);

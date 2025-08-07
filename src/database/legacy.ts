@@ -3,7 +3,6 @@
  */
 
 import { DataSource } from "typeorm";
-import type { PostgresCommonDataMapper } from "./interop.js";
 import { Alert } from "./legacy/entity/alert.js";
 import { ExecutionInfo } from "./legacy/entity/execution.js";
 import { TestInfo } from "./legacy/entity/info.js";
