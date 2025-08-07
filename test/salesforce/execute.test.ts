@@ -73,13 +73,13 @@ describe("salesforce/execute", () => {
         "<executeAnonymous><String>0 &lt; 1;</String></executeAnonymous>"
       );
       expect(response).to.eql({
-        column: "1",
+        column: 1,
         compiled: true,
         compileProblem: "",
         exceptionMessage:
           'System.AssertException: Assertion Failed: -_{"timer":8,"soqlQueries":0,"queueableJobs":0,"queryRows":0,"heapSize":40131,"futureCalls":0,"dmlStatements":0,"dmlRows":0,"cpuTime":9}_-',
         exceptionStackTrace: "AnonymousBlock: line 50, column 1",
-        line: "50",
+        line: 50,
         success: false,
         debugLog: undefined,
       } as ExecuteAnonymousResponse);
@@ -101,12 +101,12 @@ describe("salesforce/execute", () => {
 
       expect(requestStub).to.have.been.calledOnce;
       expect(response).to.eql({
-        column: "16",
+        column: 16,
         compiled: false,
         compileProblem: "Unexpected token 'i'.",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "35",
+        line: 35,
         success: false,
         debugLog: undefined,
       } as ExecuteAnonymousResponse);
@@ -120,12 +120,12 @@ describe("salesforce/execute", () => {
 
       expect(requestStub).to.have.been.calledOnce;
       expect(response).to.eql({
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "-1",
+        line: -1,
         success: true,
         debugLog: undefined,
       } as ExecuteAnonymousResponse);
@@ -160,12 +160,12 @@ describe("salesforce/execute", () => {
         "<DebuggingHeader><categories><category>System</category><level>Debug</level></categories></DebuggingHeader>"
       );
       expect(response).to.eql({
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "-1",
+        line: -1,
         success: true,
         debugLog:
           "50.0 SYSTEM,DEBUG\n ... 09:26:32.26 (36453345)|EXECUTION_FINISHED\n",
@@ -189,12 +189,12 @@ describe("salesforce/execute", () => {
 
       expect(requestStub).to.have.been.calledThrice;
       expect(response).to.eql({
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "-1",
+        line: -1,
         success: true,
         debugLog: undefined,
       } as ExecuteAnonymousResponse);
@@ -215,13 +215,13 @@ describe("salesforce/execute", () => {
 
     it("should return data with schema type", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage:
           'System.AssertException: Assertion Failed: -_{"test": 1}_-',
         exceptionStackTrace: "stack",
-        line: "-1",
+        line: -1,
         success: false,
       };
 
@@ -232,12 +232,12 @@ describe("salesforce/execute", () => {
 
     it("should throw on no data", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "-1",
+        line: -1,
         success: true,
       };
 
@@ -248,12 +248,12 @@ describe("salesforce/execute", () => {
 
     it("should throw on compile errors", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "16",
+        column: 16,
         compiled: false,
         compileProblem: "Unexpected token 'i'.",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "35",
+        line: 35,
         success: false,
       };
 
@@ -264,12 +264,12 @@ describe("salesforce/execute", () => {
 
     it("should throw original error if pattern did not match", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "System.AssertException: Assertion Failed",
         exceptionStackTrace: "stack",
-        line: "-1",
+        line: -1,
         success: false,
       };
 
@@ -280,12 +280,12 @@ describe("salesforce/execute", () => {
 
     it("should throw json parse errors", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "System.AssertException: Assertion Failed: -_{}_-",
         exceptionStackTrace: "stack",
-        line: "-1",
+        line: -1,
         success: false,
       };
 
@@ -298,12 +298,12 @@ describe("salesforce/execute", () => {
   describe("assertAnonymousError()", () => {
     it("should produce error for compile issues", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "16",
+        column: 16,
         compiled: false,
         compileProblem: "Unexpected token 'i'.",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "35",
+        line: 35,
         success: false,
       };
 
@@ -316,12 +316,12 @@ describe("salesforce/execute", () => {
 
     it("should produce error for apex exception", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "1",
+        column: 1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "Apex Exception",
         exceptionStackTrace: "AnonymousBlock: line 50, column 1",
-        line: "50",
+        line: 50,
         success: false,
       };
 
@@ -335,12 +335,12 @@ describe("salesforce/execute", () => {
 
     it("should be null for successful response", () => {
       const resp: ExecuteAnonymousResponse = {
-        column: "-1",
+        column: -1,
         compiled: true,
         compileProblem: "",
         exceptionMessage: "",
         exceptionStackTrace: "",
-        line: "-1",
+        line: -1,
         success: true,
       };
 

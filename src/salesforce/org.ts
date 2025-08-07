@@ -6,7 +6,7 @@ import type { Connection } from "@salesforce/core";
 import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
-  type OrgAuthInfo,
+  type OrgAuthOptions,
 } from "./org/connection.js";
 import { getOrgContext, type OrgContext } from "./org/context.js";
 
@@ -89,7 +89,7 @@ export class BenchmarkOrg {
     return this.namespaceRegExp;
   }
 
-  protected loadAuth(): OrgAuthInfo | undefined {
+  protected loadAuth(): OrgAuthOptions | undefined {
     const { username, password, loginUrl, version } = this.options;
 
     const user = username || process.env.BENCH_ORG_USERNAME;

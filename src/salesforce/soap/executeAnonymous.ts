@@ -8,12 +8,12 @@ import { apexDebugHeader, type DebugLogInfo } from "./debug.js";
 import { postSoapRequest } from "./request.js";
 
 export interface ExecuteAnonymousResponse {
-  column: string;
+  column: number;
   compiled: boolean;
   compileProblem: string;
   exceptionMessage: string;
   exceptionStackTrace: string;
-  line: string;
+  line: number;
   success: boolean;
   debugLog?: string;
 }
@@ -65,6 +65,8 @@ function formatExecuteAnonymousResponse(
     soapResponse["soapenv:Envelope"]["soapenv:Body"].executeAnonymousResponse
       .result;
   const {
+    line,
+    column,
     compiled,
     success,
     compileProblem,
@@ -76,6 +78,8 @@ function formatExecuteAnonymousResponse(
   // error strings will be $nil objects if not set
   return {
     ...result,
+    line: Number(line),
+    column: Number(column),
     compiled: compiled === "true",
     success: success === "true",
     compileProblem: typeof compileProblem === "object" ? "" : compileProblem,

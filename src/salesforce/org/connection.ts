@@ -10,7 +10,7 @@ import {
   StateAggregator,
 } from "@salesforce/core";
 
-export interface OrgAuthInfo {
+export interface OrgAuthOptions {
   username: string;
   password?: string; // password&token
   loginUrl?: string;
@@ -44,15 +44,15 @@ export class BenchmarkOrgConnection extends Connection {
 
 /**
  * Connects to Salesforce org given an org credentials
- * @param authInfoWrapper wraps the credentials needed to connect to an org
+ * @param auth wraps the credentials needed to connect to an org
  */
 export async function connectToSalesforceOrg(
-  authInfoWrapper: OrgAuthInfo
+  auth: OrgAuthOptions
 ): Promise<BenchmarkOrgConnection> {
-  const { username, password, loginUrl } = authInfoWrapper;
+  const { username, password, loginUrl } = auth;
   let connection: BenchmarkOrgConnection;
 
-  let version = authInfoWrapper.version;
+  let version = auth.version;
   if (!version) {
     const configAggregator = await ConfigAggregator.create();
     const value = configAggregator.getInfo("org-api-version").value;
