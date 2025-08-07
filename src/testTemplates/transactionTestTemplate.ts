@@ -6,18 +6,6 @@ import type { BenchmarkOrgConnection as SalesforceConnection } from "../salesfor
 import { ApexBenchmarkService } from "../service/apex.js";
 import { RunContext } from "../state/context.js";
 
-export interface GovernorMetricsResult {
-  timer: number;
-  cpuTime: number;
-  dmlRows: number;
-  dmlStatements: number;
-  heapSize: number;
-  queryRows: number;
-  soqlQueries: number;
-  queueableJobs: number;
-  futureCalls: number;
-}
-
 /**
  * Test Template to execute anonymous Apex code from a file and extract the Governor Limits
  */
@@ -90,9 +78,21 @@ export class AlertInfo {
   public thresholds: Thresholds;
 }
 
+export interface TestStepResult {
+  timer: number;
+  cpuTime: number;
+  dmlRows: number;
+  dmlStatements: number;
+  heapSize: number;
+  queryRows: number;
+  soqlQueries: number;
+  queueableJobs: number;
+  futureCalls: number;
+}
+
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
-  result: GovernorMetricsResult;
+  result: TestStepResult;
   error?: string;
 }
 

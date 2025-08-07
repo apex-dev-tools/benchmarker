@@ -24,6 +24,9 @@ export {
   TransactionProcess,
   TransactionTestTemplate,
   type FlowStep,
+  type TestFlowOptions,
+  type TestFlowOutput,
   type TestStepDescription,
+  type TestStepResult,
   type TokenReplacement,
 } from "./testTemplates/transactionTestTemplate.js";
