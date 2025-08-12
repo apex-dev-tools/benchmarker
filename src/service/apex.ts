@@ -20,6 +20,11 @@ import {
 } from "../metrics/limits.js";
 import type { Degradation } from "../metrics/limits/deg.js";
 import type { ApexScriptParserOptions } from "../parser/apex.js";
+import {
+  executeAnonymous,
+  type ExecuteAnonymousOptions,
+} from "../salesforce/execute.js";
+import type { ExecuteAnonymousResponse } from "../salesforce/soap/executeAnonymous.js";
 import { RunContext, type RunContextOptions } from "../state/context.js";
 import { RunStore } from "../state/store.js";
 import {
@@ -169,6 +174,25 @@ export class ApexBenchmarkService {
     }
 
     this.limitsStore.moveCursor();
+  }
+
+  /**
+   * Execute Anonymous Apex on the current org, with namespaces replaced if
+   * enabled.
+   *
+   * Optionally enable and return debug logs.
+   */
+  async execute(
+    code: string,
+    options?: ExecuteAnonymousOptions
+  ): Promise<ExecuteAnonymousResponse> {
+    const ctx = await this.ensureSetup();
+
+    return executeAnonymous(
+      ctx.org.connection,
+      ctx.org.removeUnmanagedNamespaces(code),
+      options
+    );
   }
 
   private async ensureSetup(): Promise<RunContext> {

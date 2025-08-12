@@ -89,6 +89,13 @@ export class BenchmarkOrg {
     return this.namespaceRegExp;
   }
 
+  removeUnmanagedNamespaces(text: string): string {
+    return this.getNamespaceRegExp().reduce<string>(
+      (str, regex) => str.replace(regex, ""),
+      text
+    );
+  }
+
   protected loadAuth(): OrgAuthOptions | undefined {
     const { username, password, loginUrl, version } = this.options;
 
