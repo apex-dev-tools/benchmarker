@@ -77,6 +77,14 @@
     "node": ">=20.19.0 || >=22.12.0"
   },
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": "./dist/src/index.js",
+    "./benchmark/*": "./dist/src/benchmark/*.js",
+    "./database/*": "./dist/src/database/*.js",
+    "./metrics/*": "./dist/src/metrics/*.js",
+    "./parser/*": "./dist/src/parser/*.js",
+    "./salesforce/*": "./dist/src/salesforce/*.js",
+    "./scripts/*": "./dist/src/scripts/*.js",
+    "./service/*": "./dist/src/service/*.js",
+    "./state/*": "./dist/src/state/*.js"
   }
 }
