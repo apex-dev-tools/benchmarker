@@ -9,7 +9,7 @@ import {
 } from "../../src/benchmark/limits/schemas.js";
 import { parseType } from "../../src/parser/json.js";
 
-describe("text/json", () => {
+describe("parser/json", () => {
   it("should parse governor limits", () => {
     const str =
       '{ "duration": 0, "cpuTime": 0, "dmlRows": 0, "dmlStatements": 0, "heapSize": 0, "queryRows": 0, "soqlQueries": 0, "queueableJobs": 0, "futureCalls": 0 }';

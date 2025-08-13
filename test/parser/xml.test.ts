@@ -5,7 +5,7 @@
 import { expect } from "chai";
 import { escapeXml } from "../../src/parser/xml.js";
 
-describe("text/xml", () => {
+describe("parser/xml", () => {
   it("should replace special xml characters with escape codes", () => {
     expect(
       escapeXml("void fn() { a < b; 2 > 1; x & y; 'str' == \"str\" }")
