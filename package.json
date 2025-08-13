@@ -10,14 +10,8 @@
   "repository": "apex-dev-tools/benchmarker",
   "homepage": "https://github.com/apex-dev-tools/benchmarker",
   "main": "dist/src/index.js",
-  "types": "dist/types/src/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "type": "module",
-  "files": [
-    "db/migrations",
-    "dist/src",
-    "docs/user",
-    "CHANGELOG.md"
-  ],
   "scripts": {
     "build": "npm run build:clean && npm run compile",
     "build:clean": "rm -rf dist",
@@ -33,6 +27,12 @@
     "test:system:init": "cp test_system/config/.env .env",
     "test:system": "mocha --timeout 30000 'test_system/**/*.test.*'"
   },
+  "files": [
+    "db/migrations",
+    "dist/src",
+    "docs/user",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "@apexdevtools/apex-parser": "^5.0.0-beta.2",
     "@jsforce/jsforce-node": "^3.9.5",
@@ -76,10 +76,15 @@
   "engines": {
     "node": ">=20.19.0 || >=22.12.0"
   },
-  "lint-staged": {
-    "*.ts": [
-      "eslint --cache --cache-location .eslintcache --fix",
-      "prettier --write"
-    ]
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./benchmark/*": "./dist/src/benchmark/*.js",
+    "./database/*": "./dist/src/database/*.js",
+    "./metrics/*": "./dist/src/metrics/*.js",
+    "./parser/*": "./dist/src/parser/*.js",
+    "./salesforce/*": "./dist/src/salesforce/*.js",
+    "./scripts/*": "./dist/src/scripts/*.js",
+    "./service/*": "./dist/src/service/*.js",
+    "./state/*": "./dist/src/state/*.js"
   }
 }

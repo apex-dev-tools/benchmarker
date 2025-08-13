@@ -2,30 +2,30 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import * as dotenv from 'dotenv';
-import { SinonSandbox, SinonStubbedInstance } from 'sinon';
-import { AuthInfo } from '@salesforce/core';
-import { MockTestOrgData } from '@salesforce/core/testSetup';
-import { GlobalOptions, RunContext } from '../src/state/context.js';
-import { BenchmarkOrg } from '../src/salesforce/org.js';
-import { PostgresDataSource } from '../src/database/postgres.js';
-import { PostgresCommonDataMapper } from '../src/database/interop.js';
-import { BenchmarkOrgConnection } from '../src/salesforce/org/connection.js';
-import { LegacyDataSource } from '../src/database/legacy.js';
-import { GovernorLimits } from '../src/benchmark/limits/schemas.js';
+import { AuthInfo } from "@salesforce/core";
+import { MockTestOrgData } from "@salesforce/core/testSetup";
+import * as dotenv from "dotenv";
+import type { SinonSandbox, SinonStubbedInstance } from "sinon";
+import type { GovernorLimits } from "../src/benchmark/limits/schemas.js";
+import type { PostgresCommonDataMapper } from "../src/database/interop.js";
+import { LegacyDataSource } from "../src/database/legacy.js";
+import { MainDataSource } from "../src/database/main.js";
+import { BenchmarkOrg } from "../src/salesforce/org.js";
+import { BenchmarkOrgConnection } from "../src/salesforce/org/connection.js";
+import { type GlobalOptions, RunContext } from "../src/state/context.js";
 
 const envKeys = [
-  'BENCH_PROJECT_ID',
-  'BENCH_BUILD_ID',
-  'BENCH_SOURCE_ID',
-  'BENCH_ORG_USERNAME',
-  'BENCH_ORG_PASSWORD',
-  'BENCH_ORG_LOGIN_URL',
-  'BENCH_ORG_UNMANAGED_NAMESPACES',
-  'BENCH_POSTGRES_URL',
-  'BENCH_POSTGRES_LEGACY',
-  'BENCH_METRICS',
-  'BENCH_METRICS_LIMIT_RANGES',
+  "BENCH_PROJECT_ID",
+  "BENCH_BUILD_ID",
+  "BENCH_SOURCE_ID",
+  "BENCH_ORG_USERNAME",
+  "BENCH_ORG_PASSWORD",
+  "BENCH_ORG_LOGIN_URL",
+  "BENCH_ORG_UNMANAGED_NAMESPACES",
+  "BENCH_POSTGRES_URL",
+  "BENCH_POSTGRES_LEGACY",
+  "BENCH_METRICS",
+  "BENCH_METRICS_LIMIT_RANGES",
 ] as const;
 
 export type MockEnv = { [K in (typeof envKeys)[number]]?: string };
@@ -41,6 +41,12 @@ export const mockLimits: GovernorLimits = {
   queueableJobs: 0,
   futureCalls: 0,
 };
+
+export interface PgStubs {
+  main: SinonStubbedInstance<MainDataSource>;
+  mapper: SinonStubbedInstance<PostgresCommonDataMapper>;
+  legacy?: SinonStubbedInstance<LegacyDataSource>;
+}
 
 export class MockRunContext extends RunContext {
   sandbox: SinonSandbox;
@@ -78,13 +84,13 @@ export class MockRunContext extends RunContext {
 
   stubGlobals(opts?: GlobalOptions): void {
     if (opts) {
-      this.projectId = opts.projectId || '';
+      this.projectId = opts.projectId || "";
       this.buildId = opts.buildId;
       this.sourceId = opts.sourceId;
     } else {
-      this.projectId = 'MockProduct';
-      this.buildId = 'Build #1';
-      this.sourceId = 'main';
+      this.projectId = "MockProduct";
+      this.buildId = "Build #1";
+      this.sourceId = "main";
     }
   }
 
@@ -103,26 +109,32 @@ export class MockRunContext extends RunContext {
     org.getNamespaceRegExp.returns([]);
 
     if (connection) {
-      this.sandbox.stub(org, 'connection').value(connection);
+      this.sandbox.stub(org, "connection").value(connection);
     }
 
     this.org = org;
     return org;
   }
 
-  stubPg(
-    andLegacy: boolean = false,
-    pgMapper?: PostgresCommonDataMapper
-  ): SinonStubbedInstance<PostgresDataSource> {
-    const pg = this.sandbox.createStubInstance(LegacyDataSource); // temp
-    pg.connect.resolves();
-    this.sandbox.stub(pg, 'isConnected').value(pgMapper != null);
-    this.sandbox.stub(pg, 'commonMapper').value(pgMapper);
+  stubPg(andLegacy: boolean = false): PgStubs {
+    const main = this.sandbox.createStubInstance(MainDataSource);
+    main.connect.resolves();
+    this.pg = main;
 
-    this.pg = pg;
+    let legacy: SinonStubbedInstance<LegacyDataSource> | undefined;
     if (andLegacy) {
-      this.pgLegacy = pg;
+      legacy = this.sandbox.createStubInstance(LegacyDataSource);
+      legacy.connect.resolves();
+      this.pgLegacy = legacy;
     }
-    return pg;
+
+    return {
+      main,
+      legacy,
+      mapper: {
+        findLimitsTenDayAverage: this.sandbox.stub(),
+        saveLimitsResults: this.sandbox.stub(),
+      },
+    };
   }
 }

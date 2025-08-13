@@ -2,15 +2,15 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
+import type { Connection } from "@salesforce/core";
 import {
   BenchmarkOrgConnection,
   connectToSalesforceOrg,
-  OrgAuthInfo,
-} from './org/connection.js';
-import { getOrgContext, OrgContext } from './org/context.js';
+  type OrgAuthOptions,
+} from "./org/connection.js";
+import { getOrgContext, type OrgContext } from "./org/context.js";
 
-export interface OrgOptions {
+export interface BenchmarkOrgOptions {
   // use existing connection to create internal one
   connection?: Connection;
   username?: string;
@@ -26,7 +26,7 @@ export interface OrgOptions {
 }
 
 export class BenchmarkOrg {
-  protected options: OrgOptions = {};
+  protected options: BenchmarkOrgOptions = {};
   protected orgConnection?: BenchmarkOrgConnection;
   protected context?: OrgContext;
   protected namespaces?: string[];
@@ -38,7 +38,7 @@ export class BenchmarkOrg {
 
   get connection(): BenchmarkOrgConnection {
     if (!this.orgConnection) {
-      throw new Error('Org connection not yet established.');
+      throw new Error("Org connection not yet established.");
     }
     return this.orgConnection;
   }
@@ -46,7 +46,7 @@ export class BenchmarkOrg {
   /**
    * Sets connection from options or environment
    */
-  async connect(options: OrgOptions = {}): Promise<void> {
+  async connect(options: BenchmarkOrgOptions = {}): Promise<void> {
     if (this.orgConnection) return;
 
     this.options = options;
@@ -74,7 +74,7 @@ export class BenchmarkOrg {
     if (!this.namespaces) {
       this.namespaces =
         this.options.unmanagedNamespaces ||
-        process.env.BENCH_ORG_UNMANAGED_NAMESPACES?.split(',') ||
+        process.env.BENCH_ORG_UNMANAGED_NAMESPACES?.split(",") ||
         [];
     }
     return this.namespaces;
@@ -83,13 +83,20 @@ export class BenchmarkOrg {
   getNamespaceRegExp(): RegExp[] {
     if (!this.namespaceRegExp) {
       this.namespaceRegExp = this.getUnmanagedNamespaces().map(
-        e => new RegExp(e + '(__|.)', 'g')
+        e => new RegExp(e + "(__|.)", "g")
       );
     }
     return this.namespaceRegExp;
   }
 
-  protected loadAuth(): OrgAuthInfo | undefined {
+  removeUnmanagedNamespaces(text: string): string {
+    return this.getNamespaceRegExp().reduce<string>(
+      (str, regex) => str.replace(regex, ""),
+      text
+    );
+  }
+
+  protected loadAuth(): OrgAuthOptions | undefined {
     const { username, password, loginUrl, version } = this.options;
 
     const user = username || process.env.BENCH_ORG_USERNAME;

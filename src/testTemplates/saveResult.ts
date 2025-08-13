@@ -2,12 +2,12 @@
  * Copyright (c) 2019 Certinia Inc. All rights reserved.
  */
 
-import { apexService } from '../index.js';
-import {
-  TransactionTestTemplate,
+import Table from "cli-table";
+import { ApexBenchmarkService } from "../service/apex.js";
+import type {
   TestFlowOutput,
-} from './transactionTestTemplate.js';
-import Table from 'cli-table';
+  TransactionTestTemplate,
+} from "./transactionTestTemplate.js";
 
 /**
  * Retrieve peformance metrics from a tests execution and save them
@@ -22,23 +22,23 @@ export const saveResults = async (
     console.log(createTable(results));
   }
 
-  await apexService.save();
+  await ApexBenchmarkService.default.save();
 };
 
 function createTable(data: TestFlowOutput[]): string {
   return new Table({
     head: [
-      'Flow Name',
-      'Action',
-      'Duration (ms)',
-      'CPU time (ms)',
-      'DML rows',
-      'DML statements',
-      'Heap size (bytes)',
-      'Query rows',
-      'SOQL queries',
-      'Queueables',
-      'Futures',
+      "Flow Name",
+      "Action",
+      "Duration (ms)",
+      "CPU time (ms)",
+      "DML rows",
+      "DML statements",
+      "Heap size (bytes)",
+      "Query rows",
+      "SOQL queries",
+      "Queueables",
+      "Futures",
     ],
     rows: data.map(({ testStepDescription, result }) => [
       testStepDescription.flowName,

@@ -11,21 +11,21 @@ export interface ApexLocation {
 }
 
 export enum ApexNature {
-  Class = 'Class',
-  Interface = 'Interface',
-  Method = 'Method',
-  Enum = 'Enum',
-  Property = 'Property',
-  Field = 'Field',
-  Statement = 'Statement',
-  Expression = 'Expression',
-  MethodCall = 'MethodCall',
-  Assignment = 'Assignment',
-  Id = 'Id',
-  String = 'String',
-  Number = 'Number',
-  Boolean = 'Boolean',
-  Null = 'Null',
+  Class = "Class",
+  Interface = "Interface",
+  Method = "Method",
+  Enum = "Enum",
+  Property = "Property",
+  Field = "Field",
+  Statement = "Statement",
+  Expression = "Expression",
+  MethodCall = "MethodCall",
+  Assignment = "Assignment",
+  Id = "Id",
+  String = "String",
+  Number = "Number",
+  Boolean = "Boolean",
+  Null = "Null",
 }
 
 export const literalNatures = [
@@ -45,7 +45,7 @@ export interface ApexScriptNode {
   children?: AnyAnonNode[];
 }
 
-export interface AnonNodeWrapper extends Omit<ApexScriptNode, 'nature'> {
+export interface AnonNodeWrapper extends Omit<ApexScriptNode, "nature"> {
   children: AnyAnonNode[];
 }
 

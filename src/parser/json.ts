@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Ajv, JTDSchemaType, JTDParser } from 'ajv/dist/jtd.js';
+import { Ajv, type JTDParser, type JTDSchemaType } from "ajv/dist/jtd.js";
 
 const ajv = new Ajv();
 

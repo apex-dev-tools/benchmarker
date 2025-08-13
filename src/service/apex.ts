@@ -2,27 +2,36 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import {
+import type {
   AnonApexBenchmarkFactory,
   AnonApexBenchmarkResult,
-} from '../benchmark/anon.js';
-import { Benchmark, ErrorResult } from '../benchmark/base.js';
-import { LimitsBenchmarkOptions } from '../benchmark/limits.js';
-import { LimitsBenchmarkFactory } from '../benchmark/limits/factory.js';
-import { GovernorLimits, LimitsContext } from '../benchmark/limits/schemas.js';
+} from "../benchmark/anon.js";
+import { Benchmark, type ErrorResult } from "../benchmark/base.js";
+import type { LimitsBenchmarkOptions } from "../benchmark/limits.js";
+import { LimitsBenchmarkFactory } from "../benchmark/limits/factory.js";
+import type {
+  GovernorLimits,
+  LimitsContext,
+} from "../benchmark/limits/schemas.js";
 import {
   LimitsMetricProvider,
-  LimitsMetricProviderOptions,
-} from '../metrics/limits.js';
-import { DegLimitsMetric } from '../metrics/limits/deg.js';
-import { ApexScriptParserOptions } from '../parser/apex.js';
-import { RunContext, RunContextOptions } from '../state/context.js';
-import { RunStore } from '../state/store.js';
+  type LimitsMetric,
+  type LimitsMetricProviderOptions,
+} from "../metrics/limits.js";
+import type { Degradation } from "../metrics/limits/deg.js";
+import type { ApexScriptParserOptions } from "../parser/apex.js";
+import {
+  executeAnonymous,
+  type ExecuteAnonymousOptions,
+} from "../salesforce/execute.js";
+import type { ExecuteAnonymousResponse } from "../salesforce/soap/executeAnonymous.js";
+import { RunContext, type RunContextOptions } from "../state/context.js";
+import { RunStore } from "../state/store.js";
 import {
   AnonApexBenchmarker,
-  AnonApexBenchmarkerRequest,
-  AnonApexBenchmarkRun,
-} from './apex/runner.js';
+  type AnonApexBenchmarkerRequest,
+  type AnonApexBenchmarkRun,
+} from "./apex/runner.js";
 
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {
   limitsMetrics?: LimitsMetricProviderOptions;
@@ -30,7 +39,7 @@ export interface ApexBenchmarkServiceOptions extends RunContextOptions {
 }
 
 export interface LimitsMetrics {
-  deg?: DegLimitsMetric;
+  deg?: LimitsMetric<Degradation>;
 }
 
 export type LimitsBenchmarker = AnonApexBenchmarker<
@@ -53,6 +62,8 @@ export interface LimitsBenchmarkRun {
   errors: ErrorResult[];
 }
 
+let defaultService: ApexBenchmarkService | undefined;
+
 export class ApexBenchmarkService {
   protected setupCalled: boolean = false;
   protected limitsStore: RunStore<LimitsBenchmarkResult>;
@@ -65,6 +76,11 @@ export class ApexBenchmarkService {
       new LimitsBenchmarkFactory()
     );
     this.limitsMetrics = new LimitsMetricProvider();
+  }
+
+  static get default(): ApexBenchmarkService {
+    if (!defaultService) defaultService = new ApexBenchmarkService();
+    return defaultService;
   }
 
   /**
@@ -80,10 +96,7 @@ export class ApexBenchmarkService {
       await run.setupPgLegacy(options.pg);
     }
 
-    this.limitsMetrics.setup(
-      run.pgLegacy?.commonMapper || run.pg.commonMapper,
-      options.limitsMetrics
-    );
+    this.limitsMetrics.setup(options.limitsMetrics);
   }
 
   restore() {
@@ -150,16 +163,36 @@ export class ApexBenchmarkService {
   async save(): Promise<void> {
     const run = RunContext.current;
     const results = this.limitsStore.getItemsFromCursor();
+    const mappers = run.getCommonMappers();
 
-    if (results.length === 0 || !run.isPostgresAvailable()) return;
+    if (results.length === 0 || mappers.length === 0) return;
 
     const orgContext = await run.org.getContext();
 
-    await run.forPostgres(mapper =>
-      mapper.saveLimitsResults(run, orgContext, results)
-    );
+    for (const mapper of mappers) {
+      await mapper.saveLimitsResults(run, orgContext, results);
+    }
 
     this.limitsStore.moveCursor();
+  }
+
+  /**
+   * Execute Anonymous Apex on the current org, with namespaces replaced if
+   * enabled.
+   *
+   * Optionally enable and return debug logs.
+   */
+  async execute(
+    code: string,
+    options?: ExecuteAnonymousOptions
+  ): Promise<ExecuteAnonymousResponse> {
+    const ctx = await this.ensureSetup();
+
+    return executeAnonymous(
+      ctx.org.connection,
+      ctx.org.removeUnmanagedNamespaces(code),
+      options
+    );
   }
 
   private async ensureSetup(): Promise<RunContext> {

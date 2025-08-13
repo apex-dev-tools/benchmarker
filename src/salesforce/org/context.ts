@@ -2,20 +2,10 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
-import { executeAnonymous, extractAssertionData } from '../execute.js';
-import { NamedSchema } from '../../parser/json.js';
-import { infoApex } from '../../scripts/apex.js';
-
-export interface OrgInformation {
-  id: string;
-  instance: string;
-  edition: string;
-  isSandbox: boolean;
-  isTrial: boolean;
-  isMultiCurrency: boolean;
-  isLex: boolean;
-}
+import type { Connection } from "@salesforce/core";
+import type { NamedSchema } from "../../parser/json.js";
+import { infoApex } from "../../scripts/apex.js";
+import { executeAnonymous, extractAssertionData } from "../execute.js";
 
 export interface OrgRelease {
   label: string;
@@ -33,7 +23,14 @@ export interface OrgPackage {
   isBeta: boolean;
 }
 
-export interface OrgContext extends OrgInformation {
+export interface OrgContext {
+  id: string;
+  instance: string;
+  edition: string;
+  isSandbox: boolean;
+  isTrial: boolean;
+  isMultiCurrency: boolean;
+  isLex: boolean;
   release: OrgRelease;
   packages: OrgPackage[];
 }
@@ -55,17 +52,19 @@ interface InstalledSubscriberPackage {
   };
 }
 
-const orgInfoSchema: NamedSchema<OrgInformation> = {
-  name: 'orgInfo',
+type OrgInfo = Omit<OrgContext, "release" | "packages">;
+
+const orgInfoSchema: NamedSchema<OrgInfo> = {
+  name: "orgInfo",
   schema: {
     properties: {
-      id: { type: 'string' },
-      instance: { type: 'string' },
-      edition: { type: 'string' },
-      isSandbox: { type: 'boolean' },
-      isTrial: { type: 'boolean' },
-      isMultiCurrency: { type: 'boolean' },
-      isLex: { type: 'boolean' },
+      id: { type: "string" },
+      instance: { type: "string" },
+      edition: { type: "string" },
+      isSandbox: { type: "boolean" },
+      isTrial: { type: "boolean" },
+      isMultiCurrency: { type: "boolean" },
+      isLex: { type: "boolean" },
     },
   },
 };
@@ -90,7 +89,7 @@ async function getCurrentRelease(connection: Connection): Promise<OrgRelease> {
   // Non-array response indicates an error with instanceUrl
   if (!Array.isArray(res)) {
     throw new Error(
-      'Failed to retrieve org API versions, invalid connection domain.'
+      "Failed to retrieve org API versions, invalid connection domain."
     );
   }
 
@@ -101,17 +100,17 @@ async function getInstalledPackages(
   connection: Connection
 ): Promise<OrgPackage[]> {
   const res = await connection.tooling
-    .sobject('InstalledSubscriberPackage')
+    .sobject("InstalledSubscriberPackage")
     .select<InstalledSubscriberPackage>([
-      { SubscriberPackage: ['Id', 'Name', 'NamespacePrefix'] },
+      { SubscriberPackage: ["Id", "Name", "NamespacePrefix"] },
       {
         SubscriberPackageVersion: [
-          'Id',
-          'MajorVersion',
-          'MinorVersion',
-          'PatchVersion',
-          'IsBeta',
-          'BuildNumber',
+          "Id",
+          "MajorVersion",
+          "MinorVersion",
+          "PatchVersion",
+          "IsBeta",
+          "BuildNumber",
         ],
       },
     ])
@@ -127,7 +126,7 @@ function resolvePackageInformation({
   return {
     id: sp.Id,
     name: sp.Name,
-    namespace: sp.NamespacePrefix || '',
+    namespace: sp.NamespacePrefix || "",
     version: `${spv.MajorVersion || 0}.${spv.MinorVersion || 0}.${spv.PatchVersion || 0}`,
     versionId: spv.Id,
     buildNumber: spv.BuildNumber || 0,

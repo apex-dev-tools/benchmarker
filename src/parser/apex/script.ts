@@ -2,18 +2,18 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexFile } from '../apex.js';
+import type { ApexFile } from "../apex.js";
 import {
-  AnonExpression,
-  AnonLiteralBoolean,
-  AnonLiteralNumber,
-  AnonLiteralString,
-  AnonMethodCall,
-  AnonMethodParam,
-  AnonNodeWrapper,
-  AnyAnonNode,
+  type AnonExpression,
+  type AnonLiteralBoolean,
+  type AnonLiteralNumber,
+  type AnonLiteralString,
+  type AnonMethodCall,
+  type AnonMethodParam,
+  type AnonNodeWrapper,
+  type AnyAnonNode,
   ApexNature,
-} from './tree.js';
+} from "./tree.js";
 
 export interface Block<T extends AnyAnonNode> {
   node: T;
@@ -41,7 +41,7 @@ export class ApexScript {
   }
 
   static empty(): ApexScript {
-    return new ApexScript('', { children: [] });
+    return new ApexScript("", { children: [] });
   }
 
   getTextBetweenBlocks(start: number, stop: number = -1): string {
@@ -51,7 +51,7 @@ export class ApexScript {
     const stopIndex = stopBlock?.blockLocation?.stopIndex;
 
     if (startIndex == null || stopIndex == null) {
-      throw new Error('Failed to extract text from Apex script.');
+      throw new Error("Failed to extract text from Apex script.");
     }
     return this.getText(startIndex, stopIndex);
   }
@@ -162,8 +162,8 @@ export class ApexScript {
   getMethodParam<T extends AnonMethodParam>(
     call: AnonMethodCall,
     index: number,
-    type: T['nature']
-  ): T['value'] {
+    type: T["nature"]
+  ): T["value"] {
     const param = call.children.at(index);
     if (!param || param.nature !== type) {
       throw new Error(

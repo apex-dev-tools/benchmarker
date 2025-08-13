@@ -2,12 +2,12 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import ts from 'typescript';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import ts from "typescript";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-const source = ts.createSourceFile('', '', ts.ScriptTarget.ES2020);
+const source = ts.createSourceFile("", "", ts.ScriptTarget.ES2020);
 
 function createExport(name: string, content: string): string {
   // generates a `export const name: string = 'content';` statement
@@ -20,7 +20,7 @@ function createExport(name: string, content: string): string {
           ts.factory.createIdentifier(name),
           undefined,
           ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-          ts.factory.createStringLiteral(content, true)
+          ts.factory.createStringLiteral(content, false)
         ),
       ],
       ts.NodeFlags.Const
@@ -31,7 +31,7 @@ function createExport(name: string, content: string): string {
 }
 
 const dir = import.meta.dirname;
-const apexDir = path.join(dir, './apex');
+const apexDir = path.join(dir, "./apex");
 const formatRegex = /[\t\n]+/g;
 
 let contents = `/*
@@ -44,15 +44,15 @@ let contents = `/*
 
 for (const file of await fs.readdir(apexDir)) {
   const apex = await fs.readFile(path.join(apexDir, file), {
-    encoding: 'utf8',
+    encoding: "utf8",
   });
-  const name = file.split('.', 2).at(0)?.toLowerCase();
+  const name = file.split(".", 2).at(0)?.toLowerCase();
 
   if (name) {
-    contents += `\n${createExport(`${name}Apex`, apex.replaceAll(formatRegex, ' '))}\n`;
+    contents += `\n${createExport(`${name}Apex`, apex.replaceAll(formatRegex, " "))}\n`;
   }
 }
 
-await fs.writeFile(path.join(dir, '../src/scripts/apex.ts'), contents, {
-  flag: 'w',
+await fs.writeFile(path.join(dir, "../src/scripts/apex.ts"), contents, {
+  flag: "w",
 });

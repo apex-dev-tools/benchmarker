@@ -2,21 +2,9 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
-import { apexService } from '../index.js';
-import { BenchmarkOrgConnection as SalesforceConnection } from '../salesforce/org/connection.js';
-import { RunContext } from '../state/context.js';
-
-export interface GovernorMetricsResult {
-  timer: number;
-  cpuTime: number;
-  dmlRows: number;
-  dmlStatements: number;
-  heapSize: number;
-  queryRows: number;
-  soqlQueries: number;
-  queueableJobs: number;
-  futureCalls: number;
-}
+import type { BenchmarkOrgConnection as SalesforceConnection } from "../salesforce/org/connection.js";
+import { ApexBenchmarkService } from "../service/apex.js";
+import { RunContext } from "../state/context.js";
 
 /**
  * Test Template to execute anonymous Apex code from a file and extract the Governor Limits
@@ -90,9 +78,21 @@ export class AlertInfo {
   public thresholds: Thresholds;
 }
 
+export interface TestStepResult {
+  timer: number;
+  cpuTime: number;
+  dmlRows: number;
+  dmlStatements: number;
+  heapSize: number;
+  queryRows: number;
+  soqlQueries: number;
+  queueableJobs: number;
+  futureCalls: number;
+}
+
 export interface TestFlowOutput {
   testStepDescription: TestStepDescription;
-  result: GovernorMetricsResult;
+  result: TestStepResult;
   error?: string;
 }
 
@@ -126,7 +126,7 @@ export namespace TransactionProcess {
    */
   export const build = async (
     product: string,
-    testType: string = 'Transaction Process'
+    testType: string = "Transaction Process"
   ): Promise<TransactionTestTemplate> => {
     const processTestTemplate = new TransactionTestTemplate();
     processTestTemplate.product = product;
@@ -134,7 +134,7 @@ export namespace TransactionProcess {
     processTestTemplate.flowStepsResults = [];
     processTestTemplate.testType = testType;
 
-    await apexService.setup({
+    await ApexBenchmarkService.default.setup({
       global: {
         projectId: product,
       },

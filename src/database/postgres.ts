@@ -2,15 +2,14 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import pgstr from 'pg-connection-string';
-import { PostgresCommonDataMapper } from './interop.js';
+import pgstr from "pg-connection-string";
 
 export interface PostgresOptions {
   enable?: boolean;
   url?: string;
 }
 
-export interface DataSourceCredentials {
+export interface PgDataSourceCredentials {
   host: string;
   port: number;
   database: string;
@@ -21,13 +20,11 @@ export interface DataSourceCredentials {
 export abstract class PostgresDataSource {
   protected options: PostgresOptions = {};
 
-  abstract get isConnected(): boolean;
-
-  abstract get commonMapper(): PostgresCommonDataMapper | undefined;
+  abstract get isActive(): boolean;
 
   abstract connect(options?: PostgresOptions): Promise<void>;
 
-  protected resolveCredentials(): DataSourceCredentials | null {
+  protected resolveCredentials(): PgDataSourceCredentials | null {
     const url = this.options.url || process.env.BENCH_POSTGRES_URL;
 
     if (this.options.enable === false || url == null) {
@@ -41,7 +38,7 @@ export abstract class PostgresDataSource {
     }
 
     return {
-      host: host || 'localhost',
+      host: host || "localhost",
       port: port ? parseInt(port) : 5432,
       database,
       username: user,

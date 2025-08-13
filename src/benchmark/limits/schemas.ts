@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { LimitsThresholds } from '../../metrics/limits.js';
-import { NamedSchema } from '../../parser/json.js';
+import type { LimitsThresholds } from "../../metrics/limits.js";
+import type { NamedSchema } from "../../parser/json.js";
 
 // retrieved from anonymous
 export interface GovernorLimits {
@@ -21,31 +21,32 @@ export interface GovernorLimits {
 export interface LimitsContext {
   enableMetrics?: boolean;
   thresholds?: LimitsThresholds;
+  // union like `string | object` not supported by jtd schema
   data?: any;
 }
 
 export const limitsSchema: NamedSchema<GovernorLimits> = {
-  name: 'limits',
+  name: "limits",
   schema: {
     properties: {
-      duration: { type: 'int32' },
-      cpuTime: { type: 'int32' },
-      dmlRows: { type: 'int32' },
-      dmlStatements: { type: 'int32' },
-      heapSize: { type: 'int32' },
-      queryRows: { type: 'int32' },
-      soqlQueries: { type: 'int32' },
-      queueableJobs: { type: 'int32' },
-      futureCalls: { type: 'int32' },
+      duration: { type: "int32" },
+      cpuTime: { type: "int32" },
+      dmlRows: { type: "int32" },
+      dmlStatements: { type: "int32" },
+      heapSize: { type: "int32" },
+      queryRows: { type: "int32" },
+      soqlQueries: { type: "int32" },
+      queueableJobs: { type: "int32" },
+      futureCalls: { type: "int32" },
     },
   },
 };
 
 export const contextSchema: NamedSchema<LimitsContext> = {
-  name: 'limitsContext',
+  name: "limitsContext",
   schema: {
     optionalProperties: {
-      enableMetrics: { type: 'boolean' },
+      enableMetrics: { type: "boolean" },
       thresholds: {
         optionalProperties: limitsSchema.schema.properties,
       },

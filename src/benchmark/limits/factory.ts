@@ -4,13 +4,16 @@
 
 import {
   ApexScript,
-  MethodCallDictionary,
-  MethodCallGroups,
-} from '../../parser/apex/script.js';
-import { AnonApexBenchmark, AnonApexBenchmarkFactory } from '../anon.js';
-import { LimitsAnonApexBenchmark, LimitsBenchmarkOptions } from '../limits.js';
-import { LegacyAnonApexBenchmark } from './legacy.js';
-import { GovernorLimits, LimitsContext } from './schemas.js';
+  type MethodCallDictionary,
+  type MethodCallGroups,
+} from "../../parser/apex/script.js";
+import type { AnonApexBenchmark, AnonApexBenchmarkFactory } from "../anon.js";
+import {
+  LimitsAnonApexBenchmark,
+  type LimitsBenchmarkOptions,
+} from "../limits.js";
+import { LegacyAnonApexBenchmark } from "../legacy.js";
+import type { GovernorLimits, LimitsContext } from "./schemas.js";
 
 export interface LimitsAction {
   name: string;
@@ -33,18 +36,18 @@ export interface LimitsScriptFormat {
 }
 
 const limitMethodNames = [
-  'benchmark',
-  'describe',
-  'start',
-  'stop',
-  'done',
+  "benchmark",
+  "describe",
+  "start",
+  "stop",
+  "done",
 ] as const;
 type LimitMethods = MethodCallDictionary<typeof limitMethodNames>;
 
 const legacyMethodNames = [
-  'getCurrentGovernorLimits',
-  'getLimitsDiff',
-  'assert',
+  "getCurrentGovernorLimits",
+  "getLimitsDiff",
+  "assert",
 ] as const;
 type LegacyMethods = MethodCallDictionary<typeof legacyMethodNames>;
 
@@ -128,12 +131,12 @@ export class LimitsBenchmarkFactory
 
     if (!benchmark.length != !describe.length) {
       throw new Error(
-        'Must have benchmark() with one or more describe() calls.'
+        "Must have benchmark() with one or more describe() calls."
       );
     }
 
     return {
-      name: '',
+      name: "",
       actions: [],
     };
   }
@@ -153,7 +156,7 @@ export class LimitsBenchmarkFactory
       const nextStop = this.script.getBlockInRange(stop, index, nextBlock);
 
       if (!nextStart || !nextStop) {
-        throw new Error('Missing start()/stop() in describe block.');
+        throw new Error("Missing start()/stop() in describe block.");
       }
 
       const nextDone = this.script.getBlockInRange(done, index, nextBlock);
@@ -181,7 +184,7 @@ export class LimitsBenchmarkFactory
 
     if (!startLen != !stopLen || startLen > 1 || stopLen > 1) {
       throw new Error(
-        'Can only have one start() and stop() call when not using describe().'
+        "Can only have one start() and stop() call when not using describe()."
       );
     } else if (startLen) {
       this.script.assertMethodCallOrder(start[0], stop[0]);
@@ -189,7 +192,7 @@ export class LimitsBenchmarkFactory
 
     return [
       {
-        name: '',
+        name: "",
         needsWrapping: !startLen,
         needsEnding: !done.length,
       },
@@ -219,7 +222,7 @@ export class LimitsBenchmarkFactory
 
   private resetFormat(): void {
     this.format = {
-      name: '',
+      name: "",
       actions: [],
     };
   }
@@ -228,10 +231,10 @@ export class LimitsBenchmarkFactory
     // set id / context override for single action files or code
     if (this.options.id) {
       if (this.script.file && !this.script.file.exclusive) {
-        throw new Error('Cannot set id option for multiple files.');
+        throw new Error("Cannot set id option for multiple files.");
       }
       if (this.format.actions.length > 1) {
-        throw new Error('Cannot set id option for multiple actions.');
+        throw new Error("Cannot set id option for multiple actions.");
       }
 
       const { id, context } = this.options;
@@ -246,11 +249,11 @@ export class LimitsBenchmarkFactory
   private validate(): void {
     const { name, actions } = this.format;
     if (name.length === 0) {
-      throw new Error('Benchmark name is not set in the script or options.');
+      throw new Error("Benchmark name is not set in the script or options.");
     }
     actions.forEach(({ name }) => {
       if (name.length === 0) {
-        throw new Error('Action name is not set in the script or options.');
+        throw new Error("Action name is not set in the script or options.");
       }
     });
   }

@@ -2,11 +2,11 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { NamedSchema, parseType } from '../../parser/json.js';
-import { JTDSchemaType } from 'ajv/dist/core.js';
-import { LimitsMetric } from '../limits.js';
+import type { JTDSchemaType } from "ajv/dist/core.js";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { type NamedSchema, parseType } from "../../parser/json.js";
+import type { LimitsMetric } from "../limits.js";
 
 export interface ThresholdOffsetRange {
   rangeStart: number;
@@ -20,14 +20,14 @@ export type RangeCollection = Partial<
 
 const offsetSchemaType: JTDSchemaType<ThresholdOffsetRange> = {
   properties: {
-    rangeStart: { type: 'int32' },
-    rangeEnd: { type: 'int32' },
-    thresholdOffset: { type: 'int32' },
+    rangeStart: { type: "int32" },
+    rangeEnd: { type: "int32" },
+    thresholdOffset: { type: "int32" },
   },
 };
 
 const rangeSchema: NamedSchema<RangeCollection> = {
-  name: 'customRanges',
+  name: "customRanges",
   schema: {
     optionalProperties: {
       duration: { elements: offsetSchemaType },
@@ -95,7 +95,7 @@ export async function getRangeCollection(
 ): Promise<RangeCollection> {
   if (filePath) {
     const rangeData = await fs.readFile(path.resolve(filePath), {
-      encoding: 'utf8',
+      encoding: "utf8",
     });
     return { ...defaultRanges, ...parseType(rangeData, rangeSchema) };
   }

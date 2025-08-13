@@ -2,14 +2,14 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { ApexParserFactory } from '@apexdevtools/apex-parser';
-import { expect } from 'chai';
-import { ApexScriptVisitor } from '../../src/parser/apex/visitor.js';
-import { ApexScript } from '../../src/parser/apex/script.js';
-import { AnonNodeWrapper } from '../../src/parser/apex/tree.js';
+import { ApexParserFactory } from "@apexdevtools/apex-parser";
+import { expect } from "chai";
+import { ApexScript } from "../../src/parser/apex/script.js";
+import type { AnonNodeWrapper } from "../../src/parser/apex/tree.js";
+import { ApexScriptVisitor } from "../../src/parser/apex/visitor.js";
 
-describe('parser/apex', () => {
-  it('should parse apex script', () => {
+describe("parser/apex", () => {
+  it("should parse apex script", () => {
     const source = `
     benchmark('name');
 

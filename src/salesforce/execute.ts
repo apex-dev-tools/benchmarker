@@ -2,13 +2,13 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
+import type { Connection } from "@salesforce/core";
+import { type NamedSchema, parseType } from "../parser/json.js";
+import type { DebugLogInfo } from "./soap/debug.js";
 import {
-  ExecuteAnonymousResponse,
+  type ExecuteAnonymousResponse,
   executeAnonymousSoap,
-} from './soap/executeAnonymous.js';
-import { DebugLogInfo } from './soap/debug.js';
-import { NamedSchema, parseType } from '../parser/json.js';
+} from "./soap/executeAnonymous.js";
 
 export interface ExecuteAnonymousOptions {
   /**
@@ -44,7 +44,7 @@ export function extractAssertionData<T>(
   const error = assertAnonymousError(response);
 
   if (!error) {
-    throw new Error('Apex did not assert false with data.');
+    throw new Error("Apex did not assert false with data.");
   } else if (!response.compiled) {
     throw error;
   }

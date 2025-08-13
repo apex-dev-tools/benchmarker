@@ -3,47 +3,47 @@
  */
 
 import {
-  AnonymousBlockMemberContext,
+  type AnonymousBlockMemberContext,
   ApexParser,
   ApexParserBaseVisitor,
-  ApexParserRuleContext,
-  ApexParserVisitor,
-  ApexParseTree,
-  ApexTerminalNode,
-  ApexToken,
+  type ApexParserRuleContext,
+  type ApexParserVisitor,
+  type ApexParseTree,
+  type ApexTerminalNode,
+  type ApexToken,
   AssignExpressionContext,
-  ClassDeclarationContext,
+  type ClassDeclarationContext,
   DotExpressionContext,
-  EnumDeclarationContext,
-  ExpressionContext,
-  FieldDeclarationContext,
-  IdContext,
-  InterfaceDeclarationContext,
-  LiteralContext,
-  MethodCallContext,
+  type EnumDeclarationContext,
+  type ExpressionContext,
+  type FieldDeclarationContext,
+  type IdContext,
+  type InterfaceDeclarationContext,
+  type LiteralContext,
+  type MethodCallContext,
   MethodCallExpressionContext,
-  MethodDeclarationContext,
+  type MethodDeclarationContext,
   PrimaryExpressionContext,
-  PropertyDeclarationContext,
-  StatementContext,
-} from '@apexdevtools/apex-parser';
+  type PropertyDeclarationContext,
+  type StatementContext,
+} from "@apexdevtools/apex-parser";
 import {
-  AnonAssignment,
-  AnonExpression,
-  AnonField,
-  AnonId,
-  AnonLiteral,
-  AnonMember,
-  AnonMemberNature,
-  AnonMethodCall,
-  AnonMethodParam,
-  AnonNodeWrapper,
-  AnyAnonNode,
-  ApexLocation,
+  type AnonAssignment,
+  type AnonExpression,
+  type AnonField,
+  type AnonId,
+  type AnonLiteral,
+  type AnonMember,
+  type AnonMemberNature,
+  type AnonMethodCall,
+  type AnonMethodParam,
+  type AnonNodeWrapper,
+  type AnyAnonNode,
+  type ApexLocation,
   ApexNature,
-  ApexScriptNode,
+  type ApexScriptNode,
   methodParamNatures,
-} from './tree.js';
+} from "./tree.js";
 
 // Method is on all rules
 type VisitableApex = ApexParseTree & {
@@ -246,7 +246,7 @@ export class ApexScriptVisitor
         return {
           nature: ApexNature.Boolean,
           location,
-          value: token.text.toLowerCase() === 'true',
+          value: token.text.toLowerCase() === "true",
         };
       default:
         return {
@@ -310,7 +310,7 @@ export class ApexScriptVisitor
     // This will be without whitespace / hidden tokens like comments
     // more predictable for ids, references to be matched against
     // use location indexes to get original text from source later
-    return ctx ? ctx.getText() : '';
+    return ctx ? ctx.getText() : "";
   }
 
   private getLocation(ctx: ApexParserRuleContext): ApexLocation {
@@ -329,7 +329,7 @@ export class ApexScriptVisitor
   private toNumber(text: string): number {
     // convert to Number - remove last L/D char if present on longs/double
     const suffix = text.slice(-1).toUpperCase();
-    const num = suffix === 'D' || suffix === 'L' ? text.slice(0, -1) : text;
+    const num = suffix === "D" || suffix === "L" ? text.slice(0, -1) : text;
     return Number(num);
   }
 

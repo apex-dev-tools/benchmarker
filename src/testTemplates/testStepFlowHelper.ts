@@ -2,18 +2,21 @@
  * Copyright (c) 2019 FinancialForce.com, inc. All rights reserved.
  */
 
+import type { Connection } from "@salesforce/core";
+import type { LimitsContext } from "../benchmark/limits/schemas.js";
 import {
+  ApexBenchmarkService,
+  type LimitsBenchmarkRequest,
+  type LimitsBenchmarkRun,
+} from "../service/apex.js";
+import type {
+  AlertInfo,
   FlowStep,
-  TestStepDescription,
   TestFlowOptions,
   TestFlowOutput,
-  AlertInfo,
+  TestStepDescription,
   TokenReplacement,
-} from './transactionTestTemplate.js';
-import { apexService } from '../index.js';
-import { Connection } from '@salesforce/core';
-import { LimitsContext } from '../benchmark/limits/schemas.js';
-import { LimitsBenchmarkRequest, LimitsBenchmarkRun } from '../service/apex.js';
+} from "./transactionTestTemplate.js";
 
 /**
  * Returns an async function that executes anonymous Apex code from a file and extract the Governor Limits
@@ -64,7 +67,7 @@ function toFlowStep(
     const { flowName, action, additionalData } = testStepDescription;
     console.log(`Executing '${flowName} - ${action}' performance test...`);
 
-    const result = await apexService.benchmarkLimits({
+    const result = await ApexBenchmarkService.default.benchmarkLimits({
       ...request,
       options: {
         id: {

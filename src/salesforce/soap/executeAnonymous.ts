@@ -2,27 +2,27 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import { Connection } from '@salesforce/core';
-import { postSoapRequest } from './request.js';
-import { escapeXml } from '../../parser/xml.js';
-import { apexDebugHeader, DebugLogInfo } from './debug.js';
+import type { Connection } from "@salesforce/core";
+import { escapeXml } from "../../parser/xml.js";
+import { apexDebugHeader, type DebugLogInfo } from "./debug.js";
+import { postSoapRequest } from "./request.js";
 
 export interface ExecuteAnonymousResponse {
-  column: string;
+  column: number;
   compiled: boolean;
   compileProblem: string;
   exceptionMessage: string;
   exceptionStackTrace: string;
-  line: string;
+  line: number;
   success: boolean;
   debugLog?: string;
 }
 
 export interface ExecuteAnonymousSoapResponse {
-  'soapenv:Envelope': {
+  "soapenv:Envelope": {
     $: object;
-    'soapenv:Header'?: { DebuggingInfo?: { debugLog: string } };
-    'soapenv:Body': {
+    "soapenv:Header"?: { DebuggingInfo?: { debugLog: string } };
+    "soapenv:Body": {
       executeAnonymousResponse: {
         result: {
           column: string;
@@ -50,7 +50,7 @@ export async function executeAnonymousSoap(
 ): Promise<ExecuteAnonymousResponse> {
   const soapResponse = await postSoapRequest<ExecuteAnonymousSoapResponse>(
     connection,
-    'executeAnonymous',
+    "executeAnonymous",
     (accessToken: string) =>
       formatExecuteAnonymousRequest(accessToken, apexCode, debugTraces)
   );
@@ -62,9 +62,11 @@ function formatExecuteAnonymousResponse(
   soapResponse: ExecuteAnonymousSoapResponse
 ): ExecuteAnonymousResponse {
   const result =
-    soapResponse['soapenv:Envelope']['soapenv:Body'].executeAnonymousResponse
+    soapResponse["soapenv:Envelope"]["soapenv:Body"].executeAnonymousResponse
       .result;
   const {
+    line,
+    column,
     compiled,
     success,
     compileProblem,
@@ -76,15 +78,17 @@ function formatExecuteAnonymousResponse(
   // error strings will be $nil objects if not set
   return {
     ...result,
-    compiled: compiled === 'true',
-    success: success === 'true',
-    compileProblem: typeof compileProblem === 'object' ? '' : compileProblem,
+    line: Number(line),
+    column: Number(column),
+    compiled: compiled === "true",
+    success: success === "true",
+    compileProblem: typeof compileProblem === "object" ? "" : compileProblem,
     exceptionMessage:
-      typeof exceptionMessage === 'object' ? '' : exceptionMessage,
+      typeof exceptionMessage === "object" ? "" : exceptionMessage,
     exceptionStackTrace:
-      typeof exceptionStackTrace === 'object' ? '' : exceptionStackTrace,
+      typeof exceptionStackTrace === "object" ? "" : exceptionStackTrace,
     debugLog:
-      soapResponse['soapenv:Envelope']['soapenv:Header']?.DebuggingInfo
+      soapResponse["soapenv:Envelope"]["soapenv:Header"]?.DebuggingInfo
         ?.debugLog,
   };
 }
