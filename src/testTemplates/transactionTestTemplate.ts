@@ -13,32 +13,34 @@ export class TransactionTestTemplate {
   /**
    * Product name
    */
-  public product: string;
+  public product!: string;
 
   /**
    * Object to handle the connection to a Salesforce Org
    */
-  public connection: SalesforceConnection;
+  public connection!: SalesforceConnection;
 
   /**
    * Describes what kind of action the test is going to perfrom
+   *
+   * @deprecated this property is never used by benchmarker.
    */
-  public action: string;
+  public action!: string;
 
   /**
    * Test steps to be executed
    */
-  public flowSteps: FlowStep[];
+  public flowSteps!: FlowStep[];
 
   /**
    * Results of the test steps executions
    */
-  public flowStepsResults: TestFlowOutput[];
+  public flowStepsResults!: TestFlowOutput[];
 
   /**
    * Defines the use case the test is going to cover. For example Form Load, Document Line Process, Document Process
    */
-  public testType: string;
+  public testType!: string;
 }
 
 /**
@@ -55,12 +57,12 @@ export interface TestStepDescription {
  * Thresholds that needs to be defined using this class: cpuTimeThreshold, dmlStatementThreshold, dmlRowThreshold, heapSizeThreshold, queryRowsThreshold, soqlQueriesThreshold
  */
 export class Thresholds {
-  cpuTimeThreshold: number;
-  dmlStatementThreshold: number;
-  dmlRowThreshold: number;
-  heapSizeThreshold: number;
-  queryRowsThreshold: number;
-  soqlQueriesThreshold: number;
+  cpuTimeThreshold?: number;
+  dmlStatementThreshold?: number;
+  dmlRowThreshold?: number;
+  heapSizeThreshold?: number;
+  queryRowsThreshold?: number;
+  soqlQueriesThreshold?: number;
 }
 
 /**
@@ -70,12 +72,12 @@ export class AlertInfo {
   /**
    * Describes whether alerts need to be stored or not at the test level
    */
-  public storeAlerts: boolean;
+  public storeAlerts?: boolean;
 
   /**
    * Describes the custom thresholds at test level. If you define these then thresholds will be read from here instead of the JSON
    */
-  public thresholds: Thresholds;
+  public thresholds?: Thresholds;
 }
 
 export interface TestStepResult {

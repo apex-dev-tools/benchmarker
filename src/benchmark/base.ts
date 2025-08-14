@@ -23,6 +23,7 @@ export abstract class Benchmark<R extends BenchmarkResult> {
 
   constructor() {
     this._results = [];
+    this._errors = [];
   }
 
   abstract run(): Promise<void>;

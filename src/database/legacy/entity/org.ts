@@ -8,29 +8,29 @@ import { PerformanceBaseEntity } from "./base.js";
 @Entity({ name: "org_info" })
 export class OrgInfo extends PerformanceBaseEntity {
   @Column("text", { nullable: true, name: "org_id" })
-  public orgId: string;
+  public orgId!: string;
 
   @Column("text", { nullable: true, name: "release_version" })
-  public releaseVersion: string;
+  public releaseVersion!: string;
 
   @Column("text", { nullable: true, name: "api_version" })
-  public apiVersion: string;
+  public apiVersion!: string;
 
   @Column("text", { nullable: true, name: "org_type" })
-  public orgType: string;
+  public orgType!: string;
 
   @Column("text", { nullable: true })
-  public instance: string;
+  public instance!: string;
 
   @Column("boolean", { nullable: true, name: "is_lex" })
-  public isLex: boolean;
+  public isLex!: boolean;
 
   @Column("boolean", { nullable: true, name: "is_multicurrency" })
-  public isMulticurrency: boolean;
+  public isMulticurrency!: boolean;
 
   @Column("boolean", { nullable: true, name: "is_sandbox" })
-  public isSandbox: boolean;
+  public isSandbox!: boolean;
 
   @Column("boolean", { nullable: true, name: "is_trial" })
-  public isTrial: boolean;
+  public isTrial!: boolean;
 }
