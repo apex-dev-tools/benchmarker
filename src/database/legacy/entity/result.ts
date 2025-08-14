@@ -8,65 +8,65 @@ import { PerformanceBaseEntity } from "./base.js";
 @Entity({ name: "test_result" })
 export class TestResult extends PerformanceBaseEntity {
   @Column("integer", { nullable: true })
-  public duration: number;
+  public duration!: number;
 
   @Column("integer", { nullable: true, name: "target_value" })
-  public targetValue: number;
+  public targetValue!: number;
 
   @Column("text", { nullable: true })
-  public action: string;
+  public action!: string;
 
   @Column("text", { nullable: true, name: "flow_name" })
-  public flowName: string;
+  public flowName!: string;
 
   @Column("text", { nullable: true, name: "error" })
-  public error: string;
+  public error!: string;
 
   @Column("text", { nullable: true })
-  public product: string;
+  public product!: string;
 
   @Column("boolean", { nullable: true, name: "incognito_browser" })
-  public incognitoBrowser: boolean;
+  public incognitoBrowser!: boolean;
 
   @Column("integer", { nullable: true, name: "speed_index" })
-  public lighthouseSpeedIndex: number;
+  public lighthouseSpeedIndex!: number;
 
   @Column("integer", { nullable: true, name: "time_to_interactive" })
-  public lighthouseTimeToInteractive: number;
+  public lighthouseTimeToInteractive!: number;
 
   @Column("integer", { nullable: true, name: "dlp_lines" })
-  public dlpLines: number;
+  public dlpLines!: number;
 
   @Column("integer", { nullable: true, name: "dp_documents" })
-  public dpDocuments: number;
+  public dpDocuments!: number;
 
   @Column("text", { nullable: true, name: "test_type" })
-  public testType: string;
+  public testType!: string;
 
   @Column("integer", { nullable: true, name: "cpu_time" })
-  public cpuTime: number;
+  public cpuTime!: number;
 
   @Column("integer", { nullable: true, name: "dml_rows" })
-  public dmlRows: number;
+  public dmlRows!: number;
 
   @Column("integer", { nullable: true, name: "dml_statements" })
-  public dmlStatements: number;
+  public dmlStatements!: number;
 
   @Column("integer", { nullable: true, name: "heap_size" })
-  public heapSize: number;
+  public heapSize!: number;
 
   @Column("integer", { nullable: true, name: "query_rows" })
-  public queryRows: number;
+  public queryRows!: number;
 
   @Column("integer", { nullable: true, name: "soql_queries" })
-  public soqlQueries: number;
+  public soqlQueries!: number;
 
   @Column("integer", { nullable: true, name: "queueable_jobs" })
-  public queueableJobs: number;
+  public queueableJobs!: number;
 
   @Column("integer", { nullable: true, name: "future_calls" })
-  public futureCalls: number;
+  public futureCalls!: number;
 
   @Column("text", { nullable: true, name: "source_ref" })
-  public sourceRef: string;
+  public sourceRef!: string;
 }

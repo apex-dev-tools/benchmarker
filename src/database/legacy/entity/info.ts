@@ -8,14 +8,14 @@ import { PerformanceBaseEntity } from "./base.js";
 @Entity({ name: "test_info" })
 export class TestInfo extends PerformanceBaseEntity {
   @Column("text", { nullable: true, name: "action" })
-  public action: string;
+  public action!: string;
 
   @Column("text", { nullable: true, name: "flow_name" })
-  public flowName: string;
+  public flowName!: string;
 
   @Column("text", { nullable: true, name: "product" })
-  public product: string;
+  public product!: string;
 
   @Column("text", { nullable: true, name: "additional_data" })
-  public additionalData: string;
+  public additionalData!: string;
 }

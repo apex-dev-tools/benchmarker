@@ -65,7 +65,7 @@ export class LimitsBenchmarkFactory
 
   constructor() {
     this.script = ApexScript.empty();
-    this.resetFormat();
+    this.format = this.emptyFormat();
     this.options = {};
   }
 
@@ -75,7 +75,7 @@ export class LimitsBenchmarkFactory
   ): AnonApexBenchmark<GovernorLimits, LimitsContext> {
     this.script = script;
     this.options = options;
-    this.resetFormat();
+    this.format = this.emptyFormat();
 
     const methods = script.getMethodCalls();
     // coincidental that all legacy methods are ref based
@@ -220,8 +220,8 @@ export class LimitsBenchmarkFactory
     );
   }
 
-  private resetFormat(): void {
-    this.format = {
+  private emptyFormat(): LimitsScriptFormat {
+    return {
       name: "",
       actions: [],
     };
