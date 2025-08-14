@@ -53,6 +53,7 @@
     "@types/mocha": "^10.0.10",
     "@types/mock-fs": "^4.13.4",
     "@types/node": "^22.17.1",
+    "@types/pg": "^8.15.5",
     "@types/sinon": "^17.0.4",
     "@types/sinon-chai": "^4.0.0",
     "chai": "^5.2.1",
