@@ -20,7 +20,6 @@
     "doc:generate": "typedoc --out docs/api ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "husky",
-    "postinstall": "patch-package",
     "postversion": "npm run doc:generate",
     "test": "nyc mocha --timeout 10000 'test/**/*.test.*'",
     "test:only": "nyc mocha --timeout 10000",
@@ -34,7 +33,7 @@
     "CHANGELOG.md"
   ],
   "dependencies": {
-    "@apexdevtools/apex-parser": "^5.0.0-beta.4",
+    "@apexdevtools/apex-parser": "^5.0.0-beta.5",
     "@jsforce/jsforce-node": "^3.10.3",
     "@salesforce/core": "^8.19.1",
     "ajv": "^8.17.1",
@@ -64,7 +63,6 @@
     "mocha": "^11.7.1",
     "mock-fs": "^5.5.0",
     "nyc": "^17.1.0",
-    "patch-package": "^8.0.0",
     "prettier": "^3.6.2",
     "public-ip": "^7.0.1",
     "sinon": "^21.0.0",
