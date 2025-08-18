@@ -5,14 +5,12 @@
 import {
   ApexScript,
   type MethodCallDictionary,
-  type MethodCallGroups,
 } from "../../parser/apex/script.js";
 import type { AnonApexBenchmark, AnonApexBenchmarkFactory } from "../anon.js";
 import {
   LimitsAnonApexBenchmark,
   type LimitsBenchmarkOptions,
 } from "../limits.js";
-import { LegacyAnonApexBenchmark } from "../legacy.js";
 import type { GovernorLimits, LimitsContext } from "./schemas.js";
 
 export interface LimitsAction {
@@ -44,13 +42,6 @@ const limitMethodNames = [
 ] as const;
 type LimitMethods = MethodCallDictionary<typeof limitMethodNames>;
 
-const legacyMethodNames = [
-  "getCurrentGovernorLimits",
-  "getLimitsDiff",
-  "assert",
-] as const;
-type LegacyMethods = MethodCallDictionary<typeof legacyMethodNames>;
-
 export class LimitsBenchmarkFactory
   implements
     AnonApexBenchmarkFactory<
@@ -75,33 +66,10 @@ export class LimitsBenchmarkFactory
   ): AnonApexBenchmark<GovernorLimits, LimitsContext> {
     this.script = script;
     this.options = options;
-    this.format = this.emptyFormat();
 
     const methods = script.getMethodCalls();
-    // coincidental that all legacy methods are ref based
-    // and new ones are not
-    const legacyCalls = script.toMethodDictionary(
-      methods.external,
-      legacyMethodNames
-    );
-
-    if (this.isLegacy(legacyCalls)) {
-      this.applyOptions();
-      this.validate();
-      return new LegacyAnonApexBenchmark(
-        this.script,
-        this.format,
-        this.options
-      );
-    }
-
-    this.loadFormat(methods);
-    return new LimitsAnonApexBenchmark(this.script, this.format, this.options);
-  }
-
-  private loadFormat(groups: MethodCallGroups): void {
     const calls = this.script.toMethodDictionary(
-      groups.local,
+      methods.local,
       limitMethodNames
     );
 
@@ -112,6 +80,8 @@ export class LimitsBenchmarkFactory
 
     this.applyOptions();
     this.validate();
+
+    return new LimitsAnonApexBenchmark(this.script, this.format, this.options);
   }
 
   private loadDefinition(calls: LimitMethods): LimitsScriptFormat {
@@ -135,10 +105,7 @@ export class LimitsBenchmarkFactory
       );
     }
 
-    return {
-      name: "",
-      actions: [],
-    };
+    return this.emptyFormat();
   }
 
   private loadActions(calls: LimitMethods): LimitsAction[] {
@@ -197,27 +164,6 @@ export class LimitsBenchmarkFactory
         needsEnding: !done.length,
       },
     ];
-  }
-
-  private isLegacy(calls: LegacyMethods): boolean {
-    return (
-      // has at least one limit diff step
-      calls.getCurrentGovernorLimits.length >= 2 &&
-      calls.getLimitsDiff.length >= 1 &&
-      // and asserts the data
-      calls.assert.some(({ node }) => {
-        try {
-          return (
-            // asserts false
-            !this.script.getBooleanParam(node, 0) &&
-            // and contains the expected serialize chars
-            this.script.getExpressionParam(node, 1).includes("'-_'")
-          );
-        } catch {
-          return false; // ignore unexpected param type errors
-        }
-      })
-    );
   }
 
   private emptyFormat(): LimitsScriptFormat {

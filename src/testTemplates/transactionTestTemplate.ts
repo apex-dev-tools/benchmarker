@@ -3,8 +3,8 @@
  */
 
 import type { BenchmarkOrgConnection as SalesforceConnection } from "../salesforce/org/connection.js";
-import { ApexBenchmarkService } from "../service/apex.js";
 import { RunContext } from "../state/context.js";
+import { LegacyBenchmarkService } from "./service.js";
 
 /**
  * Test Template to execute anonymous Apex code from a file and extract the Governor Limits
@@ -136,7 +136,7 @@ export namespace TransactionProcess {
     processTestTemplate.flowStepsResults = [];
     processTestTemplate.testType = testType;
 
-    await ApexBenchmarkService.default.setup({
+    await LegacyBenchmarkService.default.setup({
       global: {
         projectId: product,
       },

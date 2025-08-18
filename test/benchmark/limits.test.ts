@@ -102,8 +102,6 @@ describe("benchmark/limits", () => {
     const req = requestStub.firstCall.args[0] as HttpRequest;
     expect(req.body).to.include("class GovernorLimits");
     expect(req.body).to.include(escapeXml(code));
-    expect(req.body).not.to.include("void start()");
-    expect(req.body).not.to.include("start();");
     expect(bench.errors()).to.be.empty;
     expect(bench.results()).to.eql([
       {
