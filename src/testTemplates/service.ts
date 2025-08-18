@@ -99,7 +99,7 @@ export class LegacyBenchmarkFactory
 
   private validateScript(script: ApexScript): void {
     const methods = script.getMethodCalls();
-    const calls: LegacyMethods = script.toMethodDictionary(
+    const calls = script.toMethodDictionary(
       methods.external,
       legacyMethodNames
     );
@@ -114,8 +114,15 @@ export class LegacyBenchmarkFactory
         "Script must have a call to: (new GovernorLimits()).getLimitsDiff(initialLimits, finalLimits)"
       );
     }
+    if (!this.assertsData(script, calls)) {
+      throw new Error(
+        "Script must assert false with data: System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-')"
+      );
+    }
+  }
 
-    const assertsData = calls.assert.some(({ node }) => {
+  private assertsData(script: ApexScript, methods: LegacyMethods): boolean {
+    return methods.assert.some(({ node }) => {
       try {
         return (
           // asserts false
@@ -128,12 +135,6 @@ export class LegacyBenchmarkFactory
         return false;
       }
     });
-
-    if (!assertsData) {
-      throw new Error(
-        "Script must assert false with data: System.assert(false, '-_' + JSON.serialize(limitsDiff) + '_-')"
-      );
-    }
   }
 }
 
