@@ -8,7 +8,7 @@ import limitsCmd from "./apex/limits.js";
 export default function (yargs: Argv): CommandModule {
   return {
     command: "apex",
-    describe: "commands for benchmarking apex",
+    describe: "Commands for benchmarking apex",
     builder(argv: Argv): Argv {
       return argv.command([limitsCmd(argv)]);
     },

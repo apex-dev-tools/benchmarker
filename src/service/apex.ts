@@ -92,7 +92,9 @@ export class ApexBenchmarkService {
 
     await run.setup(options);
 
-    if (options.useLegacySchema ?? Boolean(process.env.BENCH_POSTGRES_LEGACY)) {
+    // include legacy schema mapping by default
+    const legacyEnv = process.env.BENCH_POSTGRES_LEGACY;
+    if (options.useLegacySchema ?? (Boolean(legacyEnv) || legacyEnv == null)) {
       await run.setupPgLegacy(options.pg);
     }
 
