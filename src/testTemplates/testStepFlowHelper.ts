@@ -5,10 +5,10 @@
 import type { Connection } from "@salesforce/core";
 import type { LimitsContext } from "../benchmark/limits/schemas.js";
 import {
-  ApexBenchmarkService,
   type LimitsBenchmarkRequest,
   type LimitsBenchmarkRun,
 } from "../service/apex.js";
+import { LegacyBenchmarkService } from "./service.js";
 import type {
   AlertInfo,
   FlowStep,
@@ -67,7 +67,7 @@ function toFlowStep(
     const { flowName, action, additionalData } = testStepDescription;
     console.log(`Executing '${flowName} - ${action}' performance test...`);
 
-    const result = await ApexBenchmarkService.default.benchmarkLimits({
+    const result = await LegacyBenchmarkService.default.benchmarkLimits({
       ...request,
       options: {
         id: {

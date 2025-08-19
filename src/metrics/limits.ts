@@ -11,7 +11,7 @@ import { getRangeCollection, type RangeCollection } from "./limits/ranges.js";
 
 export interface LimitsMetricProviderOptions {
   enable?: boolean;
-  limitRangesPath?: string;
+  rangesFile?: string;
 }
 
 export type LimitsMetric<T = number> = Record<keyof GovernorLimits, T>;
@@ -22,12 +22,12 @@ export type LimitsAvg = Partial<LimitsMetric> & BenchmarkId;
 
 export class LimitsMetricProvider {
   protected globalEnabled: boolean = false;
-  protected rangesPath?: string;
+  protected rangesFile?: string;
   protected ranges?: RangeCollection;
 
   setup(options: LimitsMetricProviderOptions = {}) {
     this.globalEnabled = options.enable ?? Boolean(process.env.BENCH_METRICS);
-    this.rangesPath = options.limitRangesPath;
+    this.rangesFile = options.rangesFile;
   }
 
   async calculate(
@@ -71,7 +71,7 @@ export class LimitsMetricProvider {
   private async getRanges(): Promise<RangeCollection> {
     if (!this.ranges) {
       this.ranges = await getRangeCollection(
-        this.rangesPath || process.env.BENCH_METRICS_LIMIT_RANGES
+        this.rangesFile || process.env.BENCH_METRICS_LIMIT_RANGES
       );
     }
     return this.ranges;
