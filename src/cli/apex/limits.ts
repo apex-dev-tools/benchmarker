@@ -13,10 +13,9 @@ export interface RunLimitsArgs {
 
   "env-file"?: string;
   "project-id"?: string;
-  "source-id"?: string;
 
-  "no-postgres"?: boolean;
-  "no-legacy-postgres"?: boolean;
+  save?: boolean;
+  "save-legacy"?: boolean;
 }
 
 export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
@@ -38,22 +37,19 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             string: true,
             requiresArg: true,
           },
-          "source-id": {
-            describe: "Set optional source code version id",
-            string: true,
-            requiresArg: true,
-          },
           "env-file": {
             describe:
               "Load environment variables file, does not override existing keys",
             alias: "e",
             string: true,
             requiresArg: true,
+            defaultDescription: ".env",
           },
           metrics: {
             describe: "Enable degradation metrics for governor limits",
             alias: "m",
             boolean: true,
+            defaultDescription: "false",
           },
           "limit-ranges-file": {
             describe:
@@ -61,13 +57,17 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             string: true,
             requiresArg: true,
           },
-          "no-postgres": {
-            describe: "Disable all postgres connections",
+          save: {
+            describe:
+              "Save results to configured data sources, use --no-save to disable",
             boolean: true,
+            defaultDescription: "true",
           },
-          "no-legacy-postgres": {
-            describe: "Disable legacy postgres schema output",
+          "save-legacy": {
+            describe:
+              "Save results to legacy source, use --no-save-legacy to disable",
             boolean: true,
+            defaultDescription: "true",
           },
         });
     },
@@ -79,27 +79,24 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
   const service = ApexBenchmarkService.default;
   const paths: string[] = args.paths || [process.cwd()];
 
-  // TODO --save / --no-save
-  // --legacy-schema
-
   await service.setup({
     global: {
       envFile: args.envFile,
       projectId: args.projectId,
-      sourceId: args.sourceId,
     },
+    pg: {
+      enable: args.save,
+    },
+    useLegacySchema: args.saveLegacy,
     limitsMetrics: {
       enable: args.metrics,
       rangesFile: args.limitRangesFile,
     },
-    pg: {
-      enable: args.noPostgres == true ? false : undefined,
-    },
-    useLegacySchema: args.noLegacyPostgres == true ? false : undefined,
   });
 
   await service.benchmarkLimits({ paths });
-  await service.save();
+
+  if (args.save == null || args.save) await service.save();
 
   // TODO log run JSON to stdout
 }
