@@ -94,7 +94,13 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
     },
   });
 
-  await service.benchmarkLimits({ paths });
+  const run = await service.benchmarkLimits({ paths });
+
+  run.errors.forEach(({ benchmark, error }) => {
+    let prefix = "";
+    if (benchmark) prefix = `${benchmark.name} - ${benchmark.action}:`;
+    console.error(`${prefix}${error.message}`);
+  });
 
   if (args.save == null || args.save) await service.save();
 
