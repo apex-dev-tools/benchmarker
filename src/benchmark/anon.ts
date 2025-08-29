@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
+import { ProgressReporter } from "../display/progress.js";
 import type { ApexScript } from "../parser/apex/script.js";
 import type { NamedSchema } from "../parser/json.js";
 import {
@@ -43,11 +44,17 @@ export abstract class AnonApexBenchmark<T, C> extends Benchmark<
 > {
   name: string;
   protected dataSchema: NamedSchema<T>;
+  protected reporter: ProgressReporter;
 
-  constructor(name: string, dataSchema: NamedSchema<T>) {
+  constructor(
+    name: string,
+    dataSchema: NamedSchema<T>,
+    reporter?: ProgressReporter
+  ) {
     super();
     this.name = name;
     this.dataSchema = dataSchema;
+    this.reporter = reporter ?? new ProgressReporter();
   }
 
   protected abstract nextTransaction(): Generator<AnonApexTransaction<C>>;
@@ -56,9 +63,14 @@ export abstract class AnonApexBenchmark<T, C> extends Benchmark<
    * Execute Anonymous Apex transactions and accumulate results and errors.
    */
   async run(): Promise<void> {
+    const progress = this.progress();
     this.reset();
 
+    progress.begin(this.name);
+
     for (const transaction of this.nextTransaction()) {
+      progress.beginAction(transaction.action);
+
       try {
         const response = await executeAnonymous(
           RunContext.current.org.connection,
@@ -68,16 +80,24 @@ export abstract class AnonApexBenchmark<T, C> extends Benchmark<
 
         if (transaction.hasAssertionResult) {
           // expecting a result to retrieve from the exec response
-          this._results.push(this.toBenchmarkResult(response, transaction));
+          const result = this.toBenchmarkResult(response, transaction);
+          this._results.push(result);
+          progress.pass(result);
         } else {
           // for other general transactions, treat errors normally
           const err = assertAnonymousError(response);
           if (err) throw err;
         }
       } catch (e) {
-        this._errors.push(this.toErrorResult(e, transaction));
+        const error = this.toErrorResult(e, transaction);
+        this._errors.push(error);
+        progress.fail(error);
       }
+
+      progress.endAction();
     }
+
+    progress.end();
   }
 
   protected toBenchmarkResult(
@@ -102,5 +122,9 @@ export abstract class AnonApexBenchmark<T, C> extends Benchmark<
       name: this.name,
       action: transaction.action,
     });
+  }
+
+  protected progress(): ProgressReporter {
+    return this.reporter;
   }
 }

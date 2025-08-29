@@ -128,15 +128,7 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
     },
   });
 
-  const run = await service.benchmarkLimits({ paths });
-
-  run.errors.forEach(({ benchmark, error }) => {
-    let prefix = "";
-    if (benchmark) prefix = `${benchmark.name} - ${benchmark.action}:`;
-    console.error(`${prefix}${error.message}`);
-  });
+  await service.benchmarkLimits({ paths, options: { progress: true } });
 
   if (args.save == null || args.save) await service.save();
-
-  // TODO log run JSON to stdout
 }
