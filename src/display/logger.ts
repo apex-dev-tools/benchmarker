@@ -2,55 +2,83 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
-import pino from "pino";
+import path from "node:path";
+import pino, { type TransportTargetOptions } from "pino";
+import type { PrettyOptions } from "pino-pretty";
 
 export enum LogLevel {
   ERROR = "error",
   WARN = "warn",
   INFO = "info",
   DEBUG = "debug",
+  NONE = "silent",
 }
 
-let logger: Logger | undefined;
+export interface LoggerOptions {
+  file?: string;
+  display?: boolean;
+  level?: LogLevel;
+}
+
+type TransportTarget = TransportTargetOptions<Record<string, any>>;
+
+let logger: pino.Logger | undefined;
 
 export class Logger {
-  private log: pino.Logger;
+  private constructor() {}
 
-  private constructor() {
-    this.log = pino({
-      transport: {
-        targets: [{ target: "pino-pretty", options: { destination: 2 } }],
-      },
-      base: null,
-    });
+  static setup(opts: LoggerOptions): void {
+    const targets: TransportTarget[] = [];
+
+    if (opts.file) {
+      targets.push({
+        target: "pino/file",
+        options: { destination: path.resolve(opts.file) },
+      });
+    }
+    if (opts.display) {
+      targets.push({ target: "pino-pretty", options: prettyOptions() });
+    }
+
+    if (targets.length) {
+      logger = pino({
+        transport: {
+          targets,
+        },
+        base: null,
+      });
+    }
   }
 
-  static get instance(): Logger {
-    if (!logger) logger = new Logger();
-    return logger;
+  static reset(): void {
+    logger = undefined;
   }
 
-  error(msg: string, obj?: object): void {
-    obj ? this.log.error(obj, msg) : this.log.error(msg);
+  static error(msg: string, obj?: object): void {
+    logger?.error(obj, msg);
   }
 
-  warn(msg: string, obj?: object): void {
-    obj ? this.log.warn(obj, msg) : this.log.warn(msg);
+  static warn(msg: string, obj?: object): void {
+    logger?.warn(obj, msg);
   }
 
-  info(msg: string, obj?: object): void {
-    obj ? this.log.info(obj, msg) : this.log.info(msg);
+  static info(msg: string, obj?: object): void {
+    logger?.info(obj, msg);
   }
 
-  debug(msg: string, obj?: object): void {
-    obj ? this.log.debug(obj, msg) : this.log.debug(msg);
+  static debug(msg: string, obj?: object): void {
+    logger?.debug(obj, msg);
   }
 
-  setLogLevel(level: LogLevel): void {
-    this.log.level = level;
+  static setLogLevel(level: LogLevel): void {
+    if (logger) {
+      logger.level = level;
+    }
   }
+}
 
-  disable(): void {
-    this.log.level = "silent";
-  }
+function prettyOptions(): PrettyOptions {
+  return {
+    destination: 2, // stderr
+  };
 }

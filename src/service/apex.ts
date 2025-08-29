@@ -13,6 +13,7 @@ import type {
   GovernorLimits,
   LimitsContext,
 } from "../benchmark/limits/schemas.js";
+import { Logger } from "../display/logger.js";
 import {
   LimitsMetricProvider,
   type LimitsMetric,
@@ -20,6 +21,7 @@ import {
 } from "../metrics/limits.js";
 import type { Degradation } from "../metrics/limits/deg.js";
 import type { ApexScriptParserOptions } from "../parser/apex.js";
+import { ApexScriptError } from "../parser/apex/error.js";
 import {
   executeAnonymous,
   type ExecuteAnonymousOptions,
@@ -142,8 +144,14 @@ export class ApexBenchmarkService {
     request: LimitsBenchmarkRequest
   ): Promise<LimitsBenchmarkRun> {
     await this.ensureSetup();
+
+    Logger.info("Benchmark requested.", request);
+
     const run = await this.limitsBenchmarker.runBenchmark(request);
-    return this.postProcessResults(run);
+    const postRun = await this.postProcessResults(run);
+
+    this.reportErrors(postRun.errors);
+    return postRun;
   }
 
   /**
@@ -171,6 +179,7 @@ export class ApexBenchmarkService {
 
     const orgContext = await run.org.getContext();
 
+    Logger.info(`Saving ${results.length} results to connected datasources.`);
     for (const mapper of mappers) {
       await mapper.saveLimitsResults(run, orgContext, results);
     }
@@ -215,5 +224,16 @@ export class ApexBenchmarkService {
       input.errors.push(Benchmark.coerceError(e));
       return input;
     }
+  }
+
+  private reportErrors(errors: ErrorResult[]): void {
+    errors.forEach(({ benchmark, error }) => {
+      const id = benchmark ? ` '${benchmark.name} - ${benchmark.action}'` : "";
+      if (error instanceof ApexScriptError) {
+        Logger.error(`Apex script error: ${error.message}`, error);
+      } else {
+        Logger.error(`Failed benchmark${id}: ${error.message}`, error);
+      }
+    });
   }
 }

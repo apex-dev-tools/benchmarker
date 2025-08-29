@@ -4,6 +4,7 @@
 
 import type { CommandModule, Argv, ArgumentsCamelCase } from "yargs";
 import { ApexBenchmarkService } from "../../service/apex.js";
+import { Logger, LogLevel } from "../../display/logger.js";
 
 export interface RunLimitsArgs {
   paths?: string[];
@@ -16,6 +17,10 @@ export interface RunLimitsArgs {
 
   save?: boolean;
   "save-legacy"?: boolean;
+
+  "log-file"?: string;
+  "log-level"?: LogLevel;
+  verbose?: boolean;
 }
 
 export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
@@ -69,6 +74,29 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             boolean: true,
             defaultDescription: "true",
           },
+          "log-file": {
+            describe: "Enable debug logging to text file",
+            string: true,
+            requiresArg: true,
+            defaultDescription: "disabled",
+          },
+          "log-level": {
+            describe: "Set level of debug logging",
+            string: true,
+            choices: [
+              LogLevel.ERROR,
+              LogLevel.WARN,
+              LogLevel.INFO,
+              LogLevel.DEBUG,
+            ],
+            default: LogLevel.WARN,
+            requiresArg: true,
+          },
+          verbose: {
+            describe: "Enable debug logging to console",
+            boolean: true,
+            defaultDescription: "false",
+          },
         });
     },
     handler,
@@ -78,6 +106,12 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
 async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
   const service = ApexBenchmarkService.default;
   const paths: string[] = args.paths || [process.cwd()];
+
+  Logger.setup({
+    file: args.logFile,
+    display: args.verbose,
+    level: args.logLevel,
+  });
 
   await service.setup({
     global: {

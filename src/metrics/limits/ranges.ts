@@ -7,6 +7,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { type NamedSchema, parseType } from "../../parser/json.js";
 import type { LimitsMetric } from "../limits.js";
+import { Logger } from "../../display/logger.js";
 
 export interface ThresholdOffsetRange {
   rangeStart: number;
@@ -94,11 +95,16 @@ export async function getRangeCollection(
   filePath?: string
 ): Promise<RangeCollection> {
   if (filePath) {
-    const rangeData = await fs.readFile(path.resolve(filePath), {
+    const file = path.resolve(filePath);
+    Logger.info(`Loading limit ranges from file: ${file}.`);
+
+    const rangeData = await fs.readFile(file, {
       encoding: "utf8",
     });
+
     return { ...defaultRanges, ...parseType(rangeData, rangeSchema) };
   }
 
+  Logger.info("Loading default limit ranges.");
   return defaultRanges;
 }
