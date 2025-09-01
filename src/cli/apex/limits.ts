@@ -104,14 +104,14 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
 }
 
 async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
-  const service = ApexBenchmarkService.default;
-  const paths: string[] = args.paths || [process.cwd()];
-
   Logger.setup({
     file: args.logFile,
     display: args.verbose,
     level: args.logLevel,
   });
+
+  const service = ApexBenchmarkService.default;
+  const paths: string[] = args.paths || [process.cwd()];
 
   await service.setup({
     global: {
@@ -130,5 +130,5 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
 
   await service.benchmarkLimits({ paths, options: { progress: true } });
 
-  if (args.save == null || args.save) await service.save();
+  if (args.save == null || args.save) await service.saveLimits();
 }

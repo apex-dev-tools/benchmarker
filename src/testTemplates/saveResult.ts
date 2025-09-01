@@ -22,7 +22,7 @@ export const saveResults = async (
     console.log(createTable(results));
   }
 
-  await LegacyBenchmarkService.default.save();
+  await LegacyBenchmarkService.default.saveLimits();
 };
 
 function createTable(data: TestFlowOutput[]): string {
