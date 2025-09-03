@@ -65,7 +65,7 @@ export class ApexErrorReporter extends ErrorReporter {
 
       if (error.sample) {
         this.err();
-        this.err(chalk.grey("Source:"));
+        this.err(chalk.grey("Source line:"));
         this.err(chalk.grey(error.sample.sourceLine));
       }
     } else {

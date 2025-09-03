@@ -128,7 +128,12 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
     },
   });
 
-  await service.benchmarkLimits({ paths, options: { progress: true } });
+  const run = await service.benchmarkLimits({
+    paths,
+    options: { progress: true },
+  });
 
   if (args.save == null || args.save) await service.saveLimits();
+
+  service.reportLimits(run.benchmarks);
 }

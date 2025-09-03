@@ -42,7 +42,6 @@ import {
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {
   limitsMetrics?: LimitsMetricProviderOptions;
   limitsReporter?: LimitsReporterOptions;
-  automaticReporting?: boolean;
   useLegacySchema?: boolean;
 }
 
@@ -74,7 +73,6 @@ let defaultService: ApexBenchmarkService | undefined;
 
 export class ApexBenchmarkService {
   protected setupCalled: boolean = false;
-  protected automaticReporting: boolean = true;
   protected limitsStore: RunStore<LimitsBenchmarkResult>;
   protected limitsBenchmarker: LimitsBenchmarker;
   protected limitsMetrics: LimitsMetricProvider;
@@ -113,10 +111,6 @@ export class ApexBenchmarkService {
 
     this.limitsMetrics.setup(options.limitsMetrics);
     this.limitsReporter.setup(options.limitsReporter);
-
-    if (options.automaticReporting != null) {
-      this.automaticReporting = options.automaticReporting;
-    }
   }
 
   restore() {
@@ -169,10 +163,6 @@ export class ApexBenchmarkService {
     this.limitsStore.addItems(benchmarks);
     this.errorReporter.run(errors);
 
-    if (this.automaticReporting) {
-      this.reportLimits(benchmarks);
-    }
-
     return { benchmarks, errors };
   }
 
@@ -199,8 +189,7 @@ export class ApexBenchmarkService {
   }
 
   /**
-   * Display limits results according to defined reporter options. This
-   * is run during benchmarks unless `automaticReporting` is disabled.
+   * Display limits results according to defined reporter options.
    */
   reportLimits(results?: LimitsBenchmarkResult[]): void {
     this.limitsReporter.run(results ? results : this.limitsStore.getItems());
