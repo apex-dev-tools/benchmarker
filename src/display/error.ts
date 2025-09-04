@@ -16,12 +16,10 @@ export class ErrorReporter {
     const count = errors.length;
     if (count === 0) return;
 
-    if (count > 1) {
-      this.err();
-      this.err(
-        `  ${symbols.error} ${chalk.red(`${errors.length} errors during run:`)}`
-      );
-    }
+    const msg =
+      count > 1 ? `${errors.length} errors during run:` : "Error during run:";
+    this.err();
+    this.err(`  ${symbols.error} ${chalk.red(msg)}`);
 
     errors.forEach((err, idx) => this.report(err, idx));
 

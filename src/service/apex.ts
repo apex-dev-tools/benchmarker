@@ -13,7 +13,7 @@ import type {
   GovernorLimits,
   LimitsContext,
 } from "../benchmark/limits/schemas.js";
-import { ErrorReporter } from "../display/error.js";
+import { ApexErrorReporter } from "../display/error.js";
 import {
   LimitsReporter,
   type LimitsReporterOptions,
@@ -77,7 +77,7 @@ export class ApexBenchmarkService {
   protected limitsBenchmarker: LimitsBenchmarker;
   protected limitsMetrics: LimitsMetricProvider;
   protected limitsReporter: LimitsReporter;
-  protected errorReporter: ErrorReporter;
+  protected errorReporter: ApexErrorReporter;
 
   constructor() {
     this.limitsStore = new RunStore();
@@ -86,7 +86,7 @@ export class ApexBenchmarkService {
     );
     this.limitsMetrics = new LimitsMetricProvider();
     this.limitsReporter = new LimitsReporter();
-    this.errorReporter = new ErrorReporter();
+    this.errorReporter = new ApexErrorReporter();
   }
 
   static get default(): ApexBenchmarkService {

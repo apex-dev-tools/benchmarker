@@ -8,6 +8,7 @@ import chalk from "chalk";
 import { getBorderCharacters, table } from "table";
 import type { LimitsBenchmarkResult } from "../service/apex.js";
 import { reportDeg, type Degradation } from "../metrics/limits/deg.js";
+import type { GovernorLimits } from "../benchmark/limits/schemas.js";
 
 export enum LimitsReportType {
   TABLE = "table",
@@ -16,21 +17,42 @@ export enum LimitsReportType {
 
 export interface LimitsReporterOptions {
   reportType?: LimitsReportType;
-  jsonFilePath?: string;
+  outputFile?: string;
 }
 
-const headings: string[] = [
-  "Action",
-  "Duration (ms)",
-  "CPU Time (ms)",
-  "DML Rows",
-  "DML Stmts",
-  "Heap (bytes)",
-  "Query Rows",
-  "SOQL Queries",
-  "Queueables",
-  "Futures",
+type LimitsKey = keyof GovernorLimits;
+
+interface LimitsTable {
+  maxActionLen: number;
+  rows: string[][];
+  cols: LimitsKey[];
+}
+
+// defines column order matching headings
+// data object iterations unreliable
+const limitsKeys: (keyof GovernorLimits)[] = [
+  "duration",
+  "cpuTime",
+  "dmlRows",
+  "dmlStatements",
+  "heapSize",
+  "queryRows",
+  "soqlQueries",
+  "queueableJobs",
+  "futureCalls",
 ];
+
+const limitsHeadings: Record<keyof GovernorLimits, string> = {
+  duration: "Duration (ms)",
+  cpuTime: "CPU Time (ms)",
+  dmlRows: "DML Rows",
+  dmlStatements: "DML Stmts",
+  heapSize: "Heap (bytes)",
+  queryRows: "Query Rows",
+  soqlQueries: "SOQL Queries",
+  queueableJobs: "Queueables",
+  futureCalls: "Futures",
+};
 
 export class LimitsReporter {
   protected out = console.log;
@@ -55,55 +77,110 @@ export class LimitsReporter {
   }
 
   private displayTable(results: LimitsBenchmarkResult[]): void {
-    const tables = results.reduce<Record<string, string[][]>>(
-      (tableDict, result) => {
-        const tbl = tableDict[result.name] ?? [];
-        tbl.push(this.createTableRow(result));
-        tableDict[result.name] = tbl;
-        return tableDict;
-      },
-      {}
+    const tables = this.createTablesByName(results);
+    const entries = Object.entries(tables);
+
+    this.out(
+      chalk.cyan(
+        `Completed ${entries.length} benchmark(s) with ${results.length} result(s).`
+      )
     );
 
-    Object.entries(tables).forEach(([name, rows]) => {
+    entries.forEach(([name, tbl]) => {
+      const header = [chalk.italic(name), ...tbl.cols.map(_ => "")];
+      const headings = [
+        "Action",
+        ...tbl.cols.map(c => chalk.bold(limitsHeadings[c] ?? "")),
+      ];
+
       this.out();
       this.out(
-        table([[name], headings, ...rows], {
+        table([header, headings, ...tbl.rows], {
           border: getBorderCharacters("norc"),
-          columns: { 0: { wrapWord: true } },
-          spanningCells: [{ col: 0, row: 0, colSpan: 10 }],
+          columns: {
+            // wrapWord causes crash when enabled without width
+            0: tbl.maxActionLen > 40 ? { width: 40, wrapWord: true } : {},
+          },
+          spanningCells: [{ col: 0, row: 0, colSpan: headings.length }],
         })
       );
     });
+
+    this.out();
   }
 
-  private createTableRow(result: LimitsBenchmarkResult): string[] {
+  private createTablesByName(
+    results: LimitsBenchmarkResult[]
+  ): Record<string, LimitsTable> {
+    const colsDict = this.identifyNonEmptyCols(results);
+
+    return results.reduce<Record<string, LimitsTable>>((tableDict, result) => {
+      const tbl = tableDict[result.name] ?? {
+        cols: this.createColumnOrder(colsDict[result.name]),
+        rows: [],
+        maxActionLen: 0,
+      };
+      tbl.rows.push(this.createTableRow(result, tbl.cols));
+      tbl.maxActionLen = Math.max(tbl.maxActionLen, result.action.length);
+
+      tableDict[result.name] = tbl;
+      return tableDict;
+    }, {});
+  }
+
+  private identifyNonEmptyCols(
+    results: LimitsBenchmarkResult[]
+  ): Record<string, Set<string>> {
+    return results.reduce<Record<string, Set<string>>>((keysDict, result) => {
+      // always have atleast one data col
+      const keys = keysDict[result.name] ?? new Set("duration");
+
+      Object.entries(result.data).forEach(
+        ([key, value]: [string, number]) => value > 0 && keys.add(key)
+      );
+
+      keysDict[result.name] = keys;
+      return keysDict;
+    }, {});
+  }
+
+  private createColumnOrder(enabledSet?: Set<string>): string[] {
+    return enabledSet ? limitsKeys.filter(c => enabledSet.has(c)) : limitsKeys;
+  }
+
+  private createTableRow(
+    result: LimitsBenchmarkResult,
+    colKeys: string[]
+  ): string[] {
     const degDict: Partial<Record<string, Degradation>> = result.deg ?? {};
-    const row = [result.action];
+    const cellDict = Object.fromEntries(
+      Object.entries(result.data).map(([key, value]: [string, number]) => {
+        let cell = `${value}`;
+        if (value > 0) {
+          // deg existence implies at least one entry is non-zero
+          const deg = degDict[key];
+          if (deg) {
+            const degVal = reportDeg(deg);
+            cell = `${value}${degVal > 0 ? chalk.red(` (+${degVal})`) : ""}`;
+          }
+        }
 
-    Object.entries(result.data).forEach(([key, value]: [string, number]) => {
-      // deg existence implies at least one entry is non-zero
-      const deg = degDict[key];
-      let cell = `${value}`;
-      if (deg) {
-        const degVal = reportDeg(deg);
-        cell = `${value}${degVal > 0 ? chalk.red(` (+${degVal})`) : ""}`;
-      }
+        return [key, cell];
+      })
+    );
 
-      row.push(cell);
-    });
-
-    return row;
+    return [result.action, ...colKeys.map(key => cellDict[key] ?? "")];
   }
 
   private displayJson(results: LimitsBenchmarkResult[]): void {
     const content = JSON.stringify(results, undefined, 2);
 
-    if (this.options.jsonFilePath) {
-      this.writeFile(this.options.jsonFilePath, content);
+    if (this.options.outputFile) {
+      this.writeFile(this.options.outputFile, content);
     } else {
       this.out();
       this.out(content);
+      this.out();
     }
   }
 

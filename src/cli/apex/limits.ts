@@ -5,6 +5,7 @@
 import type { CommandModule, Argv, ArgumentsCamelCase } from "yargs";
 import { ApexBenchmarkService } from "../../service/apex.js";
 import { Logger, LogLevel } from "../../display/logger.js";
+import { LimitsReportType } from "../../display/limits.js";
 
 export interface RunLimitsArgs {
   paths?: string[];
@@ -21,6 +22,9 @@ export interface RunLimitsArgs {
   "log-file"?: string;
   "log-level"?: LogLevel;
   verbose?: boolean;
+
+  reporter?: LimitsReportType;
+  "output-file"?: string;
 }
 
 export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
@@ -64,21 +68,20 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
           },
           save: {
             describe:
-              "Save results to configured data sources, use --no-save to disable",
+              "Save results to configured external data sources, use --no-save to disable",
             boolean: true,
             defaultDescription: "true",
           },
           "save-legacy": {
             describe:
-              "Save results to legacy source, use --no-save-legacy to disable",
+              "Save results to legacy data source, use --no-save-legacy to disable",
             boolean: true,
             defaultDescription: "true",
           },
           "log-file": {
-            describe: "Enable debug logging to text file",
+            describe: "Enable debug logging to given file",
             string: true,
             requiresArg: true,
-            defaultDescription: "disabled",
           },
           "log-level": {
             describe: "Set level of debug logging",
@@ -96,6 +99,19 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             describe: "Enable debug logging to console",
             boolean: true,
             defaultDescription: "false",
+          },
+          reporter: {
+            describe: "Select reporter used for displaying results",
+            string: true,
+            choices: [LimitsReportType.TABLE, LimitsReportType.JSON],
+            default: LimitsReportType.TABLE,
+            requiresArg: true,
+          },
+          "output-file": {
+            alias: "f",
+            describe: "Print results to file, if supported by reporter",
+            string: true,
+            requiresArg: true,
           },
         });
     },
@@ -125,6 +141,10 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
     limitsMetrics: {
       enable: args.metrics,
       rangesFile: args.limitRangesFile,
+    },
+    limitsReporter: {
+      reportType: args.reporter,
+      outputFile: args.outputFile,
     },
   });
 
