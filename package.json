@@ -20,6 +20,7 @@
     "build:clean": "rm -rf dist",
     "compile": "tsc",
     "compile:apex": "tsx ./scripts/inlineApex.ts",
+    "dev": "npm r -g @apexdevtools/benchmarker && npm link",
     "doc:generate": "typedoc --out docs/api ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "husky",
