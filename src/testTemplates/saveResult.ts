@@ -17,5 +17,7 @@ export const saveResults = async (
   processTestTemplate: TransactionTestTemplate,
   results: TestFlowOutput[]
 ) => {
-  await LegacyBenchmarkService.default.saveLimits();
+  const service = LegacyBenchmarkService.default;
+  const savedResults = await service.saveLimits();
+  service.reportLimits(savedResults);
 };

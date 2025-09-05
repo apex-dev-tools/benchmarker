@@ -65,7 +65,6 @@ function toFlowStep(
 ): FlowStep {
   return async alertInfo => {
     const { flowName, action, additionalData } = testStepDescription;
-    console.log(`Executing '${flowName} - ${action}' performance test...`);
 
     const result = await LegacyBenchmarkService.default.benchmarkLimits({
       ...request,
@@ -116,9 +115,6 @@ function toTestFlowOutput(
   const lastError = result.errors && result.errors.at(-1);
   if (lastError) {
     const { error } = lastError;
-    console.log(
-      `Failure during '${flowName} - ${action}' process execution: ${error.message}`
-    );
     throw error;
   }
 

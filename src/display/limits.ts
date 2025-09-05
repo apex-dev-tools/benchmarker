@@ -80,9 +80,10 @@ export class LimitsReporter {
     const tables = this.createTablesByName(results);
     const entries = Object.entries(tables);
 
+    this.out();
     this.out(
       chalk.cyan(
-        `Completed ${entries.length} benchmark(s) with ${results.length} result(s).`
+        `  Completed ${entries.length} benchmark(s) with ${results.length} result(s).`
       )
     );
 
