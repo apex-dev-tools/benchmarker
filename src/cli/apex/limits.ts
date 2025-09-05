@@ -10,11 +10,14 @@ import { LimitsReportType } from "../../display/limits.js";
 export interface RunLimitsArgs {
   paths?: string[];
 
+  "project-id"?: string;
+  "env-file"?: string;
+
+  reporter?: LimitsReportType;
+  "output-file"?: string;
+
   metrics?: boolean;
   "limit-ranges-file"?: string;
-
-  "env-file"?: string;
-  "project-id"?: string;
 
   save?: boolean;
   "save-legacy"?: boolean;
@@ -22,9 +25,6 @@ export interface RunLimitsArgs {
   "log-file"?: string;
   "log-level"?: LogLevel;
   verbose?: boolean;
-
-  reporter?: LimitsReportType;
-  "output-file"?: string;
 }
 
 export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
@@ -53,6 +53,19 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             string: true,
             requiresArg: true,
             defaultDescription: ".env",
+          },
+          reporter: {
+            describe: "Select reporter used for displaying results",
+            string: true,
+            choices: [LimitsReportType.TABLE, LimitsReportType.JSON],
+            default: LimitsReportType.TABLE,
+            requiresArg: true,
+          },
+          "output-file": {
+            alias: "f",
+            describe: "Print results to file, if supported by reporter",
+            string: true,
+            requiresArg: true,
           },
           metrics: {
             describe: "Enable degradation metrics for governor limits",
@@ -99,19 +112,6 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             describe: "Enable debug logging to console",
             boolean: true,
             defaultDescription: "false",
-          },
-          reporter: {
-            describe: "Select reporter used for displaying results",
-            string: true,
-            choices: [LimitsReportType.TABLE, LimitsReportType.JSON],
-            default: LimitsReportType.TABLE,
-            requiresArg: true,
-          },
-          "output-file": {
-            alias: "f",
-            describe: "Print results to file, if supported by reporter",
-            string: true,
-            requiresArg: true,
           },
         });
     },
