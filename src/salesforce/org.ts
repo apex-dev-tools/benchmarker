@@ -9,6 +9,7 @@ import {
   type OrgAuthOptions,
 } from "./org/connection.js";
 import { getOrgContext, type OrgContext } from "./org/context.js";
+import { Logger } from "../display/logger.js";
 
 export interface BenchmarkOrgOptions {
   // use existing connection to create internal one
@@ -53,18 +54,26 @@ export class BenchmarkOrg {
     const auth = this.loadAuth();
 
     if (options.connection) {
-      (await BenchmarkOrgConnection.create({
+      Logger.info("Using existing org connection from options.");
+      this.orgConnection = (await BenchmarkOrgConnection.create({
         authInfo: options.connection.getAuthInfo(),
       })) as BenchmarkOrgConnection;
+    } else if (auth) {
+      Logger.info(`Logging in to Salesforce org as user: ${auth.username}.`);
+      this.orgConnection = await connectToSalesforceOrg(auth);
     }
 
-    if (auth) {
-      this.orgConnection = await connectToSalesforceOrg(auth);
+    if (this.orgConnection) {
+      const { instanceUrl, version } = this.orgConnection;
+      Logger.info(
+        `Connected to Salesforce org, instance: ${instanceUrl} | version: ${version}.`
+      );
     }
   }
 
   async getContext(): Promise<OrgContext> {
     if (!this.context) {
+      Logger.info("Querying org context information.");
       this.context = await getOrgContext(this.connection);
     }
     return this.context;

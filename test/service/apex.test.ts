@@ -190,7 +190,7 @@ describe("service/apex", () => {
     const res = await service.benchmarkFileLimits("readme.md");
 
     expect(res.errors).to.not.be.empty;
-    expect(res.errors[0].error.message).to.include('not an ".apex" file');
+    expect(res.errors[0].error.message).to.include("Not an '.apex' file");
   });
 
   // TODO re-implement

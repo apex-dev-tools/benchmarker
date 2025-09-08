@@ -13,6 +13,12 @@ import type {
   GovernorLimits,
   LimitsContext,
 } from "../benchmark/limits/schemas.js";
+import { ApexErrorReporter } from "../display/error.js";
+import {
+  LimitsReporter,
+  type LimitsReporterOptions,
+} from "../display/limits.js";
+import { Logger } from "../display/logger.js";
 import {
   LimitsMetricProvider,
   type LimitsMetric,
@@ -35,6 +41,7 @@ import {
 
 export interface ApexBenchmarkServiceOptions extends RunContextOptions {
   limitsMetrics?: LimitsMetricProviderOptions;
+  limitsReporter?: LimitsReporterOptions;
   useLegacySchema?: boolean;
 }
 
@@ -69,6 +76,8 @@ export class ApexBenchmarkService {
   protected limitsStore: RunStore<LimitsBenchmarkResult>;
   protected limitsBenchmarker: LimitsBenchmarker;
   protected limitsMetrics: LimitsMetricProvider;
+  protected limitsReporter: LimitsReporter;
+  protected errorReporter: ApexErrorReporter;
 
   constructor() {
     this.limitsStore = new RunStore();
@@ -76,6 +85,8 @@ export class ApexBenchmarkService {
       new LimitsBenchmarkFactory()
     );
     this.limitsMetrics = new LimitsMetricProvider();
+    this.limitsReporter = new LimitsReporter();
+    this.errorReporter = new ApexErrorReporter();
   }
 
   static get default(): ApexBenchmarkService {
@@ -99,6 +110,7 @@ export class ApexBenchmarkService {
     }
 
     this.limitsMetrics.setup(options.limitsMetrics);
+    this.limitsReporter.setup(options.limitsReporter);
   }
 
   restore() {
@@ -142,8 +154,45 @@ export class ApexBenchmarkService {
     request: LimitsBenchmarkRequest
   ): Promise<LimitsBenchmarkRun> {
     await this.ensureSetup();
+
+    Logger.info("Benchmark requested.", request);
+
     const run = await this.limitsBenchmarker.runBenchmark(request);
-    return this.postProcessResults(run);
+    const { benchmarks, errors } = await this.postProcessResults(run);
+
+    this.limitsStore.addItems(benchmarks);
+    this.errorReporter.run(errors);
+
+    return { benchmarks, errors };
+  }
+
+  /**
+   * Sync current stored limits results to configured data sources. Returns
+   * saved results.
+   */
+  async saveLimits(): Promise<LimitsBenchmarkResult[]> {
+    const run = RunContext.current;
+    const results = this.limitsStore.getItemsFromCursor();
+    const mappers = run.getCommonMappers();
+
+    if (results.length === 0 || mappers.length === 0) return results;
+
+    const orgContext = await run.org.getContext();
+
+    Logger.info(`Saving ${results.length} results to connected datasources.`);
+    for (const mapper of mappers) {
+      await mapper.saveLimitsResults(run, orgContext, results);
+    }
+
+    this.limitsStore.moveCursor();
+    return results;
+  }
+
+  /**
+   * Display limits results according to defined reporter options.
+   */
+  reportLimits(results?: LimitsBenchmarkResult[]): void {
+    this.limitsReporter.run(results ? results : this.limitsStore.getItems());
   }
 
   /**
@@ -160,29 +209,10 @@ export class ApexBenchmarkService {
   }
 
   /**
-   * Sync current stored results to configured data sources.
-   */
-  async save(): Promise<void> {
-    const run = RunContext.current;
-    const results = this.limitsStore.getItemsFromCursor();
-    const mappers = run.getCommonMappers();
-
-    if (results.length === 0 || mappers.length === 0) return;
-
-    const orgContext = await run.org.getContext();
-
-    for (const mapper of mappers) {
-      await mapper.saveLimitsResults(run, orgContext, results);
-    }
-
-    this.limitsStore.moveCursor();
-  }
-
-  /**
    * Execute Anonymous Apex on the current org, with namespaces replaced if
    * enabled.
    *
-   * Optionally enable and return debug logs.
+   * Optionally enable and return Apex debug logs.
    */
   async execute(
     code: string,
@@ -205,15 +235,16 @@ export class ApexBenchmarkService {
   private async postProcessResults(
     input: AnonApexBenchmarkRun<GovernorLimits, LimitsContext>
   ): Promise<LimitsBenchmarkRun> {
+    let benchmarks: LimitsBenchmarkResult[] = input.benchmarks;
+    const errors: ErrorResult[] = [...input.errors];
+
     try {
-      const benchmarks = await this.limitsMetrics.calculate(input.benchmarks);
-
-      this.limitsStore.addItems(benchmarks);
-
-      return { benchmarks, errors: input.errors };
+      benchmarks = await this.limitsMetrics.calculate(input.benchmarks);
+      // TODO optional limitMetrics.validate / produce errors
     } catch (e) {
-      input.errors.push(Benchmark.coerceError(e));
-      return input;
+      errors.push(Benchmark.coerceError(e));
     }
+
+    return { benchmarks, errors };
   }
 }

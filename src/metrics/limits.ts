@@ -4,6 +4,7 @@
 
 import type { BenchmarkId } from "../benchmark/base.js";
 import type { GovernorLimits } from "../benchmark/limits/schemas.js";
+import { Logger } from "../display/logger.js";
 import type { LimitsBenchmarkResult } from "../service/apex.js";
 import { RunContext } from "../state/context.js";
 import { calculateDeg } from "./limits/deg.js";
@@ -28,6 +29,10 @@ export class LimitsMetricProvider {
   setup(options: LimitsMetricProviderOptions = {}) {
     this.globalEnabled = options.enable ?? Boolean(process.env.BENCH_METRICS);
     this.rangesFile = options.rangesFile;
+
+    if (this.globalEnabled) {
+      Logger.info("Governor limit metrics enabled globally.");
+    }
   }
 
   async calculate(
@@ -37,6 +42,10 @@ export class LimitsMetricProvider {
     if (enabled.length == 0) {
       return results;
     }
+
+    Logger.info(
+      `Running limit metrics calculation for ${enabled.length} results.`
+    );
 
     const ranges = await this.getRanges();
     const avgDict = await this.getRecentAverages(results, enabled);

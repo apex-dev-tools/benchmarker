@@ -82,7 +82,7 @@ export class ApexScriptParser {
           exclusive: count === 1,
         });
       } else if (this.filesOnly) {
-        yield new ApexScriptError(`${absolutePath} is not an ".apex" file.`, {
+        yield new ApexScriptError("Not an '.apex' file.", {
           path: absolutePath,
         });
       } else if (stats.isDirectory()) {
@@ -94,10 +94,9 @@ export class ApexScriptParser {
           });
         }
       } else {
-        yield new ApexScriptError(
-          `${absolutePath} is not a directory or ".apex" file.`,
-          { path: absolutePath }
-        );
+        yield new ApexScriptError("Not a directory or '.apex' file.", {
+          path: absolutePath,
+        });
       }
     }
   }

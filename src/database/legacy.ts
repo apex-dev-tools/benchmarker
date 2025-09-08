@@ -11,6 +11,7 @@ import { PackageInfo } from "./legacy/entity/package.js";
 import { TestResult } from "./legacy/entity/result.js";
 import { LegacyDataMapper } from "./legacy/mapper.js";
 import { PostgresDataSource, type PostgresOptions } from "./postgres.js";
+import { Logger } from "../display/logger.js";
 
 export class LegacyDataSource extends PostgresDataSource {
   mapper?: LegacyDataMapper;
@@ -26,6 +27,10 @@ export class LegacyDataSource extends PostgresDataSource {
 
     const credentials = this.resolveCredentials();
     if (!credentials) return;
+
+    Logger.info(
+      `Connecting to postgres database '${credentials.database}' at '${credentials.host}'.`
+    );
 
     const ds = await new DataSource({
       type: "postgres",
@@ -47,5 +52,7 @@ export class LegacyDataSource extends PostgresDataSource {
     }).initialize();
 
     this.mapper = new LegacyDataMapper(ds);
+
+    Logger.info("Established database connection using 'performance' schema.");
   }
 }

@@ -4,18 +4,27 @@
 
 import type { CommandModule, Argv, ArgumentsCamelCase } from "yargs";
 import { ApexBenchmarkService } from "../../service/apex.js";
+import { Logger, LogLevel } from "../../display/logger.js";
+import { LimitsReportType } from "../../display/limits.js";
 
 export interface RunLimitsArgs {
   paths?: string[];
 
+  "project-id"?: string;
+  "env-file"?: string;
+
+  reporter?: LimitsReportType;
+  "output-file"?: string;
+
   metrics?: boolean;
   "limit-ranges-file"?: string;
 
-  "env-file"?: string;
-  "project-id"?: string;
-
   save?: boolean;
   "save-legacy"?: boolean;
+
+  "log-file"?: string;
+  "log-level"?: LogLevel;
+  verbose?: boolean;
 }
 
 export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
@@ -45,6 +54,19 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
             requiresArg: true,
             defaultDescription: ".env",
           },
+          reporter: {
+            describe: "Select reporter used for displaying results",
+            string: true,
+            choices: [LimitsReportType.TABLE, LimitsReportType.JSON],
+            default: LimitsReportType.TABLE,
+            requiresArg: true,
+          },
+          "output-file": {
+            alias: "f",
+            describe: "Print results to file, if supported by reporter",
+            string: true,
+            requiresArg: true,
+          },
           metrics: {
             describe: "Enable degradation metrics for governor limits",
             alias: "m",
@@ -59,15 +81,37 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
           },
           save: {
             describe:
-              "Save results to configured data sources, use --no-save to disable",
+              "Save results to configured external data sources, use --no-save to disable",
             boolean: true,
             defaultDescription: "true",
           },
           "save-legacy": {
             describe:
-              "Save results to legacy source, use --no-save-legacy to disable",
+              "Save results to legacy data source, use --no-save-legacy to disable",
             boolean: true,
             defaultDescription: "true",
+          },
+          "log-file": {
+            describe: "Enable debug logging to given file",
+            string: true,
+            requiresArg: true,
+          },
+          "log-level": {
+            describe: "Set level of debug logging",
+            string: true,
+            choices: [
+              LogLevel.ERROR,
+              LogLevel.WARN,
+              LogLevel.INFO,
+              LogLevel.DEBUG,
+            ],
+            default: LogLevel.WARN,
+            requiresArg: true,
+          },
+          verbose: {
+            describe: "Enable debug logging to console",
+            boolean: true,
+            defaultDescription: "false",
           },
         });
     },
@@ -76,6 +120,12 @@ export default function (yargs: Argv): CommandModule<unknown, RunLimitsArgs> {
 }
 
 async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
+  Logger.setup({
+    file: args.logFile,
+    display: args.verbose,
+    level: args.logLevel,
+  });
+
   const service = ApexBenchmarkService.default;
   const paths: string[] = args.paths || [process.cwd()];
 
@@ -92,17 +142,18 @@ async function handler(args: ArgumentsCamelCase<RunLimitsArgs>): Promise<void> {
       enable: args.metrics,
       rangesFile: args.limitRangesFile,
     },
+    limitsReporter: {
+      reportType: args.reporter,
+      outputFile: args.outputFile,
+    },
   });
 
-  const run = await service.benchmarkLimits({ paths });
-
-  run.errors.forEach(({ benchmark, error }) => {
-    let prefix = "";
-    if (benchmark) prefix = `${benchmark.name} - ${benchmark.action}:`;
-    console.error(`${prefix}${error.message}`);
+  const run = await service.benchmarkLimits({
+    paths,
+    options: { progress: true },
   });
 
-  if (args.save == null || args.save) await service.save();
+  if (args.save == null || args.save) await service.saveLimits();
 
-  // TODO log run JSON to stdout
+  service.reportLimits(run.benchmarks);
 }

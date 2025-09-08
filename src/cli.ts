@@ -14,6 +14,7 @@ argv
   .usage("Usage: $0 <command> [options]")
   .command([apexCmd(argv)])
   .demandCommand()
+  .strict()
   .help()
   .alias("h", "help")
   .alias("v", "version")

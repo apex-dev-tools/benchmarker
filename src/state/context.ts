@@ -8,6 +8,7 @@ import { LegacyDataSource } from "../database/legacy.js";
 import type { PostgresOptions } from "../database/postgres.js";
 import { BenchmarkOrg, type BenchmarkOrgOptions } from "../salesforce/org.js";
 import { MainDataSource } from "../database/main.js";
+import { Logger } from "../display/logger.js";
 
 export interface GlobalOptions {
   // id/name for current run e.g. build number
@@ -78,16 +79,24 @@ export class RunContext {
   protected loadEnv(global: GlobalOptions = {}) {
     if (this.projectId.length != 0) return;
 
-    dotenv.config({ path: global.envFile || ".env", quiet: true });
+    const env = global.envFile || ".env";
+    Logger.info(`Loading Environment from '${env}'.`);
+    dotenv.config({ path: env, quiet: true });
 
     const id = global.projectId || process.env.BENCH_PROJECT_ID;
     if (id == null || id.length == 0) {
-      throw new Error("global.projectId or $BENCH_PROJECT_ID env is required");
+      throw new Error("global.projectId or $BENCH_PROJECT_ID env is required.");
     }
 
     this.projectId = id;
     this.buildId = global.buildId || process.env.BENCH_BUILD_ID;
     this.sourceId = global.sourceId || process.env.BENCH_SOURCE_ID;
+
+    Logger.info("Environment loaded.", {
+      project: this.projectId,
+      build: this.buildId,
+      source: this.sourceId,
+    });
   }
 }
 

@@ -10,7 +10,7 @@ import {
   SelectQueryBuilder,
 } from "typeorm";
 import type { LimitsAvg } from "../../metrics/limits.js";
-import type { Degradation } from "../../metrics/limits/deg.js";
+import { reportDeg } from "../../metrics/limits/deg.js";
 import type { OrgContext, OrgPackage } from "../../salesforce/org/context.js";
 import type { LimitsBenchmarkResult } from "../../service/apex.js";
 import type { RunContext } from "../../state/context.js";
@@ -333,12 +333,12 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
             flowName: name,
             action,
             testResultId: testIds[name + action],
-            cpuTimeDegraded: this.getDegradation(deg.cpuTime),
-            dmlRowsDegraded: this.getDegradation(deg.dmlRows),
-            dmlStatementsDegraded: this.getDegradation(deg.dmlStatements),
-            heapSizeDegraded: this.getDegradation(deg.heapSize),
-            queryRowsDegraded: this.getDegradation(deg.queryRows),
-            soqlQueriesDegraded: this.getDegradation(deg.soqlQueries),
+            cpuTimeDegraded: reportDeg(deg.cpuTime),
+            dmlRowsDegraded: reportDeg(deg.dmlRows),
+            dmlStatementsDegraded: reportDeg(deg.dmlStatements),
+            heapSizeDegraded: reportDeg(deg.heapSize),
+            queryRowsDegraded: reportDeg(deg.queryRows),
+            soqlQueriesDegraded: reportDeg(deg.soqlQueries),
           })
         );
       }
@@ -346,12 +346,6 @@ export class LegacyDataMapper implements PostgresCommonDataMapper {
     }, []);
 
     await this.alerts.save(records);
-  }
-
-  private getDegradation({ overThreshold, overAvg }: Degradation): number {
-    // at least one overThreshold is non zero for metric to exist
-    // use overThreshold as fall back if avg unusable
-    return overThreshold > 0 ? overAvg || overThreshold : 0;
   }
 
   private ensureJson(maybeJson: unknown): string | undefined {

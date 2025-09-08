@@ -2,6 +2,8 @@
  * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 
+import type { ProgressReporter } from "../display/progress.js";
+
 export interface BenchmarkId {
   name: string;
   action: string;
@@ -27,6 +29,8 @@ export abstract class Benchmark<R extends BenchmarkResult> {
   }
 
   abstract run(): Promise<void>;
+
+  protected abstract progress(): ProgressReporter<R>;
 
   static coerceError(e: unknown, id?: BenchmarkId): ErrorResult {
     const error =

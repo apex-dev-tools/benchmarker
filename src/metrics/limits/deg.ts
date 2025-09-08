@@ -47,6 +47,12 @@ export function calculateDeg(
   return isDegraded ? deg : undefined;
 }
 
+export function reportDeg({ overThreshold, overAvg }: Degradation): number {
+  // at least one overThreshold is non zero for metric to exist
+  // use overThreshold as fall back if avg unusable
+  return overThreshold > 0 ? overAvg || overThreshold : 0;
+}
+
 function calcOverValue(value: number, threshValue?: number): number {
   return threshValue != null && value > threshValue ? value - threshValue : 0;
 }

@@ -8,6 +8,7 @@ import { benchmarkApex, limitsApex } from "../scripts/apex.js";
 import { AnonApexBenchmark, type AnonApexTransaction } from "./anon.js";
 import type { BenchmarkId } from "./base.js";
 import type { LimitsScriptFormat } from "./limits/factory.js";
+import { LimitsProgressReporter } from "./limits/progress.js";
 import {
   type GovernorLimits,
   type LimitsContext,
@@ -18,6 +19,7 @@ export interface LimitsBenchmarkOptions {
   id?: BenchmarkId;
   context?: LimitsContext;
   executeAnonymous?: ExecuteAnonymousOptions;
+  progress?: boolean;
 }
 
 /**
@@ -61,7 +63,12 @@ export class LimitsAnonApexBenchmark extends AnonApexBenchmark<
     format: LimitsScriptFormat,
     options: LimitsBenchmarkOptions
   ) {
-    super(format.name, limitsSchema);
+    const reporter = options.progress
+      ? new LimitsProgressReporter()
+      : undefined;
+
+    super(format.name, limitsSchema, reporter);
+
     this.script = script;
     this.format = format;
     this.options = options;
