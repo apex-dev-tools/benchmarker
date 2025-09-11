@@ -104,6 +104,11 @@ export {
 } from './services/result/output';
 export { TableReporter } from './services/result/table';
 export type { TestResult } from './database/entity/result';
+/**
+ * UI Test results database helpers and entity
+ */
+export { saveUiTestResult, loadUiTestResults } from './database/uiTestResult';
+export { UiTestResult } from './database/entity/uiTestResult';
 
 export namespace Constants {
   export namespace DefaultValues {
