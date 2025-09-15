@@ -90,7 +90,7 @@ export class LimitsReporter {
     entries.forEach(([name, tbl]) => {
       const header = [chalk.italic(name), ...tbl.cols.map(_ => "")];
       const headings = [
-        "Action",
+        chalk.bold("Action"),
         ...tbl.cols.map(c => chalk.bold(limitsHeadings[c] ?? "")),
       ];
 
