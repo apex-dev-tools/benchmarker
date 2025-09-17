@@ -102,8 +102,12 @@ export {
   getReporters,
   BenchmarkReporter,
 } from './services/result/output';
-export { TableReporter } from './services/result/table';
-export type { TestResult } from './database/entity/result';
+export {
+  saveUiTestResult,
+  loadUiTestResults,
+  UiTestResultDTO,
+} from './database/uiTestResult';
+export { TestResult } from './database/entity/result';
 
 export namespace Constants {
   export namespace DefaultValues {
