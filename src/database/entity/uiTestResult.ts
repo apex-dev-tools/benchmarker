@@ -1,3 +1,7 @@
+/** @ignore */
+/*
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
+ */
 import { Entity, Column } from 'typeorm';
 import { PerformanceBaseEntity } from './base';
 import {
