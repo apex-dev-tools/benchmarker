@@ -1,6 +1,6 @@
 /** @ignore */
 /**
- * Copyright (c) 2025 FinancialForce.com, inc. All rights reserved.
+ * Copyright (c) 2025 Certinia Inc. All rights reserved.
  */
 import { getConnection } from './connection';
 
