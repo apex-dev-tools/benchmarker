@@ -89,7 +89,7 @@ export {
 } from './testTemplates/testStepFlowHelper';
 
 /**
- * Retrieve peformance metrics from a tests execution and save them
+ * Retrieve performance metrics from a tests execution and save them
  */
 export { saveResults } from './testTemplates/saveResult';
 
