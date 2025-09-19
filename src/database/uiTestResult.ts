@@ -38,14 +38,7 @@ function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
  * Converts a database entity to a DTO
  */
 function entityToDto(entity: UiTestResult): UiTestResultDTO {
-  return {
-    id: entity.id,
-    testSuiteName: entity.testSuiteName,
-    individualTestName: entity.individualTestName,
-    componentLoadTime: entity.componentLoadTime,
-    salesforceLoadTime: entity.salesforceLoadTime,
-    overallLoadTime: entity.overallLoadTime,
-  };
+  return { ...entity };
 }
 
 export async function saveUiTestResult(
