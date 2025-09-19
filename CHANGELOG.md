@@ -1,8 +1,8 @@
 # Benchmarker - Changelog
 
-## Unreleased
+## 5.0.0
 
-### Added
+### Breaking Changes
 
 - Database schema updated: Use `db/migrations/V5__create_performance_ui_table.sql` script to create new table to store performance UI test results.
 
