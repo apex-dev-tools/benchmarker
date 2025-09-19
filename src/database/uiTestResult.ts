@@ -10,12 +10,12 @@ import { getConnection } from './connection';
  * Data Transfer Object for UI Test Results
  */
 export interface UiTestResultDTO {
-  id?: number;
-  testSuiteName?: string;
-  individualTestName?: string;
+  id: number;
+  testSuiteName: string;
+  individualTestName: string;
   componentLoadTime?: number;
   salesforceLoadTime?: number;
-  overallLoadTime?: number;
+  overallLoadTime: number;
 }
 
 /**
@@ -23,24 +23,14 @@ export interface UiTestResultDTO {
  */
 function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
   const entity = new UiTestResult();
-  if (dto.id !== undefined) {
-    entity.id = dto.id;
-  }
-  if (dto.testSuiteName !== undefined) {
-    entity.testSuiteName = dto.testSuiteName;
-  }
-  if (dto.individualTestName !== undefined) {
-    entity.individualTestName = dto.individualTestName;
-  }
-  if (dto.componentLoadTime !== undefined) {
-    entity.componentLoadTime = dto.componentLoadTime;
-  }
-  if (dto.salesforceLoadTime !== undefined) {
-    entity.salesforceLoadTime = dto.salesforceLoadTime;
-  }
-  if (dto.overallLoadTime !== undefined) {
-    entity.overallLoadTime = dto.overallLoadTime;
-  }
+
+  entity.id = dto.id;
+  entity.testSuiteName = dto.testSuiteName;
+  entity.individualTestName = dto.individualTestName;
+  entity.componentLoadTime = dto.componentLoadTime || 0;
+  entity.salesforceLoadTime = dto.salesforceLoadTime || 0;
+  entity.overallLoadTime = dto.overallLoadTime;
+
   return entity;
 }
 
