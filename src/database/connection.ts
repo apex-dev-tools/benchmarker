@@ -11,6 +11,7 @@ import { TestResult } from './entity/result';
 import { ExecutionInfo } from './entity/execution';
 import { Alert } from './entity/alert';
 import { TestInfo } from './entity/testInfo';
+import { UiTestResult } from './entity/uiTestResult';
 
 export const DB_ENTITIES = [
   TestResult,
@@ -18,7 +19,8 @@ export const DB_ENTITIES = [
   PackageInfo,
   ExecutionInfo,
   Alert,
-  TestInfo
+  TestInfo,
+  UiTestResult,
 ];
 
 let connection: DataSource | null = null;
