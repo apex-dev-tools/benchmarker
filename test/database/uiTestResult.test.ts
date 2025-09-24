@@ -34,7 +34,6 @@ describe('src/database/uiTestResult', () => {
     it('should convert DTO to entities, save them and return DTO', async () => {
       // Given
       const dto: UiTestResultDTO = {
-        id: 1,
         testSuiteName: 'suite',
         individualTestName: 'test',
         componentLoadTime: 10,
@@ -59,7 +58,6 @@ describe('src/database/uiTestResult', () => {
       expect(saveRecordsStub).to.be.calledOnce;
       expect(result).to.eql([
         {
-          id: 1,
           testSuiteName: 'suite',
           individualTestName: 'test',
           componentLoadTime: 10,
@@ -92,7 +90,6 @@ describe('src/database/uiTestResult', () => {
       expect(connectionStub).to.be.calledOnce;
       expect(result).to.eql([
         {
-          id: 2,
           testSuiteName: 'suite2',
           individualTestName: 'test2',
           componentLoadTime: 100,

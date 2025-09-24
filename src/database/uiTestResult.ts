@@ -10,7 +10,6 @@ import { getConnection } from './connection';
  * Data Transfer Object for UI Test Results
  */
 export interface UiTestResultDTO {
-  id: number;
   testSuiteName: string;
   individualTestName: string;
   componentLoadTime?: number;
@@ -24,7 +23,6 @@ export interface UiTestResultDTO {
 function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
   const entity = new UiTestResult();
 
-  entity.id = dto.id;
   entity.testSuiteName = dto.testSuiteName;
   entity.individualTestName = dto.individualTestName;
   entity.componentLoadTime = dto.componentLoadTime || 0;
