@@ -108,6 +108,7 @@ export {
   saveUiTestResult,
   loadUiTestResults,
   UiTestResultDTO,
+  UiTestResultFilterOptions,
 } from './database/uiTestResult';
 
 export namespace Constants {
