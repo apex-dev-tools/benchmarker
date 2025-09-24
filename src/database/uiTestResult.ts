@@ -18,6 +18,14 @@ export interface UiTestResultDTO {
 }
 
 /**
+ * Filter options for loading UI Test Results
+ */
+export interface UiTestResultFilterOptions {
+  testSuiteName?: string;
+  individualTestName?: string;
+}
+
+/**
  * Converts a DTO to a database entity
  */
 function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
@@ -36,7 +44,13 @@ function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
  * Converts a database entity to a DTO
  */
 function entityToDto(entity: UiTestResult): UiTestResultDTO {
-  return { ...entity };
+  return {
+    testSuiteName: entity.testSuiteName,
+    individualTestName: entity.individualTestName,
+    componentLoadTime: entity.componentLoadTime,
+    salesforceLoadTime: entity.salesforceLoadTime,
+    overallLoadTime: entity.overallLoadTime,
+  };
 }
 
 export async function saveUiTestResult(
@@ -47,8 +61,25 @@ export async function saveUiTestResult(
   return savedEntities.map(entityToDto);
 }
 
-export async function loadUiTestResults(): Promise<UiTestResultDTO[]> {
+export async function loadUiTestResults(
+  filterOptions?: UiTestResultFilterOptions
+): Promise<UiTestResultDTO[]> {
   const connection = await getConnection();
-  const entities = await connection.manager.find(UiTestResult);
+
+  const whereClause: Partial<UiTestResult> = {};
+
+  if (filterOptions) {
+    if (filterOptions.testSuiteName !== undefined) {
+      whereClause.testSuiteName = filterOptions.testSuiteName;
+    }
+    if (filterOptions.individualTestName !== undefined) {
+      whereClause.individualTestName = filterOptions.individualTestName;
+    }
+  }
+
+  const entities = await connection.manager.find(UiTestResult, {
+    where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+  });
+
   return entities.map(entityToDto);
 }
