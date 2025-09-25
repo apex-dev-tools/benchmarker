@@ -89,7 +89,7 @@ export {
 } from './testTemplates/testStepFlowHelper';
 
 /**
- * Retrieve peformance metrics from a tests execution and save them
+ * Retrieve performance metrics from a tests execution and save them
  */
 export { saveResults } from './testTemplates/saveResult';
 
@@ -104,6 +104,12 @@ export {
 } from './services/result/output';
 export { TableReporter } from './services/result/table';
 export type { TestResult } from './database/entity/result';
+export {
+  saveUiTestResult,
+  loadUiTestResults,
+  UiTestResultDTO,
+  UiTestResultFilterOptions,
+} from './database/uiTestResult';
 
 export namespace Constants {
   export namespace DefaultValues {
