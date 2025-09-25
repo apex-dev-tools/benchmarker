@@ -5,6 +5,7 @@
 import { UiTestResult } from './entity/uiTestResult';
 import { saveRecords } from './saveRecords';
 import { getConnection } from './connection';
+import { MoreThanOrEqual } from 'typeorm';
 
 /**
  * Data Transfer Object for UI Test Results
@@ -61,10 +62,16 @@ export async function saveUiTestResult(
   return savedEntities.map(entityToDto);
 }
 
+/*
+ * Load UI Test Results from the last 30 days.
+ */
 export async function loadUiTestResults(
   filterOptions?: UiTestResultFilterOptions
 ): Promise<UiTestResultDTO[]> {
   const connection = await getConnection();
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const whereClause: Partial<UiTestResult> = {};
 
@@ -78,7 +85,15 @@ export async function loadUiTestResults(
   }
 
   const entities = await connection.manager.find(UiTestResult, {
-    where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+    where: [
+      {
+        ...whereClause,
+        createDateTime: MoreThanOrEqual(thirtyDaysAgo),
+      },
+    ],
+    order: {
+      createDateTime: 'DESC',
+    },
   });
 
   return entities.map(entityToDto);

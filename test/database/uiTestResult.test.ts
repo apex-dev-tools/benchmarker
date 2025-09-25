@@ -70,7 +70,7 @@ describe('src/database/uiTestResult', () => {
   });
 
   describe('loadUiTestResults', () => {
-    it('should load all entities and return DTO when no filter is provided', async () => {
+    it('should load entities from last 30 days and return DTO when no filter is provided', async () => {
       // Given
       const entity = new UiTestResult();
       entity.id = 2;
@@ -90,7 +90,12 @@ describe('src/database/uiTestResult', () => {
 
       // Then
       expect(connectionStub).to.be.calledOnce;
-      expect(findStub).to.be.calledWith(UiTestResult, { where: undefined });
+      expect(findStub).to.be.calledWith(UiTestResult, {
+        where: [{ createDateTime: sinon.match.any }],
+        order: {
+          createDateTime: 'DESC',
+        },
+      });
       expect(result).to.eql([
         {
           testSuiteName: 'suite2',
@@ -102,7 +107,7 @@ describe('src/database/uiTestResult', () => {
       ]);
     });
 
-    it('should filter by testSuiteName when provided', async () => {
+    it('should filter by testSuiteName and include 30-day filter when provided', async () => {
       // Given
       const entity1 = new UiTestResult();
       entity1.id = 3;
@@ -127,8 +132,17 @@ describe('src/database/uiTestResult', () => {
       // Then
       expect(connectionStub).to.be.calledOnce;
       expect(findStub).to.be.calledWith(UiTestResult, {
-        where: { testSuiteName: 'specific-suite' },
+        where: [
+          {
+            createDateTime: sinon.match.any,
+            testSuiteName: 'specific-suite',
+          },
+        ],
+        order: {
+          createDateTime: 'DESC',
+        },
       });
+
       expect(result).to.eql([
         {
           testSuiteName: 'specific-suite',
@@ -140,7 +154,7 @@ describe('src/database/uiTestResult', () => {
       ]);
     });
 
-    it('should filter by multiple fields when provided', async () => {
+    it('should filter by multiple fields and include 30-day filter when provided', async () => {
       // Given
       const entity = new UiTestResult();
       entity.id = 4;
@@ -166,11 +180,18 @@ describe('src/database/uiTestResult', () => {
       // Then
       expect(connectionStub).to.be.calledOnce;
       expect(findStub).to.be.calledWith(UiTestResult, {
-        where: {
-          testSuiteName: 'multi-filter-suite',
-          individualTestName: 'multi-filter-test',
+        where: [
+          {
+            createDateTime: sinon.match.any,
+            testSuiteName: 'multi-filter-suite',
+            individualTestName: 'multi-filter-test',
+          },
+        ],
+        order: {
+          createDateTime: 'DESC',
         },
       });
+
       expect(result).to.eql([
         {
           testSuiteName: 'multi-filter-suite',
@@ -182,7 +203,7 @@ describe('src/database/uiTestResult', () => {
       ]);
     });
 
-    it('should return empty array when no matching records found', async () => {
+    it('should return empty array when no matching records found within 30 days', async () => {
       // Given
       const findStub = sinon.stub().resolves([]);
       connectionStub.resolves({
@@ -199,8 +220,17 @@ describe('src/database/uiTestResult', () => {
       // Then
       expect(connectionStub).to.be.calledOnce;
       expect(findStub).to.be.calledWith(UiTestResult, {
-        where: { testSuiteName: 'non-existent-suite' },
+        where: [
+          {
+            createDateTime: sinon.match.any,
+            testSuiteName: 'non-existent-suite',
+          },
+        ],
+        order: {
+          createDateTime: 'DESC',
+        },
       });
+
       expect(result).to.eql([]);
     });
   });
