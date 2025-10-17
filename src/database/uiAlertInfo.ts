@@ -45,15 +45,15 @@ export async function getAverageLimitValuesFromDB(
                 PARTITION BY test_suite_name, individual_test_name
                 ORDER BY create_date_time DESC
             ) AS rn
-        FROM ui_test_result
+        FROM performance.ui_test_result
         WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '30 DAYS')
           AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
     )
     SELECT
         test_suite_name,
         individual_test_name,
-        AVG(CASE WHEN rn BETWEEN 1 AND 5 THEN component_load_time END) AS avg_first_5,
-        AVG(CASE WHEN rn BETWEEN 6 AND 15 THEN component_load_time END) AS avg_next_10
+        ROUND(AVG(CASE WHEN rn BETWEEN 1 AND 5 THEN component_load_time END)::numeric, 0) AS avg_first_5,
+        ROUND(AVG(CASE WHEN rn BETWEEN 6 AND 15 THEN component_load_time END)::numeric, 0) AS avg_next_10
     FROM ranked
     GROUP BY test_suite_name, individual_test_name
     HAVING COUNT(*) >= 15

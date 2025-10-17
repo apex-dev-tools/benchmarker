@@ -82,8 +82,8 @@ export async function saveUiTestResult(
   testStepResults: UiTestResultDTO[]
 ): Promise<UiTestResultDTO[]> {
   const entities = testStepResults.map(dtoToEntity);
-  const alerts = await generateValidAlerts(testStepResults);
   const savedEntities = await saveRecords<UiTestResult>(entities);
+  const alerts = await generateValidAlerts(testStepResults);
   await saveAlerts(savedEntities, alerts);
   return savedEntities.map(entityToDto);
 }

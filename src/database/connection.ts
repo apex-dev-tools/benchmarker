@@ -10,6 +10,7 @@ import { PackageInfo } from './entity/package';
 import { TestResult } from './entity/result';
 import { ExecutionInfo } from './entity/execution';
 import { Alert } from './entity/alert';
+import { UiAlert } from './entity/uiAlert';
 import { TestInfo } from './entity/testInfo';
 import { UiTestResult } from './entity/uiTestResult';
 
@@ -19,6 +20,7 @@ export const DB_ENTITIES = [
   PackageInfo,
   ExecutionInfo,
   Alert,
+  UiAlert,
   TestInfo,
   UiTestResult,
 ];
