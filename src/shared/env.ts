@@ -28,6 +28,10 @@ export function shouldStoreAlerts() {
   return process.env.STORE_ALERTS === 'true';
 }
 
+export function shouldStoreUiAlerts() {
+  return process.env.STORE_UI_ALERTS === 'true';
+}
+
 export function getPuppeteerLaunchOptions(
   headless?: boolean
 ): PuppeteerNodeLaunchOptions {
@@ -161,4 +165,12 @@ export function getRangeCollection(): RangeCollection {
  */
 export function getSourceRef() {
   return process.env.SOURCE_REF || '';
+}
+
+export function getNormalComponentLoadThreshold() {
+  return process.env.NORMAL_COMPONENT_LOAD_THRESHOLD || '1000';
+}
+
+export function getCriticalComponentLoadThreshold() {
+  return process.env.CRITICAL_COMPONENT_LOAD_THRESHOLD || '10000';
 }
