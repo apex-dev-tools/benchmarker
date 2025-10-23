@@ -27,7 +27,7 @@ describe('src/database/alertInfo', () => {
   describe('getAverageLimitValuesFromDB', () => {
     it('should return average limit values for valid data', async () => {
       // Given
-      const flowActionPairs = [
+      const suiteAndTestNamePairs = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
@@ -56,7 +56,7 @@ describe('src/database/alertInfo', () => {
       mockQuery.resolves(mockResults);
 
       // When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(mockQuery.calledOnce).to.be.true;
@@ -79,7 +79,7 @@ describe('src/database/alertInfo', () => {
 
     it('should return an empty object when no results are found', async () => {
       // Given
-      const flowActionPairs = [
+      const suiteAndTestNamePairs = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
@@ -89,7 +89,7 @@ describe('src/database/alertInfo', () => {
       mockQuery.resolves([]);
 
       // When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(mockQuery.calledOnce).to.be.true;
@@ -98,7 +98,7 @@ describe('src/database/alertInfo', () => {
 
     it('should handle missing fields and default them to zero', async () => {
       // Given
-      const flowActionPairs = [
+      const suiteAndTestNamePairs = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
@@ -117,7 +117,7 @@ describe('src/database/alertInfo', () => {
       mockQuery.resolves(mockResults);
 
       // When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(results).to.deep.equal({
@@ -128,9 +128,9 @@ describe('src/database/alertInfo', () => {
       });
     });
 
-    it('should handle an empty flowActionPairs array and return an empty object', async () => {
+    it('should handle an empty suiteAndTestNamePairs array and return an empty object', async () => {
       // Given
-      const flowActionPairs: {
+      const suiteAndTestNamePairs: {
         testSuiteName: string;
         individualTestName: string;
       }[] = [];
@@ -139,7 +139,7 @@ describe('src/database/alertInfo', () => {
       mockQuery.resolves([]);
 
       // When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(results).to.deep.equal({});
@@ -147,7 +147,7 @@ describe('src/database/alertInfo', () => {
 
     it('should handle errors and return an empty object', async () => {
       // Given
-      const flowActionPairs = [
+      const suiteAndTestNamePairs = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
@@ -157,7 +157,7 @@ describe('src/database/alertInfo', () => {
       mockQuery.rejects(new Error('Database error'));
 
       // When
-      const results = await getAverageLimitValuesFromDB(flowActionPairs);
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(results).to.deep.equal({});
