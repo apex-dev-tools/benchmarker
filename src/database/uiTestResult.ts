@@ -8,6 +8,27 @@ import { getConnection } from './connection';
 import { MoreThanOrEqual } from 'typeorm';
 
 /**
+ * Describes the Thresholds for different limits
+ * Thresholds that needs to be defined using this class: componentLoadTimeThresholdNormal, componentLoadTimeThresholdCritical
+ */
+export class UiAlertThresholds {
+  componentLoadTimeThresholdNormal: number;
+  componentLoadTimeThresholdCritical: number;
+}
+
+export class UiAlertInfo {
+  /**
+   * Describes whether alerts need to be stored or not at the test level
+   */
+  public storeAlerts: boolean;
+
+  /**
+   * Describes the custom thresholds at test level. If you define these then thresholds will be read from here instead of the JSON
+   */
+  public uiAlertThresholds: UiAlertThresholds;
+}
+
+/**
  * Data Transfer Object for UI Test Results
  */
 export interface UiTestResultDTO {
@@ -16,6 +37,7 @@ export interface UiTestResultDTO {
   componentLoadTime?: number;
   salesforceLoadTime?: number;
   overallLoadTime: number;
+  alertInfo?: UiAlertInfo;
 }
 
 /**
