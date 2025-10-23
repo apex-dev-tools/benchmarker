@@ -105,7 +105,6 @@ describe('generateValidAlerts', () => {
 
     it('should generate a CRITICAL alert when degradation is greater than critical threshold (50)', async () => {
       //Given
-      // Degradation is 100ms: |200 - 100| = 100ms. 100 >= 50 (Critical).
       const avgNext10 = 100;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
@@ -126,7 +125,6 @@ describe('generateValidAlerts', () => {
 
     it('should generate a NORMAL alert when degradation is between normal (20) and critical (50)', async () => {
       //Given
-      // Degradation is 35ms: |200 - 165| = 35ms. 20 <= 35 < 50 (Normal).
       const avgNext10 = 165;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
@@ -147,7 +145,6 @@ describe('generateValidAlerts', () => {
 
     it('should return NO alert when degradation is below the normal threshold (20)', async () => {
       // Given
-      // Degradation is 15ms: |200 - 185| = 15ms. 15 < 20.
       const avgNext10 = 185;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
@@ -177,7 +174,6 @@ describe('generateValidAlerts', () => {
 
     it('should return NO alert if degradation is zero', async () => {
       //Given
-      // Degradation is 0ms: |200 - 200| = 0ms.
       const avgNext10 = 200;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
@@ -200,7 +196,6 @@ describe('generateValidAlerts', () => {
     const testLevelNormal = 10;
     const testLevelCritical = 30;
 
-    // Degradation is 25ms: |200 - 175| = 25ms. 10 <= 25 < 30 --> NORMAL
     const avgNext10 = 175;
     const mockAverages = {
       ['ComponentLoadSuite_ComponentXLoadTime']: {
@@ -232,7 +227,7 @@ describe('generateValidAlerts', () => {
 
   it('should handle errors during average fetching and return an empty array, logging the error', async () => {
     // Given
-    const errorStub = sandbox.stub(console, 'error'); // Stub console.error to prevent test runner failure
+    const errorStub = sandbox.stub(console, 'error');
     getAveragesStub.rejects(new Error('Database connection failed'));
 
     // When
