@@ -600,4 +600,87 @@ describe('shared/env/index', () => {
       expect(customRanges.soql_ranges).to.be.an('array');
     });
   });
+
+  describe('shouldStoreUiAlerts', () => {
+    it('returns true when STORE_UI_ALERTS is true', () => {
+      // Given
+      process.env.STORE_UI_ALERTS = 'true';
+
+      // When
+      const shouldStoreUiAlerts = env.shouldStoreUiAlerts();
+
+      // Then
+      expect(shouldStoreUiAlerts).to.be.true;
+    });
+
+    it('returns false when STORE_UI_ALERTS is false', () => {
+      // Given
+      process.env.STORE_UI_ALERTS = 'false';
+
+      // When
+      const shouldStoreUiAlerts = env.shouldStoreUiAlerts();
+
+      // Then
+      expect(shouldStoreUiAlerts).to.be.false;
+    });
+
+    it('returns false when STORE_UI_ALERTS is undefined', () => {
+      // Given
+      process.env.STORE_UI_ALERTS = undefined;
+
+      // When
+      const shouldStoreUiAlerts = env.shouldStoreUiAlerts();
+
+      // Then
+      expect(shouldStoreUiAlerts).to.be.false;
+    });
+  });
+
+  describe('getNormalComponentLoadThreshold', () => {
+    it('returns NORMAL_COMPONENT_LOAD_THRESHOLD given value', () => {
+      // Given
+      process.env.NORMAL_COMPONENT_LOAD_THRESHOLD = '10';
+
+      // When
+      const normalComponentLoadThreshold = env.getNormalComponentLoadThreshold();
+
+      // Then
+      expect(normalComponentLoadThreshold).to.eql('10');
+    });
+    
+    it('return default value when NORMAL_COMPONENT_LOAD_THRESHOLD is not set', () => {
+      // Given
+      delete process.env.NORMAL_COMPONENT_LOAD_THRESHOLD;
+
+      // When
+      const normalComponentLoadThreshold = env.getNormalComponentLoadThreshold();
+
+      // Then
+      expect(normalComponentLoadThreshold).to.eql('1000');
+    });
+  });
+
+  describe('getCriticalComponentLoadThreshold', () => {
+    it('returns CRITICAL_COMPONENT_LOAD_THRESHOLD given value', () => {
+      // Given
+      process.env.CRITICAL_COMPONENT_LOAD_THRESHOLD = '10';
+
+      // When
+      const criticalComponentLoadThreshold = env.getCriticalComponentLoadThreshold();
+
+      // Then
+      expect(criticalComponentLoadThreshold).to.eql('10');
+    });
+    
+    it('return default value when CRITICAL_COMPONENT_LOAD_THRESHOLD is not set', () => {
+      // Given
+      delete process.env.CRITICAL_COMPONENT_LOAD_THRESHOLD;
+
+      // When
+      const criticalComponentLoadThreshold = env.getCriticalComponentLoadThreshold();
+
+      // Then
+      expect(criticalComponentLoadThreshold).to.eql('10000');
+    });
+  });
 });
