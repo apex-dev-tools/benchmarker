@@ -1,5 +1,11 @@
 # Benchmarker - Changelog
 
+## 6.0.0
+
+### Breaking Changes
+
+- Database schema updated: Use `db/migrations/V6__create_performance_ui_alert_table.sql` script to create new table to store alerts for performance UI test results.
+
 ## 5.0.0
 
 ### Breaking Changes
