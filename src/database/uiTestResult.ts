@@ -11,7 +11,7 @@ import { saveAlerts } from './uiAlertInfo';
 
 /**
  * Describes the Thresholds for different limits
- * Thresholds that needs to be defined using this class: componentLoadTimeThresholdNormal, componentLoadTimeThresholdCritical
+ * Use this class to specify thresholds such as: componentLoadTimeThresholdNormal and componentLoadTimeThresholdCritical.
  */
 export class UiAlertThresholds {
   componentLoadTimeThresholdNormal: number;
@@ -25,7 +25,7 @@ export class UiAlertInfo {
   public storeAlerts: boolean;
 
   /**
-   * Describes the custom thresholds at test level. If you define these then thresholds will be read from here instead of the JSON
+   * Defines custom thresholds at the test level. When specified, these values take precedence over defaults and those set in the environment file.
    */
   public uiAlertThresholds: UiAlertThresholds;
 }

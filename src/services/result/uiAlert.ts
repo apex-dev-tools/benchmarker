@@ -75,7 +75,7 @@ async function addAlertByComparingAvg(
     return alert;
   }
 
-  //storing alerts if there is a degradation
+  // Storing alerts if there is a degradation
   const normalComponentLoadThreshold: number = output.alertInfo
     ?.uiAlertThresholds
     ? output.alertInfo.uiAlertThresholds.componentLoadTimeThresholdNormal
