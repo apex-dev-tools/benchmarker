@@ -2,22 +2,29 @@
  * Copyright (c) 2025 Certinia, inc. All rights reserved.
  */
 
-import { getAverageLimitValuesFromDB } from '../../src/database/uiAlertInfo';
+import {
+  getAverageLimitValuesFromDB,
+  saveAlerts,
+} from '../../src/database/uiAlertInfo';
 import * as db from '../../src/database/connection';
 import sinon from 'sinon';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
+import { DataSource } from 'typeorm';
+import { UiAlert } from '../../src/database/entity/uiAlert';
+import { UiTestResult } from '../../src/database/entity/uiTestResult';
 
 chai.use(sinonChai);
 
 describe('src/database/alertInfo', () => {
   let mockQuery: sinon.SinonStub;
+  let connectionStub: sinon.SinonStub;
   let mockDataSource: any;
 
   beforeEach(() => {
     mockQuery = sinon.stub();
     mockDataSource = { query: mockQuery };
-    sinon.stub(db, 'getConnection').resolves(mockDataSource);
+    connectionStub = sinon.stub(db, 'getConnection').resolves(mockDataSource);
   });
 
   afterEach(() => {
@@ -161,6 +168,32 @@ describe('src/database/alertInfo', () => {
 
       // Then
       expect(results).to.deep.equal({});
+    });
+  });
+
+  describe('saveAlerts', () => {
+    it('should save alert', async () => {
+      // Given
+      const saveStub: sinon.SinonStub = sinon.stub().resolvesArg(0);
+      connectionStub.resolves({
+        manager: { save: saveStub },
+      } as unknown as DataSource);
+
+      const results = [new UiAlert()];
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 10;
+      savedEntity.salesforceLoadTime = 20;
+      savedEntity.overallLoadTime = 30;
+
+      // When
+      const savedRecords = await saveAlerts([savedEntity], results);
+
+      // Then
+      expect(saveStub).to.be.calledOnce;
+      expect(savedRecords).to.eql(results);
     });
   });
 });
