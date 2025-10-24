@@ -642,18 +642,20 @@ describe('shared/env/index', () => {
       process.env.NORMAL_COMPONENT_LOAD_THRESHOLD = '10';
 
       // When
-      const normalComponentLoadThreshold = env.getNormalComponentLoadThreshold();
+      const normalComponentLoadThreshold =
+        env.getNormalComponentLoadThreshold();
 
       // Then
       expect(normalComponentLoadThreshold).to.eql('10');
     });
-    
+
     it('return default value when NORMAL_COMPONENT_LOAD_THRESHOLD is not set', () => {
       // Given
       delete process.env.NORMAL_COMPONENT_LOAD_THRESHOLD;
 
       // When
-      const normalComponentLoadThreshold = env.getNormalComponentLoadThreshold();
+      const normalComponentLoadThreshold =
+        env.getNormalComponentLoadThreshold();
 
       // Then
       expect(normalComponentLoadThreshold).to.eql('1000');
@@ -666,18 +668,20 @@ describe('shared/env/index', () => {
       process.env.CRITICAL_COMPONENT_LOAD_THRESHOLD = '10';
 
       // When
-      const criticalComponentLoadThreshold = env.getCriticalComponentLoadThreshold();
+      const criticalComponentLoadThreshold =
+        env.getCriticalComponentLoadThreshold();
 
       // Then
       expect(criticalComponentLoadThreshold).to.eql('10');
     });
-    
+
     it('return default value when CRITICAL_COMPONENT_LOAD_THRESHOLD is not set', () => {
       // Given
       delete process.env.CRITICAL_COMPONENT_LOAD_THRESHOLD;
 
       // When
-      const criticalComponentLoadThreshold = env.getCriticalComponentLoadThreshold();
+      const criticalComponentLoadThreshold =
+        env.getCriticalComponentLoadThreshold();
 
       // Then
       expect(criticalComponentLoadThreshold).to.eql('10000');

@@ -59,3 +59,8 @@ export const CSV_EID = '<EID>';
  ******************************************************************************/
 export const ERROR_OPENING_BROWSER =
   'No test will be executed, a problem was found during browser opening and login';
+/*****************************************************************************
+ * UI ALERT TYPES
+ ******************************************************************************/
+export const NORMAL = 'normal';
+export const CRITICAL = 'critical';
