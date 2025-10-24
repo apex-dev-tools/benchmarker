@@ -109,6 +109,8 @@ export {
   loadUiTestResults,
   UiTestResultDTO,
   UiTestResultFilterOptions,
+  UiAlertInfo,
+  UiAlertThresholds,
 } from './database/uiTestResult';
 
 export namespace Constants {
