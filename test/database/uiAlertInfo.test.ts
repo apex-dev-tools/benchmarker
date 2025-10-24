@@ -179,7 +179,6 @@ describe('src/database/alertInfo', () => {
         manager: { save: saveStub },
       } as unknown as DataSource);
 
-      const results = [new UiAlert()];
       const savedEntity = new UiTestResult();
       savedEntity.id = 1;
       savedEntity.testSuiteName = 'suite';
@@ -188,12 +187,20 @@ describe('src/database/alertInfo', () => {
       savedEntity.salesforceLoadTime = 20;
       savedEntity.overallLoadTime = 30;
 
+      const alert: UiAlert = new UiAlert();
+      alert.testSuiteName = savedEntity.testSuiteName;
+      alert.individualTestName = savedEntity.individualTestName;
+      alert.componentLoadTimeDegraded = 2;
+      alert.alertType = 'normal';
+      const results = [alert];
+
       // When
       const savedRecords = await saveAlerts([savedEntity], results);
 
       // Then
       expect(saveStub).to.be.calledOnce;
       expect(savedRecords).to.eql(results);
+      expect(savedRecords[0].uiTestResultId).to.equal(1);
     });
   });
 });
