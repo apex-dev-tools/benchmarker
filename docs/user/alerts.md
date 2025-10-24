@@ -112,7 +112,7 @@ Note: If the test level threshold is misconfigured below the average, you get an
 ```
 # UI Alerts
 
-UI Alerts can be stored in the database to monitor performance degradation over time. Each record’s degradation value represents the difference between the average of the first 5 ui test results and the average of the subsequent 10 ui test results recorded within the past 10 days. If there have not been at least 15 results in the last 30 days, an ui alert is not stored.
+UI Alerts can be stored in the database to monitor performance degradation over time. Each record’s degradation value represents the difference between the average of the first 5 ui test results and the average of the subsequent 10 ui test results recorded within the past 30 days. If there have not been at least 15 results in the last 30 days, an ui alert is not stored.
 
 ## Usage
 
@@ -131,7 +131,7 @@ To override the default critical component load time threshold (10000 ms), set t
 
 ### Test Level Thresholds
 
-Alternatively, thresholds can be configured at the test level. If the difference between the average of the first 5 and the subsequent 10 UI test results exceeds the defined custom threshold, an alert will be stored. The degradation value remains the difference between the average of the first 5 results and the average of the next 10 results recorded. The threshold simply determines whether an alert is triggered.
+Alternatively, thresholds can be configured at the test level. If the difference between the average of the first 5 and the subsequent 10 ui test results exceeds the defined custom threshold, an alert will be stored. The degradation value remains the difference between the average of the first 5 results and the average of the next 10 results recorded. The threshold simply determines whether an alert is triggered.
 
 ```ts
 // Replace global alert behaviour with exact thresholds
