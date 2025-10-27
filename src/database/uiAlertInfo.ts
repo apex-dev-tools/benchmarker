@@ -3,6 +3,27 @@
  * Copyright (c) 2025 Certinia, Inc. All rights reserved.
  */
 import { getConnection } from './connection';
+import { UiAlert } from './entity/uiAlert';
+import { UiTestResult } from './entity/uiTestResult';
+
+export async function saveAlerts(
+  testResultsDB: UiTestResult[],
+  alerts: UiAlert[]
+) {
+  alerts.forEach(alert => {
+    const match = testResultsDB.find(
+      result =>
+        result.testSuiteName === alert.testSuiteName &&
+        result.individualTestName === alert.individualTestName
+    );
+    if (match) {
+      alert.uiTestResultId = match.id;
+    }
+  });
+
+  const connection = await getConnection();
+  return connection.manager.save(alerts);
+}
 
 export async function getAverageLimitValuesFromDB(
   suiteAndTestNamePairs: { testSuiteName: string; individualTestName: string }[]
