@@ -112,7 +112,7 @@ Note: If the test level threshold is misconfigured below the average, you get an
 ```
 # UI Alerts
 
-UI Alerts can be stored in the database to monitor performance degradation over time. Each record’s degradation value represents the difference between the average of the first 5 ui test results and the average of the subsequent 10 ui test results recorded within the past 30 days. If there have not been at least 15 results in the last 30 days, an ui alert is not stored.
+UI Alerts can be stored in the database to monitor performance degradation over time. Each record’s degradation value represents the difference between the average of the first 5 ui test results and the average of the subsequent 10 ui test results recorded within the past 30 days. A minimum of 15 results within a 30-day window is required to trigger UI alert storage.
 
 ## Usage
 
