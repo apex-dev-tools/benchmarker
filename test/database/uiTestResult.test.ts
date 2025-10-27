@@ -15,16 +15,26 @@ import {
 } from '../../src/database/uiTestResult';
 import { DataSource } from 'typeorm';
 import { UiTestResult } from '../../src/database/entity/uiTestResult';
+import * as uiAlert from '../../src/services/result/uiAlert';
+import { UiAlert } from '../../src/database/entity/uiAlert';
+import * as alertInfo from '../../src/database/uiAlertInfo';
 
 chai.use(sinonChai);
 
 describe('src/database/uiTestResult', () => {
   let connectionStub: SinonStub;
   let saveRecordsStub: SinonStub;
+  let generateValidAlertsStub: SinonStub;
+  let alertInfoStub: SinonStub;
 
   beforeEach(() => {
     connectionStub = sinon.stub(db, 'getConnection');
     saveRecordsStub = sinon.stub(saveModule, 'saveRecords');
+    generateValidAlertsStub = sinon.stub(uiAlert, 'generateValidAlerts');
+    alertInfoStub = sinon.stub(alertInfo, 'saveAlerts');
+
+    alertInfoStub.resolvesArg(0);
+    alertInfoStub.resolvesArg(1);
   });
 
   afterEach(() => {
@@ -51,6 +61,7 @@ describe('src/database/uiTestResult', () => {
       savedEntity.overallLoadTime = 30;
 
       saveRecordsStub.resolves([savedEntity]);
+      generateValidAlertsStub.resolves([]);
 
       // When
       const result = await saveUiTestResult([dto]);
@@ -66,6 +77,46 @@ describe('src/database/uiTestResult', () => {
           overallLoadTime: 30,
         },
       ]);
+      expect(generateValidAlertsStub).to.be.calledOnce;
+      expect(alertInfoStub).to.not.be.called;
+    });
+
+    it('should save alerts if any valid alert entries are returned', async () => {
+      // Given
+      const dto: UiTestResultDTO = {
+        testSuiteName: 'suite',
+        individualTestName: 'test',
+        componentLoadTime: 10,
+        salesforceLoadTime: 20,
+        overallLoadTime: 30,
+      };
+
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 10;
+      savedEntity.salesforceLoadTime = 20;
+      savedEntity.overallLoadTime = 30;
+
+      const alert: UiAlert = new UiAlert();
+      alert.testSuiteName = savedEntity.testSuiteName;
+      alert.individualTestName = savedEntity.individualTestName;
+      alert.componentLoadTimeDegraded = 2;
+      alert.alertType = 'normal';
+
+      saveRecordsStub.resolves([savedEntity]);
+      generateValidAlertsStub.resolves([alert]);
+
+      // When
+      await saveUiTestResult([dto]);
+
+      // Then
+      expect(saveRecordsStub).to.be.calledOnce;
+      expect(generateValidAlertsStub).to.be.calledOnce;
+      expect(alertInfoStub).to.be.calledOnce;
+      expect(alertInfoStub.args[0][0][0].id).to.equal(savedEntity.id);
+      expect(alertInfoStub.args[0][1][0].alertType).to.equal('normal');
     });
   });
 

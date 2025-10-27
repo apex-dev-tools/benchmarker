@@ -6,6 +6,8 @@ import { UiTestResult } from './entity/uiTestResult';
 import { saveRecords } from './saveRecords';
 import { getConnection } from './connection';
 import { MoreThanOrEqual } from 'typeorm';
+import { generateValidAlerts } from '../services/result/uiAlert';
+import { saveAlerts } from './uiAlertInfo';
 
 /**
  * Describes the Thresholds for different limits
@@ -81,6 +83,10 @@ export async function saveUiTestResult(
 ): Promise<UiTestResultDTO[]> {
   const entities = testStepResults.map(dtoToEntity);
   const savedEntities = await saveRecords<UiTestResult>(entities);
+  const alerts = await generateValidAlerts(testStepResults);
+  if (alerts.length) {
+    await saveAlerts(savedEntities, alerts);
+  }
   return savedEntities.map(entityToDto);
 }
 
