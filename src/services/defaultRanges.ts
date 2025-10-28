@@ -6,16 +6,14 @@ import { RangeCollection } from './ranges';
 
 export const DEFAULT_RANGES: RangeCollection = {
   dml_ranges: [
-    { start_range: 0, end_range: 50, offset_threshold: 5 },
-    { start_range: 51, end_range: 100, offset_threshold: 3 },
-    { start_range: 101, end_range: 120, offset_threshold: 2 },
-    { start_range: 121, end_range: 149, offset_threshold: 1 },
+    { start_range: 0, end_range: 50, offset_threshold: 3 },
+    { start_range: 51, end_range: 100, offset_threshold: 2 },
+    { start_range: 101, end_range: 149, offset_threshold: 1 },
   ],
   soql_ranges: [
-    { start_range: 0, end_range: 50, offset_threshold: 10 },
-    { start_range: 51, end_range: 80, offset_threshold: 5 },
-    { start_range: 81, end_range: 90, offset_threshold: 2 },
-    { start_range: 91, end_range: 99, offset_threshold: 1 },
+    { start_range: 0, end_range: 30, offset_threshold: 3 },
+    { start_range: 31, end_range: 60, offset_threshold: 2 },
+    { start_range: 61, end_range: 99, offset_threshold: 1 },
   ],
   cpu_ranges: [
     { start_range: 0, end_range: 2000, offset_threshold: 3000 },

@@ -6,6 +6,29 @@ import { UiTestResult } from './entity/uiTestResult';
 import { saveRecords } from './saveRecords';
 import { getConnection } from './connection';
 import { MoreThanOrEqual } from 'typeorm';
+import { generateValidAlerts } from '../services/result/uiAlert';
+import { saveAlerts } from './uiAlertInfo';
+
+/**
+ * Describes the Thresholds for different limits
+ * Use this class to specify thresholds such as: componentLoadTimeThresholdNormal and componentLoadTimeThresholdCritical.
+ */
+export class UiAlertThresholds {
+  componentLoadTimeThresholdNormal: number;
+  componentLoadTimeThresholdCritical: number;
+}
+
+export class UiAlertInfo {
+  /**
+   * Describes whether alerts need to be stored or not at the test level
+   */
+  public storeAlerts: boolean;
+
+  /**
+   * Defines custom thresholds at the test level. When specified, these values take precedence over defaults and those set in the environment file.
+   */
+  public uiAlertThresholds: UiAlertThresholds;
+}
 
 /**
  * Data Transfer Object for UI Test Results
@@ -16,6 +39,7 @@ export interface UiTestResultDTO {
   componentLoadTime?: number;
   salesforceLoadTime?: number;
   overallLoadTime: number;
+  alertInfo?: UiAlertInfo;
 }
 
 /**
@@ -59,6 +83,10 @@ export async function saveUiTestResult(
 ): Promise<UiTestResultDTO[]> {
   const entities = testStepResults.map(dtoToEntity);
   const savedEntities = await saveRecords<UiTestResult>(entities);
+  const alerts = await generateValidAlerts(testStepResults);
+  if (alerts.length) {
+    await saveAlerts(savedEntities, alerts);
+  }
   return savedEntities.map(entityToDto);
 }
 
