@@ -45,7 +45,18 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockResults = [
+      const mockCountResults = [
+        {
+          individual_test_name: 'individualTestName1',
+          count_older_than_15_days: 20,
+        },
+        {
+          individual_test_name: 'individualTestName2',
+          count_older_than_15_days: 18,
+        },
+      ];
+
+      const mockAvgResults = [
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
@@ -60,15 +71,16 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      mockQuery.resolves(mockResults);
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.onSecondCall().resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
-      expect(mockQuery.calledOnce).to.be.true;
-      expect(mockQuery.args[0][0]).to.include('SELECT');
-      expect(mockQuery.args[0][0]).to.include(
+      expect(mockQuery.calledTwice).to.be.true;
+      expect(mockQuery.args[1][0]).to.include('SELECT');
+      expect(mockQuery.args[1][0]).to.include(
         "(test_suite_name, individual_test_name) IN (('testSuiteName1', 'individualTestName1'), ('testSuiteName2', 'individualTestName2'))"
       );
 
@@ -84,6 +96,60 @@ describe('src/database/uiAlertInfo', () => {
       });
     });
 
+    it('should not return average limit values when no results older than 15 days', async () => {
+      // Given
+      const suiteAndTestNamePairs = [
+        {
+          testSuiteName: 'testSuiteName1',
+          individualTestName: 'individualTestName1',
+        },
+        {
+          testSuiteName: 'testSuiteName2',
+          individualTestName: 'individualTestName2',
+        },
+      ];
+
+      const mockCountResults = [
+        {
+          individual_test_name: 'individualTestName1',
+          count_older_than_15_days: 20,
+        },
+        {
+          individual_test_name: 'individualTestName2',
+          count_older_than_15_days: 0,
+        },
+      ];
+
+      const mockAvgResults = [
+        {
+          test_suite_name: 'testSuiteName1',
+          individual_test_name: 'individualTestName1',
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
+        },
+      ];
+
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.onSecondCall().resolves(mockAvgResults);
+
+      // When
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+
+      // Then
+      expect(mockQuery.calledTwice).to.be.true;
+      expect(mockQuery.args[1][0]).to.include('SELECT');
+      expect(mockQuery.args[1][0]).to.include(
+        "(test_suite_name, individual_test_name) IN (('testSuiteName1', 'individualTestName1'))"
+      );
+
+      expect(results).to.deep.equal({
+        testSuiteName1_individualTestName1: {
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
+        },
+      });
+    });
+
     it('should return an empty object when no results are found', async () => {
       // Given
       const suiteAndTestNamePairs = [
@@ -93,13 +159,25 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      mockQuery.resolves([]);
+      const mockCountResults = [
+        {
+          individual_test_name: 'individualTestName1',
+          count_older_than_15_days: 20,
+        },
+        {
+          individual_test_name: 'individualTestName2',
+          count_older_than_15_days: 18,
+        },
+      ];
+
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.onSecondCall().resolves([]);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
-      expect(mockQuery.calledOnce).to.be.true;
+      expect(mockQuery.calledTwice).to.be.true;
       expect(results).to.deep.equal({});
     });
 
@@ -112,7 +190,18 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockResults = [
+      const mockCountResults = [
+        {
+          individual_test_name: 'individualTestName1',
+          count_older_than_15_days: 20,
+        },
+        {
+          individual_test_name: 'individualTestName2',
+          count_older_than_15_days: 18,
+        },
+      ];
+
+      const mockAvgResults = [
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
@@ -121,7 +210,8 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      mockQuery.resolves(mockResults);
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.onSecondCall().resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
@@ -143,7 +233,8 @@ describe('src/database/uiAlertInfo', () => {
       }[] = [];
 
       // Simulate no results (empty array)
-      mockQuery.resolves([]);
+      mockQuery.onFirstCall().resolves([]);
+      mockQuery.onSecondCall().resolves([]);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);

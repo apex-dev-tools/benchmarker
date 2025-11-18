@@ -30,11 +30,46 @@ export async function getAverageLimitValuesFromDB(
 ) {
   const connection = await getConnection();
 
+  const countQuery = `
+    SELECT individual_test_name,
+      	COUNT(create_date_time) AS count_older_than_15_days
+      FROM performance.ui_test_result
+      WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
+      GROUP BY individual_test_name
+  `;
+
+  const countResultMap: {
+    [key: string]: { count_older_than_15_days: number };
+  } = {};
+  try {
+    const countResult = await connection.query(countQuery);
+    countResult.forEach(
+      (row: {
+        individual_test_name: string;
+        count_older_than_15_days: number;
+      }) => {
+        countResultMap[row.individual_test_name] = {
+          count_older_than_15_days: row.count_older_than_15_days,
+        };
+      }
+    );
+  } catch (error) {
+    console.error('Error in fetching the count values: ', error);
+    return {};
+  }
+
   const suiteAndTestNameConditions = suiteAndTestNamePairs
-    .map(pair => `('${pair.testSuiteName}', '${pair.individualTestName}')`)
+    .flatMap(pair => {
+      if (
+        countResultMap[pair.individualTestName]?.count_older_than_15_days > 0
+      ) {
+        return [`('${pair.testSuiteName}', '${pair.individualTestName}')`];
+      }
+      return [];
+    })
     .join(', ');
 
-  const query = `
+  const avgQuery = `
     SELECT 
       individual_test_name,
       AVG(CASE 
@@ -63,7 +98,7 @@ export async function getAverageLimitValuesFromDB(
   } = {};
 
   try {
-    const result = await connection.query(query);
+    const result = await connection.query(avgQuery);
 
     // Populate the results map
     result.forEach(
