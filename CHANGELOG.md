@@ -1,5 +1,10 @@
 # Benchmarker - Changelog
 
+## 6.0.1
+
+- Update logic for UI test alerts to use 15 days worth of results for averages.
+- Update logic for UI test alerts so that tests with less than 15 days worth of results will not alert.
+
 ## 6.0.0
 
 ### Breaking Changes
