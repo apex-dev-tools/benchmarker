@@ -30,57 +30,94 @@ export async function getAverageLimitValuesFromDB(
 ) {
   const connection = await getConnection();
 
+  const countQuery = `
+    SELECT individual_test_name,
+      	COUNT(create_date_time) AS count_older_than_15_days
+      FROM performance.ui_test_result
+      WHERE create_date_time <= CURRENT_DATE - INTERVAL '15 days'
+      GROUP BY individual_test_name
+  `;
+
+  const countResultMap: {
+    [key: string]: { count_older_than_15_days: number };
+  } = {};
+  try {
+    const countResult = await connection.query(countQuery);
+    countResult.forEach(
+      (row: {
+        individual_test_name: string;
+        count_older_than_15_days: number;
+      }) => {
+        countResultMap[row.individual_test_name] = {
+          count_older_than_15_days: row.count_older_than_15_days,
+        };
+      }
+    );
+  } catch (error) {
+    console.error('Error in fetching the count values: ', error);
+    return {};
+  }
+
   const suiteAndTestNameConditions = suiteAndTestNamePairs
-    .map(pair => `('${pair.testSuiteName}', '${pair.individualTestName}')`)
+    .flatMap(pair => {
+      if (
+        countResultMap[pair.individualTestName]?.count_older_than_15_days > 0
+      ) {
+        return [`('${pair.testSuiteName}', '${pair.individualTestName}')`];
+      }
+      return [];
+    })
     .join(', ');
 
-  const query = `
-    WITH ranked AS (
-        SELECT
-            test_suite_name,
-            individual_test_name,
-            component_load_time,
-            create_date_time,
-            ROW_NUMBER() OVER (
-                PARTITION BY test_suite_name, individual_test_name
-                ORDER BY create_date_time DESC
-            ) AS rn
-        FROM performance.ui_test_result
-        WHERE (create_date_time >= CURRENT_TIMESTAMP - INTERVAL '30 DAYS')
-          AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
-    )
-    SELECT
-        test_suite_name,
-        individual_test_name,
-        ROUND(AVG(CASE WHEN rn BETWEEN 1 AND 5 THEN component_load_time END)::numeric, 0) AS avg_first_5,
-        ROUND(AVG(CASE WHEN rn BETWEEN 6 AND 15 THEN component_load_time END)::numeric, 0) AS avg_next_10
-    FROM ranked
-    GROUP BY test_suite_name, individual_test_name
-    HAVING COUNT(*) >= 15
+  if (suiteAndTestNameConditions.length === 0) {
+    return {};
+  }
+
+  const avgQuery = `
+    SELECT 
+      individual_test_name,
+      test_suite_name,
+      AVG(CASE 
+          WHEN create_date_time >= CURRENT_DATE - INTERVAL '5 days' 
+          THEN component_load_time 
+          ELSE NULL 
+      END) AS avg_load_time_past_5_days,
+      AVG(CASE 
+          WHEN create_date_time >= CURRENT_DATE - INTERVAL '15 days' 
+              AND create_date_time < CURRENT_DATE - INTERVAL '5 days' 
+          THEN component_load_time 
+          ELSE NULL 
+      END) AS avg_load_time_6_to_15_days_ago
+    FROM performance.ui_test_result
+    WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
+      AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
+    GROUP BY individual_test_name, test_suite_name
+    ORDER BY individual_test_name;
   `;
 
   const resultsMap: {
     [key: string]: {
-      avg_first_5: number;
-      avg_next_10: number;
+      avg_load_time_past_5_days: number;
+      avg_load_time_6_to_15_days_ago: number;
     };
   } = {};
 
   try {
-    const result = await connection.query(query);
+    const result = await connection.query(avgQuery);
 
     // Populate the results map
     result.forEach(
       (row: {
         test_suite_name: string;
         individual_test_name: string;
-        avg_first_5: number;
-        avg_next_10: number;
+        avg_load_time_past_5_days: number;
+        avg_load_time_6_to_15_days_ago: number;
       }) => {
         const key = `${row.test_suite_name}_${row.individual_test_name}`;
         resultsMap[key] = {
-          avg_first_5: row.avg_first_5 ?? 0,
-          avg_next_10: row.avg_next_10 ?? 0,
+          avg_load_time_past_5_days: row.avg_load_time_past_5_days ?? 0,
+          avg_load_time_6_to_15_days_ago:
+            row.avg_load_time_6_to_15_days_ago ?? 0,
         };
       }
     );
