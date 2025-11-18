@@ -34,7 +34,7 @@ export async function getAverageLimitValuesFromDB(
     SELECT individual_test_name,
       	COUNT(create_date_time) AS count_older_than_15_days
       FROM performance.ui_test_result
-      WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
+      WHERE create_date_time <= CURRENT_DATE - INTERVAL '15 days'
       GROUP BY individual_test_name
   `;
 
@@ -69,9 +69,14 @@ export async function getAverageLimitValuesFromDB(
     })
     .join(', ');
 
+  if (suiteAndTestNameConditions.length === 0) {
+    return {};
+  }
+
   const avgQuery = `
     SELECT 
       individual_test_name,
+      test_suite_name,
       AVG(CASE 
           WHEN create_date_time >= CURRENT_DATE - INTERVAL '5 days' 
           THEN component_load_time 
@@ -86,7 +91,7 @@ export async function getAverageLimitValuesFromDB(
     FROM performance.ui_test_result
     WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
       AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
-    GROUP BY individual_test_name
+    GROUP BY individual_test_name, test_suite_name
     ORDER BY individual_test_name;
   `;
 

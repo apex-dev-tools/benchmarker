@@ -96,7 +96,7 @@ describe('src/database/uiAlertInfo', () => {
       });
     });
 
-    it('should not return average limit values when no results older than 15 days', async () => {
+    it('should not return average limit values when a test has no results older than 15 days', async () => {
       // Given
       const suiteAndTestNamePairs = [
         {
@@ -148,6 +148,41 @@ describe('src/database/uiAlertInfo', () => {
           avg_load_time_6_to_15_days_ago: 1500,
         },
       });
+    });
+
+    it('should not return average limit values when no results older than 15 days', async () => {
+      // Given
+      const suiteAndTestNamePairs = [
+        {
+          testSuiteName: 'testSuiteName1',
+          individualTestName: 'individualTestName1',
+        },
+        {
+          testSuiteName: 'testSuiteName2',
+          individualTestName: 'individualTestName2',
+        },
+      ];
+
+      const mockCountResults = [
+        {
+          individual_test_name: 'individualTestName1',
+          count_older_than_15_days: 0,
+        },
+        {
+          individual_test_name: 'individualTestName2',
+          count_older_than_15_days: 0,
+        },
+      ];
+
+      mockQuery.onFirstCall().resolves(mockCountResults);
+
+      // When
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+
+      // Then
+      expect(mockQuery.calledOnce).to.be.true;
+
+      expect(results).to.deep.equal({});
     });
 
     it('should return an empty object when no results are found', async () => {
