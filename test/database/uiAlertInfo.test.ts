@@ -16,7 +16,7 @@ import { UiTestResult } from '../../src/database/entity/uiTestResult';
 
 chai.use(sinonChai);
 
-describe('src/database/alertInfo', () => {
+describe('src/database/uiAlertInfo', () => {
   let mockQuery: sinon.SinonStub;
   let connectionStub: sinon.SinonStub;
   let mockDataSource: any;
@@ -49,14 +49,14 @@ describe('src/database/alertInfo', () => {
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
-          avg_first_5: 2000,
-          avg_next_10: 1500,
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
         },
         {
           test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
-          avg_first_5: 2000,
-          avg_next_10: 1500,
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
         },
       ];
 
@@ -74,12 +74,12 @@ describe('src/database/alertInfo', () => {
 
       expect(results).to.deep.equal({
         testSuiteName1_individualTestName1: {
-          avg_first_5: 2000,
-          avg_next_10: 1500,
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
         },
         testSuiteName2_individualTestName2: {
-          avg_first_5: 2000,
-          avg_next_10: 1500,
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: 1500,
         },
       });
     });
@@ -116,8 +116,8 @@ describe('src/database/alertInfo', () => {
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
-          avg_first_5: null,
-          avg_next_10: undefined,
+          avg_load_time_past_5_days: null,
+          avg_load_time_6_to_15_days_ago: undefined,
         },
       ];
 
@@ -129,8 +129,8 @@ describe('src/database/alertInfo', () => {
       // Then
       expect(results).to.deep.equal({
         testSuiteName1_individualTestName1: {
-          avg_first_5: 0,
-          avg_next_10: 0,
+          avg_load_time_past_5_days: 0,
+          avg_load_time_6_to_15_days_ago: 0,
         },
       });
     });
