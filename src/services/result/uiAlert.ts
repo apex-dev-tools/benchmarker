@@ -57,8 +57,8 @@ async function addAlertByComparingAvg(
   output: UiTestResultDTO,
   preFetchedAverages: {
     [key: string]: {
-      avg_first_5: number;
-      avg_next_10: number;
+      avg_load_time_past_5_days: number;
+      avg_load_time_6_to_15_days_ago: number;
     };
   }
 ): Promise<UiAlert> {
@@ -85,7 +85,8 @@ async function addAlertByComparingAvg(
     ? output.alertInfo.uiAlertThresholds.componentLoadTimeThresholdCritical
     : Number(getCriticalComponentLoadThreshold());
   const componentLoadThresholdDegraded = Math.abs(
-    averageResults.avg_first_5 - averageResults.avg_next_10
+    averageResults.avg_load_time_past_5_days -
+      averageResults.avg_load_time_6_to_15_days_ago
   );
 
   if (

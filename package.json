@@ -1,6 +1,6 @@
 {
   "name": "@apexdevtools/benchmarker",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Benchmarks performance of processes on Salesforce Orgs",
   "author": {
     "name": "Apex Dev Tools Team",
@@ -25,7 +25,6 @@
     "doc:generate": "typedoc --out docs/api ./src",
     "lint": "eslint ./src ./test ./test_system --fix",
     "prepare": "ts-patch install -s && husky",
-    "postversion": "npm run doc:generate",
     "test": "nyc mocha --timeout 10000 'test/**/*.test.*'",
     "test:only": "nyc mocha --timeout 10000",
     "test:system:init": "cp test_system/.env .env",
