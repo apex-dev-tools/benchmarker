@@ -1,5 +1,9 @@
 # Benchmarker - Changelog
 
+## 6.0.2
+
+- Update logic to generate UI Alerts to handle averages that are decimals.
+
 ## 6.0.1
 
 - Update logic for UI test alerts to use 15 days worth of results for averages.

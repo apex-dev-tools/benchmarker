@@ -77,17 +77,17 @@ export async function getAverageLimitValuesFromDB(
     SELECT 
       individual_test_name,
       test_suite_name,
-      AVG(CASE 
+      ROUND(AVG(CASE 
           WHEN create_date_time >= CURRENT_DATE - INTERVAL '5 days' 
           THEN component_load_time 
           ELSE NULL 
-      END) AS avg_load_time_past_5_days,
-      AVG(CASE 
+      END)::numeric, 0) AS avg_load_time_past_5_days,
+      ROUND(AVG(CASE 
           WHEN create_date_time >= CURRENT_DATE - INTERVAL '15 days' 
               AND create_date_time < CURRENT_DATE - INTERVAL '5 days' 
           THEN component_load_time 
           ELSE NULL 
-      END) AS avg_load_time_6_to_15_days_ago
+      END)::numeric, 0) AS avg_load_time_6_to_15_days_ago
     FROM performance.ui_test_result
     WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
       AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
