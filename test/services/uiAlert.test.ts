@@ -107,7 +107,7 @@ describe('generateValidAlerts', () => {
     const avgFirst5 = 200;
     it('should skip processing if an alert was already triggered for this test in the last 3 days', async () => {
       // Given
-      const avgNext10 = 200;
+      const avgNext10 = 100;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
           avg_load_time_past_5_days: avgFirst5,
@@ -129,7 +129,7 @@ describe('generateValidAlerts', () => {
 
     it('should process the test normally if no recent alerts exist', async () => {
       // Given
-      const avgNext10 = 200;
+      const avgNext10 = 100;
       const mockAverages = {
         ['ComponentLoadSuite_ComponentXLoadTime']: {
           avg_load_time_past_5_days: avgFirst5,
