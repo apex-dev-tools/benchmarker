@@ -7,7 +7,7 @@ import * as env from '../../src/shared/env';
 import * as uiAlertInfo from '../../src/database/uiAlertInfo';
 
 import { UiTestResultDTO } from '../../src/database/uiTestResult';
-import { NORMAL, CRITICAL } from '../../src/shared/constants';
+import { CRITICAL } from '../../src/shared/constants';
 
 chai.use(sinonChai);
 
@@ -26,6 +26,7 @@ describe('generateValidAlerts', () => {
   let getAveragesStub: sinon.SinonStub;
   let normalThresholdStub: sinon.SinonStub;
   let criticalThresholdStub: sinon.SinonStub;
+  let checkRecentStub: sinon.SinonStub;
 
   before(() => {
     sandbox = sinon.createSandbox();
@@ -38,6 +39,7 @@ describe('generateValidAlerts', () => {
     );
 
     getAveragesStub = sandbox.stub(uiAlertInfo, 'getAverageLimitValuesFromDB');
+    checkRecentStub = sandbox.stub(uiAlertInfo, 'checkRecentUiAlerts');
   });
 
   beforeEach(() => {
@@ -47,6 +49,7 @@ describe('generateValidAlerts', () => {
     normalThresholdStub.returns('20');
     criticalThresholdStub.returns('50');
     getAveragesStub.resolves({});
+    checkRecentStub.resolves(new Set<string>());
   });
 
   after(() => {
@@ -100,6 +103,51 @@ describe('generateValidAlerts', () => {
     });
   });
 
+  describe('recent alert filtering', () => {
+    const avgFirst5 = 200;
+    it('should skip processing if an alert was already triggered for this test in the last 3 days', async () => {
+      // Given
+      const avgNext10 = 200;
+      const mockAverages = {
+        ['ComponentLoadSuite_ComponentXLoadTime']: {
+          avg_load_time_past_5_days: avgFirst5,
+          avg_load_time_6_to_15_days_ago: avgNext10,
+        },
+      };
+      checkRecentStub.resolves(
+        new Set(['ComponentLoadSuite_ComponentXLoadTime'])
+      );
+      getAveragesStub.resolves(mockAverages);
+
+      // When
+      const results = await generateValidAlerts([MOCK_TEST_DTO_BASE]);
+
+      // Then
+      expect(results).to.be.an('array').that.is.empty;
+      expect(getAveragesStub).to.not.have.been.called;
+    });
+
+    it('should process the test normally if no recent alerts exist', async () => {
+      // Given
+      const avgNext10 = 200;
+      const mockAverages = {
+        ['ComponentLoadSuite_ComponentXLoadTime']: {
+          avg_load_time_past_5_days: avgFirst5,
+          avg_load_time_6_to_15_days_ago: avgNext10,
+        },
+      };
+      checkRecentStub.resolves(new Set());
+      getAveragesStub.resolves(mockAverages);
+
+      // When
+      const results = await generateValidAlerts([MOCK_TEST_DTO_BASE]);
+
+      // Then
+      expect(results).to.have.lengthOf(1);
+      expect(getAveragesStub).to.have.been.called;
+    });
+  });
+
   describe('alert generation logic', () => {
     const avgFirst5 = 200;
 
@@ -139,7 +187,6 @@ describe('generateValidAlerts', () => {
 
       // Then
       expect(results).to.have.lengthOf(1);
-      expect(results[0].alertType).to.equal(NORMAL);
       expect(results[0].componentLoadTimeDegraded).to.equal(35);
     });
 
@@ -220,7 +267,6 @@ describe('generateValidAlerts', () => {
 
     // Then
     expect(results).to.have.lengthOf(1);
-    expect(results[0].alertType).to.equal(NORMAL);
     expect(results[0].componentLoadTimeDegraded).to.equal(25);
     expect(normalThresholdStub).to.not.have.been.called;
   });

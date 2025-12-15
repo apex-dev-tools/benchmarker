@@ -128,3 +128,37 @@ export async function getAverageLimitValuesFromDB(
     return {};
   }
 }
+
+export async function checkRecentUiAlerts(
+  suiteAndTestNamePairs: { testSuiteName: string; individualTestName: string }[]
+) {
+  const connection = await getConnection();
+
+  const suiteAndTestNameConditions = suiteAndTestNamePairs
+    .map(pair => `('${pair.testSuiteName}', '${pair.individualTestName}')`)
+    .join(', ');
+
+  const query = `
+    SELECT test_suite_name, individual_test_name
+    FROM performance.ui_alert
+    WHERE create_date_time >= CURRENT_DATE - INTERVAL '3 days'
+      AND (test_suite_name, individual_test_name) IN (${suiteAndTestNameConditions})
+  `;
+
+  const existingAlerts = new Set<string>();
+
+  try {
+    const result = await connection.query(query);
+    result.forEach(
+      (row: { test_suite_name: string; individual_test_name: string }) => {
+        existingAlerts.add(
+          `${row.test_suite_name}_${row.individual_test_name}`
+        );
+      }
+    );
+  } catch (error) {
+    console.error('Error checking recent UI alerts:', error);
+  }
+
+  return existingAlerts;
+}
