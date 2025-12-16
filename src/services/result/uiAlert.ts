@@ -13,7 +13,7 @@ import {
 } from '../../database/uiAlertInfo';
 import { UiAlert } from '../../database/entity/uiAlert';
 import { UiTestResultDTO } from '../../database/uiTestResult';
-import { CRITICAL } from '../../shared/constants';
+import { CRITICAL, NORMAL } from '../../shared/constants';
 
 export async function generateValidAlerts(
   testResultOutput: UiTestResultDTO[]
@@ -108,6 +108,7 @@ async function addAlertByComparingAvg(
     componentLoadThresholdDegraded < criticalComponentLoadThreshold
   ) {
     alert.componentLoadTimeDegraded = componentLoadThresholdDegraded;
+    alert.alertType = NORMAL;
   } else if (componentLoadThresholdDegraded >= criticalComponentLoadThreshold) {
     alert.componentLoadTimeDegraded = componentLoadThresholdDegraded;
     alert.alertType = CRITICAL;
