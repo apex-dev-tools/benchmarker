@@ -1,5 +1,9 @@
 # Benchmarker - Changelog
 
+## 6.1.0
+
+- UI performance alerts are now suppressed if the same test suite and individual test have already triggered an alert within the last 3 days.
+
 ## 6.0.2
 
 - Update logic to generate UI Alerts to handle averages that are decimals.
@@ -41,6 +45,7 @@
 ### Added
 
 - New property on `TestStepDescription`, `additionalData`. Provide custom string information to link to results.
+
   - Stored against `flowName`, `action` and `product` of the test.
   - To set it use `createApexExecutionTestStepFlow(connection, path, { flowName, action, additionalData })`.
 
@@ -76,6 +81,7 @@
 ### Added
 
 - New alerts config for global and per test usage. Used for reporting on degradations over time.
+
   - Configure global behaviour with a JSON file, or per test with new parameter on `TransactionProcess.executeTestStep`.
   - See [the documentation on alerts](./docs/user/alerts.md) for more details.
 
