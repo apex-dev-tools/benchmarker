@@ -62,4 +62,5 @@ export const ERROR_OPENING_BROWSER =
 /*****************************************************************************
  * UI ALERT TYPES
  ******************************************************************************/
+export const NORMAL = 'normal';
 export const CRITICAL = 'critical';
