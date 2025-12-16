@@ -1,6 +1,6 @@
 {
   "name": "@apexdevtools/benchmarker",
-  "version": "6.0.2",
+  "version": "6.1.2",
   "description": "Benchmarks performance of processes on Salesforce Orgs",
   "author": {
     "name": "Apex Dev Tools Team",
