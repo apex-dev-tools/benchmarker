@@ -7,7 +7,7 @@ import * as env from '../../src/shared/env';
 import * as uiAlertInfo from '../../src/database/uiAlertInfo';
 
 import { UiTestResultDTO } from '../../src/database/uiTestResult';
-import { CRITICAL } from '../../src/shared/constants';
+import { NORMAL, CRITICAL } from '../../src/shared/constants';
 
 chai.use(sinonChai);
 
