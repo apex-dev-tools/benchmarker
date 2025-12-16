@@ -187,6 +187,7 @@ describe('generateValidAlerts', () => {
 
       // Then
       expect(results).to.have.lengthOf(1);
+      expect(results[0].alertType).to.equal(NORMAL);
       expect(results[0].componentLoadTimeDegraded).to.equal(35);
     });
 
@@ -267,6 +268,7 @@ describe('generateValidAlerts', () => {
 
     // Then
     expect(results).to.have.lengthOf(1);
+    expect(results[0].alertType).to.equal(NORMAL);
     expect(results[0].componentLoadTimeDegraded).to.equal(25);
     expect(normalThresholdStub).to.not.have.been.called;
   });
