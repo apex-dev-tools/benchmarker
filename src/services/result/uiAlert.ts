@@ -7,7 +7,10 @@ import {
   getNormalComponentLoadThreshold,
   getCriticalComponentLoadThreshold,
 } from '../../shared/env';
-import { getAverageLimitValuesFromDB } from '../../database/uiAlertInfo';
+import {
+  getAverageLimitValuesFromDB,
+  checkRecentUiAlerts,
+} from '../../database/uiAlertInfo';
 import { UiAlert } from '../../database/entity/uiAlert';
 import { UiTestResultDTO } from '../../database/uiTestResult';
 import { NORMAL, CRITICAL } from '../../shared/constants';
@@ -31,6 +34,17 @@ export async function generateValidAlerts(
       individualTestName: result.individualTestName,
     }));
 
+    const existingAlerts = await checkRecentUiAlerts(suiteAndTestNamePairs);
+
+    const alertsToProcess = needToStoreAlert.filter(
+      item =>
+        !existingAlerts.has(`${item.testSuiteName}_${item.individualTestName}`)
+    );
+
+    if (alertsToProcess.length === 0) {
+      return [];
+    }
+
     // Fetch average values
     const preFetchedAverages = await getAverageLimitValuesFromDB(
       suiteAndTestNamePairs
@@ -38,7 +52,7 @@ export async function generateValidAlerts(
 
     // Generate alerts
     const alerts = await Promise.all(
-      needToStoreAlert.map(async item =>
+      alertsToProcess.map(async item =>
         addAlertByComparingAvg(item, preFetchedAverages)
       )
     );

@@ -5,6 +5,7 @@
 import {
   getAverageLimitValuesFromDB,
   saveAlerts,
+  checkRecentUiAlerts,
 } from '../../src/database/uiAlertInfo';
 import * as db from '../../src/database/connection';
 import sinon from 'sinon';
@@ -327,6 +328,73 @@ describe('src/database/uiAlertInfo', () => {
       expect(saveStub).to.be.calledOnce;
       expect(savedRecords).to.eql(results);
       expect(savedRecords[0].uiTestResultId).to.equal(1);
+    });
+  });
+
+  describe('checkRecentUiAlerts', () => {
+    it('should return a Set of keys for alerts found in the last 3 days', async () => {
+      // Given
+      const pairs = [
+        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
+        { testSuiteName: 'SuiteB', individualTestName: 'Test2' },
+      ];
+
+      const mockDbRows = [
+        { test_suite_name: 'SuiteA', individual_test_name: 'Test1' },
+      ];
+
+      mockQuery.resolves(mockDbRows);
+
+      // When
+      const result = await checkRecentUiAlerts(pairs);
+
+      // Then
+      expect(mockQuery).to.have.been.calledOnce;
+
+      const sqlQuery = mockQuery.firstCall.args[0];
+      expect(sqlQuery).to.include("INTERVAL '3 days'");
+
+      expect(sqlQuery).to.include("('SuiteA', 'Test1')");
+      expect(sqlQuery).to.include("('SuiteB', 'Test2')");
+
+      expect(result).to.be.instanceOf(Set);
+      expect(result.size).to.equal(1);
+      expect(result.has('SuiteA_Test1')).to.be.true;
+      expect(result.has('SuiteB_Test2')).to.be.false;
+    });
+
+    it('should return an empty Set if no recent alerts are found', async () => {
+      // Given
+      mockQuery.resolves([]);
+
+      // When
+      const result = await checkRecentUiAlerts([
+        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
+      ]);
+
+      // Then
+      expect(result).to.be.instanceOf(Set);
+      expect(result.size).to.equal(0);
+    });
+
+    it('should handle database errors gracefully by returning an empty Set', async () => {
+      // Given
+      const consoleStub = sinon.stub(console, 'error');
+      mockQuery.rejects(new Error('Connection failed'));
+
+      // When
+      const result = await checkRecentUiAlerts([
+        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
+      ]);
+
+      // Then
+      expect(result).to.be.instanceOf(Set);
+      expect(result.size).to.equal(0);
+      expect(consoleStub).to.have.been.calledWith(
+        sinon.match('Error checking recent UI alerts')
+      );
+
+      consoleStub.restore();
     });
   });
 });

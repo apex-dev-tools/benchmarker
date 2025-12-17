@@ -1,5 +1,9 @@
 # Benchmarker - Changelog
 
+## 6.1.0
+
+- UI performance alerts are now suppressed if the same test suite and individual test have already triggered an alert within the last 3 days.
+
 ## 6.0.2
 
 - Update logic to generate UI Alerts to handle averages that are decimals.
