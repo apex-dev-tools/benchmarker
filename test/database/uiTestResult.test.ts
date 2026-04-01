@@ -50,6 +50,7 @@ describe('src/database/uiTestResult', () => {
         componentLoadTime: 10,
         salesforceLoadTime: 20,
         overallLoadTime: 30,
+        lwsEnabled: false,
       };
 
       const savedEntity = new UiTestResult();
@@ -59,6 +60,7 @@ describe('src/database/uiTestResult', () => {
       savedEntity.componentLoadTime = 10;
       savedEntity.salesforceLoadTime = 20;
       savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
 
       saveRecordsStub.resolves([savedEntity]);
       generateValidAlertsStub.resolves([]);
@@ -75,6 +77,7 @@ describe('src/database/uiTestResult', () => {
           componentLoadTime: 10,
           salesforceLoadTime: 20,
           overallLoadTime: 30,
+          lwsEnabled: false,
         },
       ]);
       expect(generateValidAlertsStub).to.be.calledOnce;
@@ -89,6 +92,7 @@ describe('src/database/uiTestResult', () => {
         componentLoadTime: 10,
         salesforceLoadTime: 20,
         overallLoadTime: 30,
+        lwsEnabled: false,
       };
 
       const savedEntity = new UiTestResult();
@@ -98,6 +102,7 @@ describe('src/database/uiTestResult', () => {
       savedEntity.componentLoadTime = 10;
       savedEntity.salesforceLoadTime = 20;
       savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
 
       const alert: UiAlert = new UiAlert();
       alert.testSuiteName = savedEntity.testSuiteName;
@@ -118,6 +123,125 @@ describe('src/database/uiTestResult', () => {
       expect(alertInfoStub.args[0][0][0].id).to.equal(savedEntity.id);
       expect(alertInfoStub.args[0][1][0].alertType).to.equal('normal');
     });
+
+    it('should default lwsEnabled to false when not provided in DTO', async () => {
+      // Given
+      const dto: UiTestResultDTO = {
+        testSuiteName: 'suite',
+        individualTestName: 'test',
+        componentLoadTime: 10,
+        salesforceLoadTime: 20,
+        overallLoadTime: 30,
+      };
+
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 10;
+      savedEntity.salesforceLoadTime = 20;
+      savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
+
+      saveRecordsStub.resolves([savedEntity]);
+      generateValidAlertsStub.resolves([]);
+
+      // When
+      const result = await saveUiTestResult([dto]);
+
+      // Then
+      const entityPassedToSave = saveRecordsStub.args[0][0][0] as UiTestResult;
+      expect(entityPassedToSave.lwsEnabled).to.equal(false);
+      expect(result).to.eql([
+        {
+          testSuiteName: 'suite',
+          individualTestName: 'test',
+          componentLoadTime: 10,
+          salesforceLoadTime: 20,
+          overallLoadTime: 30,
+          lwsEnabled: false,
+        },
+      ]);
+    });
+
+    it('should preserve lwsEnabled=true through save and return', async () => {
+      // Given
+      const dto: UiTestResultDTO = {
+        testSuiteName: 'suite',
+        individualTestName: 'test',
+        componentLoadTime: 10,
+        salesforceLoadTime: 20,
+        overallLoadTime: 30,
+        lwsEnabled: true,
+      };
+
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 10;
+      savedEntity.salesforceLoadTime = 20;
+      savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = true;
+
+      saveRecordsStub.resolves([savedEntity]);
+      generateValidAlertsStub.resolves([]);
+
+      // When
+      const result = await saveUiTestResult([dto]);
+
+      // Then
+      expect(result).to.eql([
+        {
+          testSuiteName: 'suite',
+          individualTestName: 'test',
+          componentLoadTime: 10,
+          salesforceLoadTime: 20,
+          overallLoadTime: 30,
+          lwsEnabled: true,
+        },
+      ]);
+    });
+
+    it('should convert DTO to entities, when component and salesforce load times are provided, default to zero', async () => {
+      // Given
+      const dto: UiTestResultDTO = {
+        testSuiteName: 'suite',
+        individualTestName: 'test',
+        overallLoadTime: 30,
+        lwsEnabled: false,
+      };
+
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 0;
+      savedEntity.salesforceLoadTime = 0;
+      savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
+
+      saveRecordsStub.resolves([savedEntity]);
+      generateValidAlertsStub.resolves([]);
+
+      // When
+      const result = await saveUiTestResult([dto]);
+
+      // Then
+      expect(saveRecordsStub).to.be.calledOnce;
+      expect(result).to.eql([
+        {
+          testSuiteName: 'suite',
+          individualTestName: 'test',
+          componentLoadTime: 0,
+          salesforceLoadTime: 0,
+          overallLoadTime: 30,
+          lwsEnabled: false,
+        },
+      ]);
+      expect(generateValidAlertsStub).to.be.calledOnce;
+      expect(alertInfoStub).to.not.be.called;
+    });
   });
 
   describe('loadUiTestResults', () => {
@@ -130,6 +254,7 @@ describe('src/database/uiTestResult', () => {
       entity.componentLoadTime = 100;
       entity.salesforceLoadTime = 200;
       entity.overallLoadTime = 300;
+      entity.lwsEnabled = false;
 
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
@@ -154,6 +279,7 @@ describe('src/database/uiTestResult', () => {
           componentLoadTime: 100,
           salesforceLoadTime: 200,
           overallLoadTime: 300,
+          lwsEnabled: false,
         },
       ]);
     });
@@ -167,6 +293,7 @@ describe('src/database/uiTestResult', () => {
       entity1.componentLoadTime = 50;
       entity1.salesforceLoadTime = 150;
       entity1.overallLoadTime = 200;
+      entity1.lwsEnabled = false;
 
       const findStub = sinon.stub().resolves([entity1]);
       connectionStub.resolves({
@@ -201,6 +328,7 @@ describe('src/database/uiTestResult', () => {
           componentLoadTime: 50,
           salesforceLoadTime: 150,
           overallLoadTime: 200,
+          lwsEnabled: false,
         },
       ]);
     });
@@ -214,6 +342,7 @@ describe('src/database/uiTestResult', () => {
       entity.componentLoadTime = 75;
       entity.salesforceLoadTime = 125;
       entity.overallLoadTime = 250;
+      entity.lwsEnabled = false;
 
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
@@ -250,6 +379,104 @@ describe('src/database/uiTestResult', () => {
           componentLoadTime: 75,
           salesforceLoadTime: 125,
           overallLoadTime: 250,
+          lwsEnabled: false,
+        },
+      ]);
+    });
+
+    it('should filter by lwsEnabled and include 30-day filter when provided', async () => {
+      // Given
+      const entity = new UiTestResult();
+      entity.id = 5;
+      entity.testSuiteName = 'lws-suite';
+      entity.individualTestName = 'lws-test';
+      entity.componentLoadTime = 60;
+      entity.salesforceLoadTime = 140;
+      entity.overallLoadTime = 220;
+      entity.lwsEnabled = true;
+
+      const findStub = sinon.stub().resolves([entity]);
+      connectionStub.resolves({
+        manager: { find: findStub },
+      } as unknown as DataSource);
+
+      const filterOptions: UiTestResultFilterOptions = {
+        lwsEnabled: true,
+      };
+
+      // When
+      const result = await loadUiTestResults(filterOptions);
+
+      // Then
+      expect(connectionStub).to.be.calledOnce;
+      expect(findStub).to.be.calledWith(UiTestResult, {
+        where: [
+          {
+            createDateTime: sinon.match.any,
+            lwsEnabled: true,
+          },
+        ],
+        order: {
+          createDateTime: 'DESC',
+        },
+      });
+
+      expect(result).to.eql([
+        {
+          testSuiteName: 'lws-suite',
+          individualTestName: 'lws-test',
+          componentLoadTime: 60,
+          salesforceLoadTime: 140,
+          overallLoadTime: 220,
+          lwsEnabled: true,
+        },
+      ]);
+    });
+
+    it('should not include lwsEnabled in where clause when not provided in filter', async () => {
+      // Given
+      const entity = new UiTestResult();
+      entity.id = 7;
+      entity.testSuiteName = 'no-lws-filter-suite';
+      entity.individualTestName = 'no-lws-filter-test';
+      entity.componentLoadTime = 90;
+      entity.salesforceLoadTime = 180;
+      entity.overallLoadTime = 270;
+      entity.lwsEnabled = true;
+
+      const findStub = sinon.stub().resolves([entity]);
+      connectionStub.resolves({
+        manager: { find: findStub },
+      } as unknown as DataSource);
+
+      const filterOptions: UiTestResultFilterOptions = {
+        testSuiteName: 'no-lws-filter-suite',
+      };
+
+      // When
+      const result = await loadUiTestResults(filterOptions);
+
+      // Then
+      expect(findStub).to.be.calledWith(UiTestResult, {
+        where: [
+          {
+            createDateTime: sinon.match.any,
+            testSuiteName: 'no-lws-filter-suite',
+          },
+        ],
+        order: {
+          createDateTime: 'DESC',
+        },
+      });
+
+      expect(result).to.eql([
+        {
+          testSuiteName: 'no-lws-filter-suite',
+          individualTestName: 'no-lws-filter-test',
+          componentLoadTime: 90,
+          salesforceLoadTime: 180,
+          overallLoadTime: 270,
+          lwsEnabled: true,
         },
       ]);
     });

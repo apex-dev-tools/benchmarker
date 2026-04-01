@@ -6,6 +6,8 @@ import {
   getAverageLimitValuesFromDB,
   saveAlerts,
   checkRecentUiAlerts,
+  buildKey,
+  SuiteTestLwsPair,
 } from '../../src/database/uiAlertInfo';
 import * as db from '../../src/database/connection';
 import sinon from 'sinon';
@@ -35,24 +37,30 @@ describe('src/database/uiAlertInfo', () => {
   describe('getAverageLimitValuesFromDB', () => {
     it('should return average limit values for valid data', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
         {
           testSuiteName: 'testSuiteName2',
           individualTestName: 'individualTestName2',
+          lwsEnabled: true,
         },
       ];
 
       const mockCountResults = [
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           count_older_than_15_days: 20,
         },
         {
+          test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
+          lws_enabled: true,
           count_older_than_15_days: 18,
         },
       ];
@@ -61,12 +69,14 @@ describe('src/database/uiAlertInfo', () => {
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
         {
           test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
+          lws_enabled: true,
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
@@ -82,15 +92,23 @@ describe('src/database/uiAlertInfo', () => {
       expect(mockQuery.calledTwice).to.be.true;
       expect(mockQuery.args[1][0]).to.include('SELECT');
       expect(mockQuery.args[1][0]).to.include(
-        "(test_suite_name, individual_test_name) IN (('testSuiteName1', 'individualTestName1'), ('testSuiteName2', 'individualTestName2'))"
+        '(test_suite_name, individual_test_name, lws_enabled) IN'
       );
+      expect(mockQuery.args[1][1]).to.deep.equal([
+        'testSuiteName1',
+        'individualTestName1',
+        false,
+        'testSuiteName2',
+        'individualTestName2',
+        true,
+      ]);
 
       expect(results).to.deep.equal({
-        testSuiteName1_individualTestName1: {
+        [buildKey('testSuiteName1', 'individualTestName1', false)]: {
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
-        testSuiteName2_individualTestName2: {
+        [buildKey('testSuiteName2', 'individualTestName2', true)]: {
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
@@ -99,24 +117,30 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should not return average limit values when a test has no results older than 15 days', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
         {
           testSuiteName: 'testSuiteName2',
           individualTestName: 'individualTestName2',
+          lwsEnabled: false,
         },
       ];
 
       const mockCountResults = [
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           count_older_than_15_days: 20,
         },
         {
+          test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
+          lws_enabled: false,
           count_older_than_15_days: 0,
         },
       ];
@@ -125,6 +149,7 @@ describe('src/database/uiAlertInfo', () => {
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
@@ -138,13 +163,17 @@ describe('src/database/uiAlertInfo', () => {
 
       // Then
       expect(mockQuery.calledTwice).to.be.true;
-      expect(mockQuery.args[1][0]).to.include('SELECT');
       expect(mockQuery.args[1][0]).to.include(
-        "(test_suite_name, individual_test_name) IN (('testSuiteName1', 'individualTestName1'))"
+        '(test_suite_name, individual_test_name, lws_enabled) IN'
       );
+      expect(mockQuery.args[1][1]).to.deep.equal([
+        'testSuiteName1',
+        'individualTestName1',
+        false,
+      ]);
 
       expect(results).to.deep.equal({
-        testSuiteName1_individualTestName1: {
+        [buildKey('testSuiteName1', 'individualTestName1', false)]: {
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
@@ -153,24 +182,30 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should not return average limit values when no results older than 15 days', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
         {
           testSuiteName: 'testSuiteName2',
           individualTestName: 'individualTestName2',
+          lwsEnabled: false,
         },
       ];
 
       const mockCountResults = [
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           count_older_than_15_days: 0,
         },
         {
+          test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
+          lws_enabled: false,
           count_older_than_15_days: 0,
         },
       ];
@@ -188,20 +223,25 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should return an empty object when no results are found', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
       ];
 
       const mockCountResults = [
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           count_older_than_15_days: 20,
         },
         {
+          test_suite_name: 'testSuiteName2',
           individual_test_name: 'individualTestName2',
+          lws_enabled: false,
           count_older_than_15_days: 18,
         },
       ];
@@ -219,20 +259,25 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should handle missing fields and default them to zero', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
       ];
 
       const mockCountResults = [
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           count_older_than_15_days: 20,
         },
         {
+          test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName2',
+          lws_enabled: false,
           count_older_than_15_days: 18,
         },
       ];
@@ -241,6 +286,7 @@ describe('src/database/uiAlertInfo', () => {
         {
           test_suite_name: 'testSuiteName1',
           individual_test_name: 'individualTestName1',
+          lws_enabled: false,
           avg_load_time_past_5_days: null,
           avg_load_time_6_to_15_days_ago: undefined,
         },
@@ -254,7 +300,7 @@ describe('src/database/uiAlertInfo', () => {
 
       // Then
       expect(results).to.deep.equal({
-        testSuiteName1_individualTestName1: {
+        [buildKey('testSuiteName1', 'individualTestName1', false)]: {
           avg_load_time_past_5_days: 0,
           avg_load_time_6_to_15_days_ago: 0,
         },
@@ -263,10 +309,7 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should handle an empty suiteAndTestNamePairs array and return an empty object', async () => {
       // Given
-      const suiteAndTestNamePairs: {
-        testSuiteName: string;
-        individualTestName: string;
-      }[] = [];
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [];
 
       // Simulate no results (empty array)
       mockQuery.onFirstCall().resolves([]);
@@ -281,10 +324,11 @@ describe('src/database/uiAlertInfo', () => {
 
     it('should handle errors and return an empty object', async () => {
       // Given
-      const suiteAndTestNamePairs = [
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
+          lwsEnabled: false,
         },
       ];
 
@@ -295,6 +339,151 @@ describe('src/database/uiAlertInfo', () => {
 
       // Then
       expect(results).to.deep.equal({});
+    });
+
+    it('fetchRollingAverages returns an empty object on error', async () => {
+      // Given
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: false,
+        },
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: true,
+        },
+      ];
+
+      const mockCountResults = [
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: false,
+          count_older_than_15_days: 10,
+        },
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: true,
+          count_older_than_15_days: 5,
+        },
+      ];
+
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      const consoleStub = sinon.stub(console, 'error');
+      mockQuery.rejects(new Error('Connection failed'));
+
+      // When
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+
+      // Then
+      expect(results).to.deep.equal({});
+      expect(consoleStub).to.have.been.calledWith(
+        sinon.match('Error in fetching the average values: ')
+      );
+
+      consoleStub.restore();
+    });
+
+    it('should return {} when fetchHistoryCounts returns null', async () => {
+      // Given
+      mockQuery.onFirstCall().resolves(null);
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: false,
+        },
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: true,
+        },
+      ];
+
+      // When
+      const result = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+
+      // Then
+      expect(result).to.deep.equal({});
+    });
+    it('should scope by lwsEnabled so same test with different lwsEnabled values are separate', async () => {
+      // Given
+      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: false,
+        },
+        {
+          testSuiteName: 'suite1',
+          individualTestName: 'test1',
+          lwsEnabled: true,
+        },
+      ];
+
+      const mockCountResults = [
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: false,
+          count_older_than_15_days: 10,
+        },
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: true,
+          count_older_than_15_days: 5,
+        },
+      ];
+
+      const mockAvgResults = [
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: false,
+          avg_load_time_past_5_days: 1000,
+          avg_load_time_6_to_15_days_ago: 800,
+        },
+        {
+          test_suite_name: 'suite1',
+          individual_test_name: 'test1',
+          lws_enabled: true,
+          avg_load_time_past_5_days: 1200,
+          avg_load_time_6_to_15_days_ago: 900,
+        },
+      ];
+
+      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.onSecondCall().resolves(mockAvgResults);
+
+      // When
+      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+
+      // Then
+      expect(results).to.deep.equal({
+        [buildKey('suite1', 'test1', false)]: {
+          avg_load_time_past_5_days: 1000,
+          avg_load_time_6_to_15_days_ago: 800,
+        },
+        [buildKey('suite1', 'test1', true)]: {
+          avg_load_time_past_5_days: 1200,
+          avg_load_time_6_to_15_days_ago: 900,
+        },
+      });
+    });
+  });
+
+  describe('buildKey', () => {
+    it('should build key with suite name, test name, and lwsEnabled', () => {
+      expect(buildKey('mySuite', 'myTest', false)).to.equal(
+        'mySuite_myTest_false'
+      );
+      expect(buildKey('mySuite', 'myTest', true)).to.equal(
+        'mySuite_myTest_true'
+      );
     });
   });
 
@@ -313,12 +502,14 @@ describe('src/database/uiAlertInfo', () => {
       savedEntity.componentLoadTime = 10;
       savedEntity.salesforceLoadTime = 20;
       savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
 
       const alert: UiAlert = new UiAlert();
       alert.testSuiteName = savedEntity.testSuiteName;
       alert.individualTestName = savedEntity.individualTestName;
       alert.componentLoadTimeDegraded = 2;
       alert.alertType = 'normal';
+      alert.lwsEnabled = false;
       const results = [alert];
 
       // When
@@ -329,18 +520,61 @@ describe('src/database/uiAlertInfo', () => {
       expect(savedRecords).to.eql(results);
       expect(savedRecords[0].uiTestResultId).to.equal(1);
     });
+
+    it('should not link alert to result with different lwsEnabled value', async () => {
+      // Given
+      const saveStub: sinon.SinonStub = sinon.stub().resolvesArg(0);
+      connectionStub.resolves({
+        manager: { save: saveStub },
+      } as unknown as DataSource);
+
+      const savedEntity = new UiTestResult();
+      savedEntity.id = 1;
+      savedEntity.testSuiteName = 'suite';
+      savedEntity.individualTestName = 'test';
+      savedEntity.componentLoadTime = 10;
+      savedEntity.salesforceLoadTime = 20;
+      savedEntity.overallLoadTime = 30;
+      savedEntity.lwsEnabled = false;
+
+      const alert: UiAlert = new UiAlert();
+      alert.testSuiteName = savedEntity.testSuiteName;
+      alert.individualTestName = savedEntity.individualTestName;
+      alert.componentLoadTimeDegraded = 2;
+      alert.alertType = 'normal';
+      alert.lwsEnabled = true;
+
+      // When
+      const savedRecords = await saveAlerts([savedEntity], [alert]);
+
+      // Then
+      expect(saveStub).to.be.calledOnce;
+      expect(savedRecords[0].uiTestResultId).to.not.equal(1);
+    });
   });
 
   describe('checkRecentUiAlerts', () => {
     it('should return a Set of keys for alerts found in the last 3 days', async () => {
       // Given
       const pairs = [
-        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
-        { testSuiteName: 'SuiteB', individualTestName: 'Test2' },
+        {
+          testSuiteName: 'SuiteA',
+          individualTestName: 'Test1',
+          lwsEnabled: false,
+        },
+        {
+          testSuiteName: 'SuiteB',
+          individualTestName: 'Test2',
+          lwsEnabled: false,
+        },
       ];
 
       const mockDbRows = [
-        { test_suite_name: 'SuiteA', individual_test_name: 'Test1' },
+        {
+          test_suite_name: 'SuiteA',
+          individual_test_name: 'Test1',
+          lws_enabled: false,
+        },
       ];
 
       mockQuery.resolves(mockDbRows);
@@ -352,15 +586,51 @@ describe('src/database/uiAlertInfo', () => {
       expect(mockQuery).to.have.been.calledOnce;
 
       const sqlQuery = mockQuery.firstCall.args[0];
+      const queryParams = mockQuery.firstCall.args[1];
       expect(sqlQuery).to.include("INTERVAL '3 days'");
 
-      expect(sqlQuery).to.include("('SuiteA', 'Test1')");
-      expect(sqlQuery).to.include("('SuiteB', 'Test2')");
+      expect(sqlQuery).to.include('($1, $2, $3), ($4, $5, $6)');
+      expect(queryParams).to.deep.equal([
+        'SuiteA',
+        'Test1',
+        false,
+        'SuiteB',
+        'Test2',
+        false,
+      ]);
 
       expect(result).to.be.instanceOf(Set);
       expect(result.size).to.equal(1);
-      expect(result.has('SuiteA_Test1')).to.be.true;
-      expect(result.has('SuiteB_Test2')).to.be.false;
+      expect(result.has('SuiteA_Test1_false')).to.be.true;
+      expect(result.has('SuiteB_Test2_false')).to.be.false;
+    });
+
+    it('should not suppress an alert for lwsEnabled=false when an alert exists for lwsEnabled=true', async () => {
+      // Given
+      const pairs = [
+        {
+          testSuiteName: 'SuiteA',
+          individualTestName: 'Test1',
+          lwsEnabled: false,
+        },
+      ];
+
+      const mockDbRows = [
+        {
+          test_suite_name: 'SuiteA',
+          individual_test_name: 'Test1',
+          lws_enabled: true,
+        },
+      ];
+
+      mockQuery.resolves(mockDbRows);
+
+      // When
+      const result = await checkRecentUiAlerts(pairs);
+
+      // Then
+      expect(result.has('SuiteA_Test1_true')).to.be.true;
+      expect(result.has('SuiteA_Test1_false')).to.be.false;
     });
 
     it('should return an empty Set if no recent alerts are found', async () => {
@@ -369,7 +639,11 @@ describe('src/database/uiAlertInfo', () => {
 
       // When
       const result = await checkRecentUiAlerts([
-        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
+        {
+          testSuiteName: 'SuiteA',
+          individualTestName: 'Test1',
+          lwsEnabled: false,
+        },
       ]);
 
       // Then
@@ -384,7 +658,11 @@ describe('src/database/uiAlertInfo', () => {
 
       // When
       const result = await checkRecentUiAlerts([
-        { testSuiteName: 'SuiteA', individualTestName: 'Test1' },
+        {
+          testSuiteName: 'SuiteA',
+          individualTestName: 'Test1',
+          lwsEnabled: false,
+        },
       ]);
 
       // Then

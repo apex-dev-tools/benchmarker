@@ -28,6 +28,9 @@ export class UiTestResult extends PerformanceBaseEntity {
   @Column('integer', { nullable: true, name: 'overall_load_time' })
   public overallLoadTime = DEFAULT_NUMERIC_VALUE;
 
+  @Column('boolean', { name: 'lws_enabled', default: false })
+  public lwsEnabled = false;
+
   public constructor() {
     super();
   }

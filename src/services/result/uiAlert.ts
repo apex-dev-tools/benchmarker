@@ -8,6 +8,7 @@ import {
   getCriticalComponentLoadThreshold,
 } from '../../shared/env';
 import {
+  buildKey,
   getAverageLimitValuesFromDB,
   checkRecentUiAlerts,
 } from '../../database/uiAlertInfo';
@@ -32,13 +33,20 @@ export async function generateValidAlerts(
     const suiteAndTestNamePairs = needToStoreAlert.map(result => ({
       testSuiteName: result.testSuiteName,
       individualTestName: result.individualTestName,
+      lwsEnabled: result.lwsEnabled ?? false,
     }));
 
     const existingAlerts = await checkRecentUiAlerts(suiteAndTestNamePairs);
 
     const alertsToProcess = needToStoreAlert.filter(
       item =>
-        !existingAlerts.has(`${item.testSuiteName}_${item.individualTestName}`)
+        !existingAlerts.has(
+          buildKey(
+            item.testSuiteName,
+            item.individualTestName,
+            item.lwsEnabled ?? false
+          )
+        )
     );
 
     if (alertsToProcess.length === 0) {
@@ -79,9 +87,14 @@ async function addAlertByComparingAvg(
   const alert: UiAlert = new UiAlert();
   alert.testSuiteName = output.testSuiteName;
   alert.individualTestName = output.individualTestName;
+  alert.lwsEnabled = output.lwsEnabled ?? false;
 
-  // Construct the key for the current individualTestName and testSuiteName
-  const key = `${output.testSuiteName}_${output.individualTestName}`;
+  // Construct the key for the current individualTestName and testSuiteName and lwsEnabled
+  const key = buildKey(
+    output.testSuiteName,
+    output.individualTestName,
+    output.lwsEnabled ?? false
+  );
 
   const averageResults = preFetchedAverages[key];
 
@@ -98,10 +111,9 @@ async function addAlertByComparingAvg(
     ?.uiAlertThresholds
     ? output.alertInfo.uiAlertThresholds.componentLoadTimeThresholdCritical
     : Number(getCriticalComponentLoadThreshold());
-  const componentLoadThresholdDegraded = Math.abs(
+  const componentLoadThresholdDegraded =
     averageResults.avg_load_time_past_5_days -
-      averageResults.avg_load_time_6_to_15_days_ago
-  );
+    averageResults.avg_load_time_6_to_15_days_ago;
 
   if (
     componentLoadThresholdDegraded >= normalComponentLoadThreshold &&

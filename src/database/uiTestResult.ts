@@ -39,6 +39,7 @@ export interface UiTestResultDTO {
   componentLoadTime?: number;
   salesforceLoadTime?: number;
   overallLoadTime: number;
+  lwsEnabled?: boolean;
   alertInfo?: UiAlertInfo;
 }
 
@@ -48,6 +49,7 @@ export interface UiTestResultDTO {
 export interface UiTestResultFilterOptions {
   testSuiteName?: string;
   individualTestName?: string;
+  lwsEnabled?: boolean;
 }
 
 /**
@@ -61,6 +63,7 @@ function dtoToEntity(dto: UiTestResultDTO): UiTestResult {
   entity.componentLoadTime = dto.componentLoadTime || 0;
   entity.salesforceLoadTime = dto.salesforceLoadTime || 0;
   entity.overallLoadTime = dto.overallLoadTime;
+  entity.lwsEnabled = dto.lwsEnabled ?? false;
 
   return entity;
 }
@@ -75,6 +78,7 @@ function entityToDto(entity: UiTestResult): UiTestResultDTO {
     componentLoadTime: entity.componentLoadTime,
     salesforceLoadTime: entity.salesforceLoadTime,
     overallLoadTime: entity.overallLoadTime,
+    lwsEnabled: entity.lwsEnabled,
   };
 }
 
@@ -109,6 +113,9 @@ export async function loadUiTestResults(
     }
     if (filterOptions.individualTestName !== undefined) {
       whereClause.individualTestName = filterOptions.individualTestName;
+    }
+    if (filterOptions.lwsEnabled !== undefined) {
+      whereClause.lwsEnabled = filterOptions.lwsEnabled;
     }
   }
 
