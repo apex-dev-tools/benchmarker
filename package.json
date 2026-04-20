@@ -1,6 +1,6 @@
 {
   "name": "@apexdevtools/benchmarker",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Benchmarks performance of processes on Salesforce Orgs",
   "author": {
     "name": "Apex Dev Tools Team",
@@ -11,6 +11,16 @@
   "homepage": "https://github.com/apex-dev-tools/benchmarker",
   "main": "dist/src/index.js",
   "types": "dist/types/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./database": {
+      "types": "./dist/types/src/database/index.d.ts",
+      "default": "./dist/src/database/index.js"
+    }
+  },
   "files": [
     "db/migrations",
     "dist/src",

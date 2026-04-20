@@ -1,5 +1,9 @@
 # Benchmarker - Changelog
 
+## 7.1.0
+
+- Add `database` subpath export to allow direct imports from `@apexdevtools/benchmarker/database`.
+
 ## 7.0.0
 
 - Add LWS (Lightning Web Security) Tracking to UI Test Results & Alerts.
