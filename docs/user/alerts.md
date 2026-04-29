@@ -19,7 +19,7 @@ By default, the alert system will use a pre-defined threshold (`offset_threshold
 
 If you do not want to use the [default ranges](https://github.com/apex-dev-tools/benchmarker/blob/797a57ac45712f079b4a0ce86a15a02f0f12a3b8/src/services/defaultRanges.ts), create your own JSON file with different ranges and give its path via the env file `CUSTOM_RANGES_PATH` variable.
 
-#### Example Scenario
+#### Example: Global Offset Threshold
 
 * The measured average CPU Time in the last 10 days was 1500, within a set custom range of 0 - 2000.
 * Offset threshold for the range is 3000, applied to the average CPU Time.
@@ -80,7 +80,7 @@ Must be at least one range per limit type.
 }
 ```
 
-### Test Level Thresholds
+### Test-Level Thresholds
 
 Another way is to set thresholds at the test level. If the limit value exceeds the custom threshold defined, an alert will be stored. The degradation value is still the difference to the 10 day average, not the threshold value which only determines when an alert is created.
 
@@ -102,7 +102,7 @@ alertInfo.thresholds = customThresholds;
 await TransactionProcess.executeTestStep(..., alertInfo);
 ```
 
-#### Example Scenario
+#### Example: Test-Level Threshold
 
 * Threshold at test level for CPU was 4000.
 * You will get an alert on any value 4000+, saying it has degraded by X above the average.
@@ -110,11 +110,12 @@ await TransactionProcess.executeTestStep(..., alertInfo);
 ```txt
 Note: If the test level threshold is misconfigured below the average, you get an alert with a value of 0. Recommend filtering out zero alerts when querying for new records.
 ```
-# UI Alerts
 
-UI Alerts can be stored in the database to monitor performance degradation over time. Each record’s degradation value represents the difference between the average of the first 5 ui test results and the average of the subsequent 10 ui test results recorded within the past 30 days. A minimum of 15 results within a 30-day window is required to trigger UI alert storage.
+## UI Alerts
 
-## Usage
+UI Alerts can be stored in the database to monitor performance degradation over time. Each record's degradation value represents the difference between the average component load time of the last 5 days and the average of the 6-to-15-days-ago window. Both windows use timestamp-based boundaries (not calendar days).
+
+A minimum of **10 runs** in the 6-to-15-day baseline window is required before an alert is considered. If either window has no data the comparison is skipped entirely — a missing baseline is never treated as zero.
 
 ### Environment Variables
 
@@ -124,14 +125,14 @@ To override the default normal component load time threshold (1000 ms), set the 
 
 To override the default critical component load time threshold (10000 ms), set the `CRITICAL_COMPONENT_LOAD_THRESHOLD` variable to any desired value in the environment file
 
-#### Example Scenario
+#### Example: UI Alert Global Thresholds
 
-* The average component load time for the first 5 results was 1500 ms, while the next 10 results averaged 1000 ms.
-* You will get an normal alert, saying it has degraded by 500 above the average.
+* The average component load time over the last 5 days was 1500 ms, while the 6-to-15-days-ago window averaged 1000 ms.
+* You will get a normal alert, saying it has degraded by 500 ms above the baseline.
 
-### Test Level Thresholds
+### UI Test-Level Thresholds
 
-Alternatively, thresholds can be configured at the test level. If the difference between the average of the first 5 and the subsequent 10 ui test results exceeds the defined custom threshold, an alert will be stored. The degradation value remains the difference between the average of the first 5 results and the average of the next 10 results recorded. The threshold simply determines whether an alert is triggered.
+Alternatively, thresholds can be configured at the test level. If the difference between the 5-day average and the 6-to-15-day baseline exceeds the defined custom threshold, an alert will be stored. The degradation value remains the difference between the two averages; the threshold only determines whether an alert is triggered.
 
 ```ts
 // Replace global alert behaviour with exact thresholds
@@ -151,7 +152,9 @@ const testResult: UiTestResultDTO = {
 
 await saveUiTestResult([testResult]);
 ```
-#### Example Scenario
 
-* Test-level thresholds for normal and critical component load times are set to 50 ms and 100 ms, respectively. The average load time for the first 5 results was 1500 ms, while the subsequent 10 results averaged 1000 ms.
-* You will get an critical alert, saying it has degraded by 500 above the average.
+#### Example: UI Alert Test-Level Thresholds
+
+* Test-level thresholds for normal and critical component load times are set to 50 ms and 100 ms, respectively.
+* The 5-day average load time was 1500 ms while the 6-to-15-day baseline averaged 1000 ms.
+* You will get a critical alert, saying it has degraded by 500 ms above the baseline.

@@ -53,10 +53,13 @@ export async function generateValidAlerts(
       return [];
     }
 
-    // Fetch average values
-    const preFetchedAverages = await getAverageLimitValuesFromDB(
-      suiteAndTestNamePairs
-    );
+    const alertsToProcessPairs = alertsToProcess.map(result => ({
+      testSuiteName: result.testSuiteName,
+      individualTestName: result.individualTestName,
+      lwsEnabled: result.lwsEnabled ?? false,
+    }));
+    const preFetchedAverages =
+      await getAverageLimitValuesFromDB(alertsToProcessPairs);
 
     // Generate alerts
     const alerts = await Promise.all(
@@ -79,8 +82,8 @@ async function addAlertByComparingAvg(
   output: UiTestResultDTO,
   preFetchedAverages: {
     [key: string]: {
-      avg_load_time_past_5_days: number;
-      avg_load_time_6_to_15_days_ago: number;
+      avg_load_time_past_5_days: number | null;
+      avg_load_time_6_to_15_days_ago: number | null;
     };
   }
 ): Promise<UiAlert> {
@@ -99,6 +102,15 @@ async function addAlertByComparingAvg(
   const averageResults = preFetchedAverages[key];
 
   if (!averageResults) {
+    return alert;
+  }
+
+  // Skip comparison if either window has no data — a null baseline would
+  // produce a false degradation signal equal to the raw load time.
+  if (
+    averageResults.avg_load_time_6_to_15_days_ago == null ||
+    averageResults.avg_load_time_past_5_days == null
+  ) {
     return alert;
   }
 

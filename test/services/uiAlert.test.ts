@@ -128,6 +128,37 @@ describe('generateValidAlerts', () => {
       expect(getAveragesStub).to.not.have.been.called;
     });
 
+    it('should call getAverageLimitValuesFromDB only with pairs that have no recent alert', async () => {
+      // Given — two tests; only one has a recent alert suppression
+      const suppressedTest = {
+        ...MOCK_TEST_DTO_BASE,
+        testSuiteName: 'SuppressedSuite',
+        individualTestName: 'SuppressedTest',
+      } as UiTestResultDTO;
+
+      checkRecentStub.resolves(
+        new Set(['SuppressedSuite_SuppressedTest_false'])
+      );
+      getAveragesStub.resolves({
+        ['ComponentLoadSuite_ComponentXLoadTime_false']: {
+          avg_load_time_past_5_days: 200,
+          avg_load_time_6_to_15_days_ago: 100,
+        },
+      });
+
+      // When
+      await generateValidAlerts([MOCK_TEST_DTO_BASE, suppressedTest]);
+
+      // Then — averages fetched for only the non-suppressed test
+      expect(getAveragesStub).to.have.been.calledOnceWith([
+        {
+          testSuiteName: 'ComponentLoadSuite',
+          individualTestName: 'ComponentXLoadTime',
+          lwsEnabled: false,
+        },
+      ]);
+    });
+
     it('should process the test normally if no recent alerts exist', async () => {
       // Given
       const avgNext10 = 100;
@@ -249,6 +280,41 @@ describe('generateValidAlerts', () => {
         ['ComponentLoadSuite_ComponentXLoadTime_false']: {
           avg_load_time_past_5_days: 100,
           avg_load_time_6_to_15_days_ago: 200,
+        },
+      };
+      getAveragesStub.resolves(mockAverages);
+
+      // When
+      const results = await generateValidAlerts([MOCK_TEST_DTO_BASE]);
+
+      // Then
+      expect(results).to.be.an('array').that.is.empty;
+    });
+
+    it('should return NO alert when baseline average (6-to-15-day) is null', async () => {
+      // Given — a null baseline must not be treated as 0, which would cause a
+      // false positive equal to the raw recent load time.
+      const mockAverages = {
+        ['ComponentLoadSuite_ComponentXLoadTime_false']: {
+          avg_load_time_past_5_days: 2000,
+          avg_load_time_6_to_15_days_ago: null,
+        },
+      };
+      getAveragesStub.resolves(mockAverages);
+
+      // When
+      const results = await generateValidAlerts([MOCK_TEST_DTO_BASE]);
+
+      // Then
+      expect(results).to.be.an('array').that.is.empty;
+    });
+
+    it('should return NO alert when recent average (0-to-5-day) is null', async () => {
+      // Given
+      const mockAverages = {
+        ['ComponentLoadSuite_ComponentXLoadTime_false']: {
+          avg_load_time_past_5_days: null,
+          avg_load_time_6_to_15_days_ago: 1000,
         },
       };
       getAveragesStub.resolves(mockAverages);

@@ -13,6 +13,7 @@ export type SuiteTestLwsPair = {
 };
 
 const KEY_DELIMITER = '_';
+const MIN_BASELINE_COUNT = 10;
 
 export function buildKey(
   suiteName: string,
@@ -70,55 +71,11 @@ export async function saveAlerts(
 export async function getAverageLimitValuesFromDB(
   suiteAndTestNamePairs: SuiteTestLwsPair[]
 ) {
+  if (suiteAndTestNamePairs.length === 0) {
+    return {};
+  }
   const connection = await getConnection();
-
-  const countResultMap = await fetchHistoryCounts(connection);
-  if (!countResultMap || Object.keys(countResultMap).length === 0) {
-    return {};
-  }
-
-  const pairsWithHistory = suiteAndTestNamePairs.filter(pair => {
-    const countKey = buildKey(
-      pair.testSuiteName,
-      pair.individualTestName,
-      pair.lwsEnabled
-    );
-    return countResultMap[countKey]?.count_older_than_15_days > 0;
-  });
-
-  if (pairsWithHistory.length === 0) {
-    return {};
-  }
-
-  return fetchRollingAverages(connection, pairsWithHistory);
-}
-
-async function fetchHistoryCounts(
-  connection: any
-): Promise<{ [key: string]: { count_older_than_15_days: number } } | null> {
-  const countQuery = `
-    SELECT individual_test_name, lws_enabled, test_suite_name,
-      COUNT(create_date_time) AS count_older_than_15_days
-    FROM performance.ui_test_result
-    WHERE create_date_time <= CURRENT_DATE - INTERVAL '15 days'
-    GROUP BY individual_test_name, lws_enabled, test_suite_name
-  `;
-  try {
-    const rows = await connection.query(countQuery);
-    const map: { [key: string]: { count_older_than_15_days: number } } = {};
-    for (const row of rows) {
-      const key = buildKey(
-        row.test_suite_name,
-        row.individual_test_name,
-        row.lws_enabled
-      );
-      map[key] = { count_older_than_15_days: row.count_older_than_15_days };
-    }
-    return map;
-  } catch (error) {
-    console.error('Error in fetching the count values: ', error);
-    return {};
-  }
+  return fetchRollingAverages(connection, suiteAndTestNamePairs);
 }
 
 async function fetchRollingAverages(
@@ -126,51 +83,62 @@ async function fetchRollingAverages(
   pairs: SuiteTestLwsPair[]
 ): Promise<{
   [key: string]: {
-    avg_load_time_past_5_days: number;
-    avg_load_time_6_to_15_days_ago: number;
+    avg_load_time_past_5_days: number | null;
+    avg_load_time_6_to_15_days_ago: number | null;
   };
 }> {
   const { sql: tuplesSql, params } = buildTupleParams(pairs);
+  // HAVING ensures at least MIN_BASELINE_COUNT runs exist in the 6-to-15-day
+  // window before we trust the baseline average. Without this guard a single
+  // old data-point (or a gap in runs) produces a NULL/zero baseline that makes
+  // every recent result look like a regression.
   const avgQuery = `
-    SELECT 
+    SELECT
       individual_test_name,
       test_suite_name,
       lws_enabled,
-      ROUND(AVG(CASE 
-          WHEN create_date_time >= CURRENT_DATE - INTERVAL '5 days' 
-          THEN component_load_time 
-          ELSE NULL 
+      ROUND(AVG(CASE
+          WHEN create_date_time >= CURRENT_TIMESTAMP - INTERVAL '5 days'
+          THEN component_load_time
+          ELSE NULL
       END)::numeric, 0) AS avg_load_time_past_5_days,
-      ROUND(AVG(CASE 
-          WHEN create_date_time >= CURRENT_DATE - INTERVAL '15 days' 
-              AND create_date_time < CURRENT_DATE - INTERVAL '5 days' 
-          THEN component_load_time 
-          ELSE NULL 
+      ROUND(AVG(CASE
+          WHEN create_date_time >= CURRENT_TIMESTAMP - INTERVAL '15 days'
+              AND create_date_time < CURRENT_TIMESTAMP - INTERVAL '5 days'
+          THEN component_load_time
+          ELSE NULL
       END)::numeric, 0) AS avg_load_time_6_to_15_days_ago
     FROM performance.ui_test_result
-    WHERE create_date_time >= CURRENT_DATE - INTERVAL '15 days'
-    AND (test_suite_name, individual_test_name, lws_enabled) IN (${tuplesSql})
+    WHERE (test_suite_name, individual_test_name, lws_enabled) IN (${tuplesSql})
+      AND create_date_time >= CURRENT_TIMESTAMP - INTERVAL '15 days'
     GROUP BY individual_test_name, test_suite_name, lws_enabled
+    HAVING COUNT(CASE
+        WHEN create_date_time >= CURRENT_TIMESTAMP - INTERVAL '15 days'
+            AND create_date_time < CURRENT_TIMESTAMP - INTERVAL '5 days'
+        THEN 1
+        ELSE NULL
+    END) >= ${MIN_BASELINE_COUNT}
     ORDER BY individual_test_name;
   `;
   const resultsMap: {
     [key: string]: {
-      avg_load_time_past_5_days: number;
-      avg_load_time_6_to_15_days_ago: number;
+      avg_load_time_past_5_days: number | null;
+      avg_load_time_6_to_15_days_ago: number | null;
     };
   } = {};
 
   try {
     const rows = await connection.query(avgQuery, params);
-    for (const row of rows) {
+    for (const row of rows ?? []) {
       const key = buildKey(
         row.test_suite_name,
         row.individual_test_name,
         row.lws_enabled
       );
       resultsMap[key] = {
-        avg_load_time_past_5_days: row.avg_load_time_past_5_days ?? 0,
-        avg_load_time_6_to_15_days_ago: row.avg_load_time_6_to_15_days_ago ?? 0,
+        avg_load_time_past_5_days: row.avg_load_time_past_5_days ?? null,
+        avg_load_time_6_to_15_days_ago:
+          row.avg_load_time_6_to_15_days_ago ?? null,
       };
     }
     return resultsMap;
@@ -189,7 +157,7 @@ export async function checkRecentUiAlerts(
   const query = `
     SELECT test_suite_name, individual_test_name, lws_enabled
     FROM performance.ui_alert
-    WHERE create_date_time >= CURRENT_DATE - INTERVAL '3 days'
+    WHERE create_date_time >= CURRENT_TIMESTAMP - INTERVAL '3 days'
       AND (test_suite_name, individual_test_name, lws_enabled) IN (${tuplesSql})
   `;
 

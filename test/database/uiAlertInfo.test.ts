@@ -50,21 +50,6 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockCountResults = [
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName1',
-          lws_enabled: false,
-          count_older_than_15_days: 20,
-        },
-        {
-          test_suite_name: 'testSuiteName2',
-          individual_test_name: 'individualTestName2',
-          lws_enabled: true,
-          count_older_than_15_days: 18,
-        },
-      ];
-
       const mockAvgResults = [
         {
           test_suite_name: 'testSuiteName1',
@@ -82,19 +67,19 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      mockQuery.onFirstCall().resolves(mockCountResults);
-      mockQuery.onSecondCall().resolves(mockAvgResults);
+      mockQuery.resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
-      expect(mockQuery.calledTwice).to.be.true;
-      expect(mockQuery.args[1][0]).to.include('SELECT');
-      expect(mockQuery.args[1][0]).to.include(
+      expect(mockQuery.calledOnce).to.be.true;
+      expect(mockQuery.args[0][0]).to.include('SELECT');
+      expect(mockQuery.args[0][0]).to.include(
         '(test_suite_name, individual_test_name, lws_enabled) IN'
       );
-      expect(mockQuery.args[1][1]).to.deep.equal([
+      expect(mockQuery.args[0][0]).to.include('HAVING');
+      expect(mockQuery.args[0][1]).to.deep.equal([
         'testSuiteName1',
         'individualTestName1',
         false,
@@ -115,8 +100,8 @@ describe('src/database/uiAlertInfo', () => {
       });
     });
 
-    it('should not return average limit values when a test has no results older than 15 days', async () => {
-      // Given
+    it('should exclude tests with fewer than the minimum baseline runs via HAVING', async () => {
+      // Given — DB only returns the test that passed the HAVING threshold
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
@@ -127,21 +112,6 @@ describe('src/database/uiAlertInfo', () => {
           testSuiteName: 'testSuiteName2',
           individualTestName: 'individualTestName2',
           lwsEnabled: false,
-        },
-      ];
-
-      const mockCountResults = [
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName1',
-          lws_enabled: false,
-          count_older_than_15_days: 20,
-        },
-        {
-          test_suite_name: 'testSuiteName2',
-          individual_test_name: 'individualTestName2',
-          lws_enabled: false,
-          count_older_than_15_days: 0,
         },
       ];
 
@@ -153,25 +123,16 @@ describe('src/database/uiAlertInfo', () => {
           avg_load_time_past_5_days: 2000,
           avg_load_time_6_to_15_days_ago: 1500,
         },
+        // testSuiteName2 excluded by HAVING (< MIN_BASELINE_COUNT runs in baseline window)
       ];
 
-      mockQuery.onFirstCall().resolves(mockCountResults);
-      mockQuery.onSecondCall().resolves(mockAvgResults);
+      mockQuery.resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
-      expect(mockQuery.calledTwice).to.be.true;
-      expect(mockQuery.args[1][0]).to.include(
-        '(test_suite_name, individual_test_name, lws_enabled) IN'
-      );
-      expect(mockQuery.args[1][1]).to.deep.equal([
-        'testSuiteName1',
-        'individualTestName1',
-        false,
-      ]);
-
+      expect(mockQuery.calledOnce).to.be.true;
       expect(results).to.deep.equal({
         [buildKey('testSuiteName1', 'individualTestName1', false)]: {
           avg_load_time_past_5_days: 2000,
@@ -180,7 +141,7 @@ describe('src/database/uiAlertInfo', () => {
       });
     });
 
-    it('should not return average limit values when no results older than 15 days', async () => {
+    it('should return {} when all tests are excluded by HAVING', async () => {
       // Given
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
@@ -195,29 +156,13 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockCountResults = [
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName1',
-          lws_enabled: false,
-          count_older_than_15_days: 0,
-        },
-        {
-          test_suite_name: 'testSuiteName2',
-          individual_test_name: 'individualTestName2',
-          lws_enabled: false,
-          count_older_than_15_days: 0,
-        },
-      ];
-
-      mockQuery.onFirstCall().resolves(mockCountResults);
+      mockQuery.resolves([]);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
       expect(mockQuery.calledOnce).to.be.true;
-
       expect(results).to.deep.equal({});
     });
 
@@ -231,54 +176,24 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockCountResults = [
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName1',
-          lws_enabled: false,
-          count_older_than_15_days: 20,
-        },
-        {
-          test_suite_name: 'testSuiteName2',
-          individual_test_name: 'individualTestName2',
-          lws_enabled: false,
-          count_older_than_15_days: 18,
-        },
-      ];
-
-      mockQuery.onFirstCall().resolves(mockCountResults);
-      mockQuery.onSecondCall().resolves([]);
+      mockQuery.resolves([]);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
-      expect(mockQuery.calledTwice).to.be.true;
+      expect(mockQuery.calledOnce).to.be.true;
       expect(results).to.deep.equal({});
     });
 
-    it('should handle missing fields and default them to zero', async () => {
-      // Given
+    it('should return null for missing average fields instead of defaulting to zero', async () => {
+      // Given — null averages must not be silently coerced to 0, which would
+      // produce a false degradation signal.
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'testSuiteName1',
           individualTestName: 'individualTestName1',
           lwsEnabled: false,
-        },
-      ];
-
-      const mockCountResults = [
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName1',
-          lws_enabled: false,
-          count_older_than_15_days: 20,
-        },
-        {
-          test_suite_name: 'testSuiteName1',
-          individual_test_name: 'individualTestName2',
-          lws_enabled: false,
-          count_older_than_15_days: 18,
         },
       ];
 
@@ -288,12 +203,11 @@ describe('src/database/uiAlertInfo', () => {
           individual_test_name: 'individualTestName1',
           lws_enabled: false,
           avg_load_time_past_5_days: null,
-          avg_load_time_6_to_15_days_ago: undefined,
+          avg_load_time_6_to_15_days_ago: null,
         },
       ];
 
-      mockQuery.onFirstCall().resolves(mockCountResults);
-      mockQuery.onSecondCall().resolves(mockAvgResults);
+      mockQuery.resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
@@ -301,24 +215,18 @@ describe('src/database/uiAlertInfo', () => {
       // Then
       expect(results).to.deep.equal({
         [buildKey('testSuiteName1', 'individualTestName1', false)]: {
-          avg_load_time_past_5_days: 0,
-          avg_load_time_6_to_15_days_ago: 0,
+          avg_load_time_past_5_days: null,
+          avg_load_time_6_to_15_days_ago: null,
         },
       });
     });
 
-    it('should handle an empty suiteAndTestNamePairs array and return an empty object', async () => {
-      // Given
-      const suiteAndTestNamePairs: SuiteTestLwsPair[] = [];
-
-      // Simulate no results (empty array)
-      mockQuery.onFirstCall().resolves([]);
-      mockQuery.onSecondCall().resolves([]);
-
+    it('should return {} for an empty suiteAndTestNamePairs array without querying the DB', async () => {
       // When
-      const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
+      const results = await getAverageLimitValuesFromDB([]);
 
       // Then
+      expect(mockQuery.notCalled).to.be.true;
       expect(results).to.deep.equal({});
     });
 
@@ -341,7 +249,7 @@ describe('src/database/uiAlertInfo', () => {
       expect(results).to.deep.equal({});
     });
 
-    it('fetchRollingAverages returns an empty object on error', async () => {
+    it('should return {} on query error and log the error message', async () => {
       // Given
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
@@ -356,22 +264,6 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      const mockCountResults = [
-        {
-          test_suite_name: 'suite1',
-          individual_test_name: 'test1',
-          lws_enabled: false,
-          count_older_than_15_days: 10,
-        },
-        {
-          test_suite_name: 'suite1',
-          individual_test_name: 'test1',
-          lws_enabled: true,
-          count_older_than_15_days: 5,
-        },
-      ];
-
-      mockQuery.onFirstCall().resolves(mockCountResults);
       const consoleStub = sinon.stub(console, 'error');
       mockQuery.rejects(new Error('Connection failed'));
 
@@ -387,21 +279,17 @@ describe('src/database/uiAlertInfo', () => {
       consoleStub.restore();
     });
 
-    it('should return {} when fetchHistoryCounts returns null', async () => {
+    it('should return {} when the DB returns null rows', async () => {
       // Given
-      mockQuery.onFirstCall().resolves(null);
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
         {
           testSuiteName: 'suite1',
           individualTestName: 'test1',
           lwsEnabled: false,
         },
-        {
-          testSuiteName: 'suite1',
-          individualTestName: 'test1',
-          lwsEnabled: true,
-        },
       ];
+
+      mockQuery.resolves(null);
 
       // When
       const result = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
@@ -409,6 +297,7 @@ describe('src/database/uiAlertInfo', () => {
       // Then
       expect(result).to.deep.equal({});
     });
+
     it('should scope by lwsEnabled so same test with different lwsEnabled values are separate', async () => {
       // Given
       const suiteAndTestNamePairs: SuiteTestLwsPair[] = [
@@ -421,21 +310,6 @@ describe('src/database/uiAlertInfo', () => {
           testSuiteName: 'suite1',
           individualTestName: 'test1',
           lwsEnabled: true,
-        },
-      ];
-
-      const mockCountResults = [
-        {
-          test_suite_name: 'suite1',
-          individual_test_name: 'test1',
-          lws_enabled: false,
-          count_older_than_15_days: 10,
-        },
-        {
-          test_suite_name: 'suite1',
-          individual_test_name: 'test1',
-          lws_enabled: true,
-          count_older_than_15_days: 5,
         },
       ];
 
@@ -456,13 +330,13 @@ describe('src/database/uiAlertInfo', () => {
         },
       ];
 
-      mockQuery.onFirstCall().resolves(mockCountResults);
-      mockQuery.onSecondCall().resolves(mockAvgResults);
+      mockQuery.resolves(mockAvgResults);
 
       // When
       const results = await getAverageLimitValuesFromDB(suiteAndTestNamePairs);
 
       // Then
+      expect(mockQuery.calledOnce).to.be.true;
       expect(results).to.deep.equal({
         [buildKey('suite1', 'test1', false)]: {
           avg_load_time_past_5_days: 1000,
@@ -554,7 +428,7 @@ describe('src/database/uiAlertInfo', () => {
   });
 
   describe('checkRecentUiAlerts', () => {
-    it('should return a Set of keys for alerts found in the last 3 days', async () => {
+    it('should return a Set of keys for alerts found in the last 3 days using CURRENT_TIMESTAMP', async () => {
       // Given
       const pairs = [
         {
@@ -588,6 +462,7 @@ describe('src/database/uiAlertInfo', () => {
       const sqlQuery = mockQuery.firstCall.args[0];
       const queryParams = mockQuery.firstCall.args[1];
       expect(sqlQuery).to.include("INTERVAL '3 days'");
+      expect(sqlQuery).to.include('CURRENT_TIMESTAMP');
 
       expect(sqlQuery).to.include('($1, $2, $3), ($4, $5, $6)');
       expect(queryParams).to.deep.equal([

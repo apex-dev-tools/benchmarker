@@ -1,5 +1,13 @@
 # Benchmarker - Changelog
 
+## 7.1.1
+
+- Fix UI alert false positives caused by a NULL baseline average being silently coerced to zero when no data existed in the 6-to-15-day window.
+- Replace the full-table history guard with a `HAVING` clause that requires at least 10 runs in the 6-to-15-day baseline window before a comparison is made.
+- Scope the rolling-averages query to only the incoming test pairs, avoiding a full-table scan.
+- Fix `getAverageLimitValuesFromDB` being called with all test pairs instead of only those not already suppressed by a recent alert.
+- Use `CURRENT_TIMESTAMP` instead of `CURRENT_DATE` in UI alert queries for true rolling time windows.
+
 ## 7.1.0
 
 - Add `database` subpath export to allow direct imports from `@apexdevtools/benchmarker/database`.
