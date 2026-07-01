@@ -13,7 +13,6 @@ import * as db from '../../src/database/connection';
 import sinon from 'sinon';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import { DataSource } from 'typeorm';
 import { UiAlert } from '../../src/database/entity/uiAlert';
 import { UiTestResult } from '../../src/database/entity/uiTestResult';
 
@@ -367,7 +366,7 @@ describe('src/database/uiAlertInfo', () => {
       const saveStub: sinon.SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const savedEntity = new UiTestResult();
       savedEntity.id = 1;
@@ -400,7 +399,7 @@ describe('src/database/uiAlertInfo', () => {
       const saveStub: sinon.SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const savedEntity = new UiTestResult();
       savedEntity.id = 1;

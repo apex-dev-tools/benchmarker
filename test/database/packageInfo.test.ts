@@ -11,7 +11,6 @@ import {
   savePackageInfo,
   getPackagesByVersionId,
 } from '../../src/database/packageInfo';
-import { DataSource } from 'typeorm';
 
 chai.use(sinonChai);
 
@@ -32,7 +31,7 @@ describe('src/database/packageInfo', () => {
       const saveStub: SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const pkgInfo = new PackageInfo();
       pkgInfo.packageVersion = 'testPackageVersion';
@@ -84,7 +83,7 @@ describe('src/database/packageInfo', () => {
             andWhere: sinon.stub().returnsThis(),
           }),
         }),
-      } as unknown as DataSource);
+      });
 
       // When
       const result = await getPackagesByVersionId(['id']);

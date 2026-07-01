@@ -13,7 +13,6 @@ import {
   UiTestResultDTO,
   UiTestResultFilterOptions,
 } from '../../src/database/uiTestResult';
-import { DataSource } from 'typeorm';
 import { UiTestResult } from '../../src/database/entity/uiTestResult';
 import * as uiAlert from '../../src/services/result/uiAlert';
 import { UiAlert } from '../../src/database/entity/uiAlert';
@@ -259,7 +258,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       // When
       const result = await loadUiTestResults();
@@ -298,7 +297,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([entity1]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       const filterOptions: UiTestResultFilterOptions = {
         testSuiteName: 'specific-suite',
@@ -347,7 +346,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       const filterOptions: UiTestResultFilterOptions = {
         testSuiteName: 'multi-filter-suite',
@@ -398,7 +397,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       const filterOptions: UiTestResultFilterOptions = {
         lwsEnabled: true,
@@ -447,7 +446,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([entity]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       const filterOptions: UiTestResultFilterOptions = {
         testSuiteName: 'no-lws-filter-suite',
@@ -486,7 +485,7 @@ describe('src/database/uiTestResult', () => {
       const findStub = sinon.stub().resolves([]);
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       const filterOptions: UiTestResultFilterOptions = {
         testSuiteName: 'non-existent-suite',

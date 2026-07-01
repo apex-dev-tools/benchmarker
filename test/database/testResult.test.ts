@@ -6,7 +6,6 @@ import chai, { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
 import sinonChai from 'sinon-chai';
 import { TestResult } from '../../src/database/entity/result';
-import { DataSource } from 'typeorm';
 
 import * as db from '../../src/database/connection';
 import { loadTestResults, saveTestResult } from '../../src/database/testResult';
@@ -30,7 +29,7 @@ describe('src/database/testResult', () => {
       const saveStub: SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const results = [new TestResult()];
 
@@ -49,7 +48,7 @@ describe('src/database/testResult', () => {
       const findStub: SinonStub = sinon.stub();
       connectionStub.resolves({
         manager: { find: findStub },
-      } as unknown as DataSource);
+      });
 
       // When
       await loadTestResults();

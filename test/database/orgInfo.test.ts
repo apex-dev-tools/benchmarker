@@ -8,7 +8,6 @@ import sinonChai from 'sinon-chai';
 import * as db from '../../src/database/connection';
 import { OrgInfo } from '../../src/database/entity/org';
 import { saveOrgInfo, getOrgInfoById } from '../../src/database/orgInfo';
-import { DataSource } from 'typeorm';
 
 chai.use(sinonChai);
 
@@ -29,7 +28,7 @@ describe('src/database/orgInfo', () => {
       const saveStub: SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const orgInfo = new OrgInfo();
       orgInfo.orgId = 'testId';
@@ -55,7 +54,7 @@ describe('src/database/orgInfo', () => {
       const saveStub: SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       // When
       const orgInfo = new OrgInfo();
@@ -116,7 +115,7 @@ describe('src/database/orgInfo', () => {
             andWhere: sinon.stub().returnsThis(),
           }),
         }),
-      } as unknown as DataSource);
+      });
 
       // When
       const result = await getOrgInfoById('id', '45');

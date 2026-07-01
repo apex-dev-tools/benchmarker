@@ -8,7 +8,6 @@ import chaiAsPromised from 'chai-as-promised';
 import { stub, spy, restore } from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as utils from '../../../src/services/salesforce/utils';
-import { Connection } from '@salesforce/core';
 import * as env from '../../../src/shared/env';
 import * as envSf from '../../../src/services/salesforce/env';
 import axios from 'axios';
@@ -147,10 +146,7 @@ describe('src/services/salesforce/utils', () => {
         }),
       };
 
-      const response = await utils.sobject(
-        connectionStub as Connection,
-        'fake__Mock__c'
-      );
+      const response = await utils.sobject(connectionStub, 'fake__Mock__c');
       expect(response.type).to.be.equal('Mock__c');
     });
   });
