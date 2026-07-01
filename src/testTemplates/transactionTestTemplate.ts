@@ -164,7 +164,7 @@ const averageResults = (results: TestFlowOutput[]): TestFlowOutput => {
   }, {} as GovernorMetricsResult);
 
   return {
-    ...firstResult,
+    testStepDescription: firstResult.testStepDescription,
     result: averageMetrics,
   };
 };
