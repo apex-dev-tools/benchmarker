@@ -114,6 +114,61 @@ export interface TestFlowOptions {
   tokenMap?: TokenReplacement[];
 }
 
+const DEFAULT_RUN_COUNT = 1;
+
+const FAILED_GOVERNOR_METRICS_RESULT: GovernorMetricsResult = {
+  cpuTime: -1,
+  dmlRows: -1,
+  dmlStatements: -1,
+  heapSize: -1,
+  queryRows: -1,
+  soqlQueries: -1,
+  queueableJobs: -1,
+  futureCalls: -1,
+  timer: -1,
+};
+
+const governorMetricKeys = Object.keys(FAILED_GOVERNOR_METRICS_RESULT) as Array<
+  keyof GovernorMetricsResult
+>;
+
+const resolveExecutionOptions = (
+  alertInfoOrRunCount?: AlertInfo | number,
+  runCount?: number
+): { alertInfo?: AlertInfo; runCount: number } => {
+  if (typeof alertInfoOrRunCount === 'number') {
+    return { runCount: alertInfoOrRunCount };
+  }
+
+  return {
+    alertInfo: alertInfoOrRunCount,
+    runCount: runCount ?? DEFAULT_RUN_COUNT,
+  };
+};
+
+const validateRunCount = (runCount: number): void => {
+  if (!Number.isInteger(runCount) || runCount < 1) {
+    throw new RangeError(
+      'runCount must be an integer greater than or equal to 1'
+    );
+  }
+};
+
+const averageResults = (results: TestFlowOutput[]): TestFlowOutput => {
+  const [firstResult] = results;
+
+  const averageMetrics = governorMetricKeys.reduce((acc, key) => {
+    const total = results.reduce((sum, output) => sum + output.result[key], 0);
+    acc[key] = Math.round(total / results.length);
+    return acc;
+  }, {} as GovernorMetricsResult);
+
+  return {
+    testStepDescription: firstResult.testStepDescription,
+    result: averageMetrics,
+  };
+};
+
 export namespace TransactionProcess {
   /**
    * Sets the configuration for the Test Template
@@ -142,32 +197,36 @@ export namespace TransactionProcess {
    * Executes Apex code from a file and retrieve the Governor Limits
    * @param processTestTemplate object with all the information required to execute a test
    * @param testStep list of test steps to be executed
+   * @param alertInfoOrRunCount alert configuration, or number of runs to execute and average
+   * @param runCount number of runs to execute and average when alert info is provided
    */
   export const executeTestStep = async (
     processTestTemplate: TransactionTestTemplate,
     testStep: FlowStep,
-    alertInfo?: AlertInfo
+    alertInfoOrRunCount?: AlertInfo | number,
+    runCount?: number
   ) => {
+    const executionOptions = resolveExecutionOptions(
+      alertInfoOrRunCount,
+      runCount
+    );
+    validateRunCount(executionOptions.runCount);
+
     try {
-      const result: TestFlowOutput = await testStep();
-      result.alertInfo = alertInfo;
+      const results: TestFlowOutput[] = [];
+      for (let i = 0; i < executionOptions.runCount; i++) {
+        results.push(await testStep());
+      }
+
+      const result: TestFlowOutput = averageResults(results);
+      result.alertInfo = executionOptions.alertInfo;
       processTestTemplate.flowStepsResults.push(result);
     } catch (e) {
       if (e.testStepDescription) {
         processTestTemplate.flowStepsResults.push({
           testStepDescription: e.testStepDescription,
           error: e.message,
-          result: {
-            cpuTime: -1,
-            dmlRows: -1,
-            dmlStatements: -1,
-            heapSize: -1,
-            queryRows: -1,
-            soqlQueries: -1,
-            queueableJobs: -1,
-            futureCalls: -1,
-            timer: -1,
-          },
+          result: { ...FAILED_GOVERNOR_METRICS_RESULT },
         });
       } else {
         throw e;
