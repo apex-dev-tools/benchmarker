@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
-      - name: Set up Node LTS
-        uses: actions/setup-node@v3
+      - name: Set up Node
+        uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
-          cache: 'npm'
+          node-version: 22
+          cache: "npm"
 
       - name: Install
         run: npm ci

@@ -9,18 +9,25 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
-      - name: Set up Node LTS
-        uses: actions/setup-node@v3
+      - name: Set up Node
+        uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
 
       - name: Publish package
         run: |
           npm ci
           npm run build
-          npm publish --access public
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            echo "Publishing $VERSION under dist-tag 'beta'"
+            npm publish --access public --tag beta
+          else
+            echo "Publishing $VERSION under dist-tag 'latest'"
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
