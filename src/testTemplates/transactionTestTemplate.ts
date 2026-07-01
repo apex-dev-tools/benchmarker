@@ -116,17 +116,21 @@ export interface TestFlowOptions {
 
 const DEFAULT_RUN_COUNT = 1;
 
-const governorMetricKeys: Array<keyof GovernorMetricsResult> = [
-  'timer',
-  'cpuTime',
-  'dmlRows',
-  'dmlStatements',
-  'heapSize',
-  'queryRows',
-  'soqlQueries',
-  'queueableJobs',
-  'futureCalls',
-];
+const FAILED_GOVERNOR_METRICS_RESULT: GovernorMetricsResult = {
+  cpuTime: -1,
+  dmlRows: -1,
+  dmlStatements: -1,
+  heapSize: -1,
+  queryRows: -1,
+  soqlQueries: -1,
+  queueableJobs: -1,
+  futureCalls: -1,
+  timer: -1,
+};
+
+const governorMetricKeys = Object.keys(FAILED_GOVERNOR_METRICS_RESULT) as Array<
+  keyof GovernorMetricsResult
+>;
 
 const resolveExecutionOptions = (
   alertInfoOrRunCount?: AlertInfo | number,
@@ -143,7 +147,7 @@ const resolveExecutionOptions = (
 };
 
 const validateRunCount = (runCount: number): void => {
-  if (!Number.isInteger(runCount) || runCount < DEFAULT_RUN_COUNT) {
+  if (!Number.isInteger(runCount) || runCount < 1) {
     throw new RangeError(
       'runCount must be an integer greater than or equal to 1'
     );
@@ -222,17 +226,7 @@ export namespace TransactionProcess {
         processTestTemplate.flowStepsResults.push({
           testStepDescription: e.testStepDescription,
           error: e.message,
-          result: {
-            cpuTime: -1,
-            dmlRows: -1,
-            dmlStatements: -1,
-            heapSize: -1,
-            queryRows: -1,
-            soqlQueries: -1,
-            queueableJobs: -1,
-            futureCalls: -1,
-            timer: -1,
-          },
+          result: { ...FAILED_GOVERNOR_METRICS_RESULT },
         });
       } else {
         throw e;
