@@ -10,7 +10,6 @@ import axios, { AxiosResponse } from 'axios';
 import { SalesforceConnection } from '../../src/services/salesforce/connection';
 import { getOrgContext } from '../../src/services/org';
 import { OrgContext } from '../../src/services/org/context';
-import { ExecuteAnonymousResult } from '@jsforce/jsforce-node/lib/api/tooling';
 
 chai.use(sinonChai);
 
@@ -38,7 +37,7 @@ describe('src/services/org', () => {
 
     execAnonStub.onFirstCall().resolves({
       success: false,
-    } as ExecuteAnonymousResult);
+    });
     queryStub.onFirstCall().resolves({
       records: [
         {
@@ -59,7 +58,7 @@ describe('src/services/org', () => {
     });
     execAnonStub.onSecondCall().resolves({
       exceptionMessage: 'System.AssertException: Assertion Failed: -_false_-',
-    } as ExecuteAnonymousResult);
+    });
     getStub.onFirstCall().resolves({
       data: [
         {

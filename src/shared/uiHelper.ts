@@ -45,7 +45,7 @@ export function retryMaxAttempsWithDelay<T>(
         reject({
           message: 'Max attempts reached',
           exception: err,
-        } as TestPerformanceErrorI);
+        });
       }
     }
   });

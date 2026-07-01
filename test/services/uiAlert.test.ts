@@ -19,7 +19,7 @@ const MOCK_TEST_DTO_BASE: UiTestResultDTO = {
   salesforceLoadTime: 500,
   lwsEnabled: false,
   alertInfo: undefined,
-} as UiTestResultDTO;
+};
 
 describe('generateValidAlerts', () => {
   let sandbox: sinon.SinonSandbox;
@@ -134,7 +134,7 @@ describe('generateValidAlerts', () => {
         ...MOCK_TEST_DTO_BASE,
         testSuiteName: 'SuppressedSuite',
         individualTestName: 'SuppressedTest',
-      } as UiTestResultDTO;
+      };
 
       checkRecentStub.resolves(
         new Set(['SuppressedSuite_SuppressedTest_false'])

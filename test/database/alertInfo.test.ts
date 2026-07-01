@@ -10,7 +10,6 @@ import * as db from '../../src/database/connection';
 import sinon from 'sinon';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import { DataSource } from 'typeorm';
 import { Alert } from '../../src/database/entity/alert';
 
 chai.use(sinonChai);
@@ -182,7 +181,7 @@ describe('src/database/alertInfo', () => {
       const saveStub: sinon.SinonStub = sinon.stub().resolvesArg(0);
       connectionStub.resolves({
         manager: { save: saveStub },
-      } as unknown as DataSource);
+      });
 
       const results = [new Alert()];
 
