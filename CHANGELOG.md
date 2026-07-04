@@ -1,5 +1,11 @@
 # Benchmarker - Changelog
 
+## 7.2.0
+
+- Average `TransactionProcess` runs for short-running transactions to reduce noise from single-run variance, without carrying first-run-only fields into the averaged result.
+- Update Lighthouse to 13.4.0.
+- Dependency and tooling maintenance: TypeScript 6, mocha 11, nyc 18, updated ESLint tooling, and fixes for vulnerable dependencies.
+
 ## 7.1.1
 
 - Fix UI alert false positives caused by a NULL baseline average being silently coerced to zero when no data existed in the 6-to-15-day window.
