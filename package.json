@@ -1,6 +1,7 @@
 {
   "name": "@apexdevtools/benchmarker",
   "version": "7.2.0",
+  "packageManager": "npm@10.9.8",
   "description": "Benchmarks performance of processes on Salesforce Orgs",
   "author": {
     "name": "Apex Dev Tools Team",
@@ -54,6 +55,9 @@
     "puppeteer": "22.15.0",
     "tslib": "2.8.1",
     "typeorm": "0.3.30"
+  },
+  "optionalDependencies": {
+    "proxy-agent": "8.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.5",
