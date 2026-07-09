@@ -25,7 +25,7 @@ export async function getPackagesOnOrg(
     SubscriberPackageVersion,
   } of packageData.records) {
     const packageName: string = SubscriberPackage.Name;
-    let packageVersion: string = '';
+    let packageVersion: string;
     let isBeta: boolean = false;
     let betaName: number = DEFAULT_NUMERIC_VALUE;
 

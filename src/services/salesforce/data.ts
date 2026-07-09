@@ -259,8 +259,8 @@ const insertDataWithBatches = async (
   return batchExecutionResults;
 };
 const insertChunk = (job: Job<Schema, BulkOperation>, chunkedData: any[]) => {
-  let batchJob = job.createBatch();
-  return (batchJob = batchJob.execute(chunkedData));
+  const batchJob = job.createBatch();
+  return batchJob.execute(chunkedData);
 };
 function getBulkBatchExecution(batchResults: BulkIngestBatchResult): {
   failed: boolean;

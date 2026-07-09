@@ -11,7 +11,9 @@ export async function cleanDatabase(): Promise<void> {
 
     await connection.query(`TRUNCATE ${tableNames} CASCADE;`);
   } catch (error) {
-    throw new Error(`ERROR: Cleaning test database: ${error}`);
+    throw Object.assign(new Error(`ERROR: Cleaning test database: ${error}`), {
+      cause: error,
+    });
   }
 }
 
@@ -37,8 +39,9 @@ export async function getAlerts(
         AND action='${action_name}'`
     );
   } catch (error) {
-    throw new Error(
-      `ERROR: Getting the alerts from database. ${error.message}`
+    throw Object.assign(
+      new Error(`ERROR: Getting the alerts from database. ${error.message}`),
+      { cause: error }
     );
   }
 }
