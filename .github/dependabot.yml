@@ -10,6 +10,14 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
+      chai-stack:
+        patterns:
+          - "chai"
+          - "@types/chai"
+          - "chai-as-promised"
+          - "@types/chai-as-promised"
+          - "sinon-chai"
+          - "@types/sinon-chai"
       npm-minor-patch:
         update-types: ["minor", "patch"]
     ignore:
