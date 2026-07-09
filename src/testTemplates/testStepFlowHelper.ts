@@ -24,6 +24,7 @@ export const createApexExecutionTestStepFlow = async (
   testStepDescription: TestStepDescription,
   testFlowOptions?: TestFlowOptions
 ): Promise<FlowStep> => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- The Apex transformer inlines require('*.apex') calls at compile time.
   const governorMetricsApexClass = require('./apex/GovernorLimits.apex');
   const originalApexFileContent = await readFile(apexScriptPath);
   const processedApexFileContent = replaceTokensInString(

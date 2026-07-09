@@ -90,7 +90,7 @@ const createDir = async (directoryName: string): Promise<string> =>
   exists(directoryName)
     .then((existsFolder: boolean) => {
       if (!existsFolder) return directoryName;
-      else throw { error: `Already exists ${directoryName}` };
+      else throw new Error(`Already exists ${directoryName}`);
     })
     .then((_directoryName: string) => mkdirCustomMode(_directoryName))
     .then(() => directoryName);

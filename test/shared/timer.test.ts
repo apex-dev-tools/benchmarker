@@ -42,13 +42,13 @@ describe('src/scenario/shared/timer', () => {
     const testTimer: Timer = new Timer('Test');
 
     const startTime = moment('2010-01-01 10:30:35', 'YYYY-MM-DD HH:mm:ss');
-    let momentStub = stub(moment, 'now').returns(startTime.unix() * 1000);
+    const momentStub = stub(moment, 'now').returns(startTime.unix() * 1000);
     testTimer.start();
 
     momentStub.restore();
 
     const endTime = moment('2015-02-02 11:40:45', 'YYYY-MM-DD HH:mm:ss');
-    momentStub = stub(moment, 'now').returns(endTime.unix() * 1000);
+    stub(moment, 'now').returns(endTime.unix() * 1000);
     testTimer.end();
 
     expect(testTimer.getTime()).to.eql(endTime.diff(startTime));
