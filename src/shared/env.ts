@@ -7,7 +7,7 @@ import fs from 'fs';
 import { RangeCollection } from '../services/ranges';
 dotenv.config({ path: '.env' });
 
-import { PuppeteerNodeLaunchOptions } from 'puppeteer';
+import type { LaunchOptions } from 'puppeteer';
 import { DEFAULT_RANGES } from '../services/defaultRanges';
 
 let cachedRanges: RangeCollection | null = null;
@@ -32,9 +32,7 @@ export function shouldStoreUiAlerts() {
   return process.env.STORE_UI_ALERTS === 'true';
 }
 
-export function getPuppeteerLaunchOptions(
-  headless?: boolean
-): PuppeteerNodeLaunchOptions {
+export function getPuppeteerLaunchOptions(headless?: boolean): LaunchOptions {
   return {
     args: [
       // Improves headless performance: https://github.com/GoogleChrome/puppeteer/issues/1718
