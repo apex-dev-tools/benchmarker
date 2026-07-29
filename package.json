@@ -44,7 +44,7 @@
   "dependencies": {
     "@jsforce/jsforce-node": "3.10.19",
     "@salesforce/core": "8.32.6",
-    "axios": "1.18.1",
+    "axios": "1.19.0",
     "cli-table": "0.3.11",
     "dotenv": "16.4.5",
     "lighthouse": "13.4.1",
