@@ -25,6 +25,19 @@ updates:
       # build runtime rather than chasing current Node majors.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # chai 5+, chai-as-promised 8+ and sinon-chai 4+ are ESM-only, but the
+      # test suite compiles as CommonJS (tsc fails with TS1479). Skip major
+      # bumps of the chai stack until the tests move to ESM.
+      - dependency-name: "chai"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "chai-as-promised"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/chai-as-promised"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "sinon-chai"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/sinon-chai"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
