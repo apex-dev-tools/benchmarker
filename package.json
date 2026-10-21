@@ -52,7 +52,7 @@
     "moment": "2.31.0",
     "pg": "8.23.1",
     "pg-connection-string": "2.14.1",
-    "puppeteer": "24.43.1",
+    "puppeteer": "25.14.0",
     "tslib": "2.8.1",
     "typeorm": "1.1.2"
   },
